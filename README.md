@@ -11,7 +11,7 @@ This tool aims to provide an easy CRUD+List (CRUDL from now on) feature for any 
 
 ## Documentation
 
-* [1. Installation](docs/1_installation.md)
+- [1. Installation](docs/1_installation.md)
 - [2. Structure](docs/2_structure.md)
 - [3. Manager configuration](docs/3_manager.md)
 - [4. Controller configuration](docs/4_controller.md)
