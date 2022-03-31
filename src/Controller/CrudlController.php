@@ -3,11 +3,6 @@
 namespace Softspring\Component\CrudlController\Controller;
 
 use Jhg\DoctrinePagination\ORM\PaginatedRepositoryInterface;
-use Softspring\CoreBundle\Controller\Traits\DispatchGetResponseTrait;
-use Softspring\CoreBundle\Event\FormEvent;
-use Softspring\CoreBundle\Event\GetResponseEventInterface;
-use Softspring\CoreBundle\Event\GetResponseRequestEvent;
-use Softspring\CoreBundle\Event\ViewEvent;
 use Softspring\Component\CrudlController\Event\FilterEvent;
 use Softspring\Component\CrudlController\Event\GetResponseEntityEvent;
 use Softspring\Component\CrudlController\Event\GetResponseEntityExceptionEvent;
@@ -16,6 +11,11 @@ use Softspring\Component\CrudlController\Form\DefaultDeleteForm;
 use Softspring\Component\CrudlController\Form\EntityListFilterFormInterface;
 use Softspring\Component\CrudlController\Form\FormOptionsInterface;
 use Softspring\Component\CrudlController\Manager\CrudlEntityManagerInterface;
+use Softspring\CoreBundle\Controller\Traits\DispatchGetResponseTrait;
+use Softspring\CoreBundle\Event\FormEvent;
+use Softspring\CoreBundle\Event\GetResponseEventInterface;
+use Softspring\CoreBundle\Event\GetResponseRequestEvent;
+use Softspring\CoreBundle\Event\ViewEvent;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\EventDispatcher\EventDispatcherInterface;
 use Symfony\Component\Form\FormInterface;
@@ -40,18 +40,21 @@ class CrudlController extends AbstractController
 
     /**
      * @var FormTypeInterface|string|null
+     *
      * @deprecated
      */
     protected $createForm;
 
     /**
      * @var FormTypeInterface|string|null
+     *
      * @deprecated
      */
     protected $updateForm;
 
     /**
      * @var FormTypeInterface|string|null
+     *
      * @deprecated
      */
     protected $deleteForm;
@@ -121,7 +124,7 @@ class CrudlController extends AbstractController
 
         if ($createForm instanceof FormOptionsInterface) {
             $formOptions = $createForm->formOptions($entity, $request);
-        } else if ($createForm instanceof FormTypeInterface && method_exists($createForm, 'formOptions')) {
+        } elseif ($createForm instanceof FormTypeInterface && method_exists($createForm, 'formOptions')) {
             trigger_deprecation('softspring/crudl-controller', '5.x', 'If you want to use formOptions method you must implement %s interface.', FormOptionsInterface::class);
             $formOptions = $createForm->formOptions($entity, $request);
         } else {
@@ -238,7 +241,7 @@ class CrudlController extends AbstractController
 
         if ($updateForm instanceof FormOptionsInterface) {
             $formOptions = $updateForm->formOptions($entity, $request);
-        } else if ($updateForm instanceof FormTypeInterface && method_exists($updateForm, 'formOptions')) {
+        } elseif ($updateForm instanceof FormTypeInterface && method_exists($updateForm, 'formOptions')) {
             trigger_deprecation('softspring/crudl-controller', '5.x', 'If you want to use formOptions method you must implement %s interface.', FormOptionsInterface::class);
             $formOptions = $updateForm->formOptions($entity, $request);
         } else {
@@ -320,7 +323,7 @@ class CrudlController extends AbstractController
 
         if ($deleteForm instanceof FormOptionsInterface) {
             $formOptions = $deleteForm->formOptions($entity, $request);
-        } else if ($deleteForm instanceof FormTypeInterface && method_exists($deleteForm, 'formOptions')) {
+        } elseif ($deleteForm instanceof FormTypeInterface && method_exists($deleteForm, 'formOptions')) {
             trigger_deprecation('softspring/crudl-controller', '5.x', 'If you want to use formOptions method you must implement %s interface.', FormOptionsInterface::class);
             $formOptions = $deleteForm->formOptions($entity, $request);
         } else {
