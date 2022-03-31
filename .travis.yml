@@ -1,0 +1,15 @@
+language: php
+
+env:
+  global:
+    - XDEBUG_MODE=coverage
+
+php:
+  - 7.4
+#  - 8.0
+
+install: composer update --prefer-dist --no-interaction
+
+script:
+  - ./vendor/bin/phpunit --coverage-text
+  - ./vendor/bin/php-cs-fixer fix -v --diff --dry-run
