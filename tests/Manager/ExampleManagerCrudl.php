@@ -17,6 +17,6 @@ class ExampleManagerCrudl implements CrudlEntityManagerInterface
 
     public function getTargetClass(): string
     {
-        return 'Softspring\\CrudlBundle\\Tests\\Manager\\ExampleEntity';
+        return 'Softspring\\Component\\CrudlController\\Tests\\Manager\\ExampleEntity';
     }
 }

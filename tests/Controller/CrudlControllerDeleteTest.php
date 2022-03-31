@@ -54,23 +54,6 @@ class CrudlControllerDeleteTest extends AbstractCrudlControllerTestCase
         $controller->delete(new Request([], [], ['entity' => 'id']));
     }
 
-    public function testDeleteWithNoForm()
-    {
-        $config = [
-            'delete' => [
-                'initialize_event_name' => '',
-            ],
-        ];
-
-        $this->repository->expects($this->once())->method('findOneBy')->willReturn(new \stdClass());
-
-        $controller = new CrudlController($this->manager, $this->dispatcher, null, null, null, null, $config);
-
-        $this->expectException(\InvalidArgumentException::class);
-
-        $controller->delete(new Request([], [], ['entity' => 'id']));
-    }
-
     public function testDeleteWithInitializeEventReturningResponse()
     {
         $config = [
