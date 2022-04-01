@@ -3,7 +3,7 @@
 <phpunit bootstrap="./tests/bootstrap.php" colors="true">
 
     <testsuites>
-        <testsuite name="SfsCrudlBundle test suite">
+        <testsuite name="CrudlController test suite">
             <directory suffix="Test.php">./tests</directory>
         </testsuite>
     </testsuites>
