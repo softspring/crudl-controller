@@ -17,6 +17,7 @@ use Softspring\CoreBundle\Event\GetResponseEventInterface;
 use Softspring\CoreBundle\Event\GetResponseRequestEvent;
 use Softspring\CoreBundle\Event\ViewEvent;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
+use Symfony\Component\DependencyInjection\Exception\ServiceNotFoundException;
 use Symfony\Component\EventDispatcher\EventDispatcherInterface;
 use Symfony\Component\Form\FormInterface;
 use Symfony\Component\Form\FormTypeInterface;
@@ -381,6 +382,14 @@ class CrudlController extends AbstractController
 
         $config = array_replace_recursive($this->config['list'] ?? [], $config);
         $listFilterForm = $listFilterForm ?: $this->listFilterForm ?: $config['filter_form'] ?? null;
+
+        if (is_string($listFilterForm)) {
+            try {
+                $listFilterForm = $this->container->get($listFilterForm);
+            } catch (ServiceNotFoundException $e) {
+                throw new \InvalidArgumentException('List filter is a string, if it\'s a service must be public');
+            }
+        }
 
         if (empty($config)) {
             throw new \InvalidArgumentException('List action configuration is empty');
