@@ -417,8 +417,17 @@ class CrudlController extends AbstractController
 
             $formClassName = get_class($listFilterForm);
 
+            if ($listFilterForm instanceof FormOptionsInterface) {
+                $formOptions = $listFilterForm->formOptions(null, $request);
+            } elseif ($listFilterForm instanceof FormTypeInterface && method_exists($listFilterForm, 'formOptions')) {
+                trigger_deprecation('softspring/crudl-controller', '5.x', 'If you want to use formOptions method you must implement %s interface.', FormOptionsInterface::class);
+                $formOptions = $listFilterForm->formOptions(null, $request);
+            } else {
+                $formOptions = ['method' => 'POST'];
+            }
+
             // filter form
-            $form = $this->createForm($formClassName)->handleRequest($request);
+            $form = $this->createForm($formClassName, [], $formOptions)->handleRequest($request);
             $filters = $form->isSubmitted() && $form->isValid() ? array_filter($form->getData()) : [];
         } else {
             $page = 1;
