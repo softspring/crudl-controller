@@ -55,9 +55,9 @@ For example, create action dispatches following events:
 
 Each of those events, dispatch an object of next classes:
 
-- Softspring\CoreBundle\Event\FormEvent
-- Softspring\CoreBundle\Event\GetResponseRequestEvent
-- Softspring\CoreBundle\Event\ViewEvent
+- Softspring\Component\Events\FormEvent
+- Softspring\Component\Events\GetResponseRequestEvent
+- Softspring\Component\Events\ViewEvent
 - Softspring\Component\CrudlController\Event\FilterEvent
 - Softspring\Component\CrudlController\Event\GetResponseEntityEvent
 - Softspring\Component\CrudlController\Event\GetResponseEntityExceptionEvent

@@ -2,12 +2,12 @@
 
 namespace Softspring\Component\CrudlController\Event;
 
-use Softspring\CoreBundle\Event\FormEvent as CoreFormEvent;
+use Softspring\Component\Events\FormEvent as CoreFormEvent;
 
 /**
  * Class FormEvent.
  *
- * @deprecated Use Softspring\CoreBundle\Event\FormEvent instead
+ * @deprecated Use Softspring\Component\Events\FormEvent instead
  */
 class FormEvent extends CoreFormEvent
 {

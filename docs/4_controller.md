@@ -66,7 +66,7 @@ Main fields:
 Events configuration:
 
 - **initialize_event_name**: (optional) event dispatched after checking is_granded and before form processing.
-  Dispatches Softspring\CoreBundle\Event\GetResponseRequestEvent object
+  Dispatches Softspring\Component\Events\GetResponseRequestEvent object
   It allows, for example, to redirect on custom situation.
 - **form_init_event_name**: (optional) event dispatched after form creation but before process it
   Dispatches Softspring\Component\CrudlController\Event\GetResponseEntityEvent object
@@ -81,7 +81,7 @@ Events configuration:
   Dispatches Softspring\Component\CrudlController\Event\GetResponseFormEvent object
   It allows to process form errors.
 - **view_event_name**: (optional)
-  Dispatches Softspring\CoreBundle\Event\ViewEvent object
+  Dispatches Softspring\Component\Events\ViewEvent object
   Allows data adding for the view.
 
 ## Read action configuration
@@ -106,10 +106,10 @@ Main fields:
 Events configuration:
 
 - **initialize_event_name**: (optional) event dispatched after checking is_granded and before form processing.
-  Dispatches Softspring\CoreBundle\Event\GetResponseRequestEvent object
+  Dispatches Softspring\Component\Events\GetResponseRequestEvent object
   It allows, for example, to redirect on custom situation.
 - **view_event_name**: (optional)
-  Dispatches Softspring\CoreBundle\Event\ViewEvent object
+  Dispatches Softspring\Component\Events\ViewEvent object
   Allows data adding for the view.
 
 ## Update action configuration
@@ -139,7 +139,7 @@ Main fields:
 Events configuration:
 
 - **initialize_event_name**: (optional) event dispatched after checking is_granded and before form processing.
-  Dispatches Softspring\CoreBundle\Event\GetResponseRequestEvent object
+  Dispatches Softspring\Component\Events\GetResponseRequestEvent object
   It allows, for example, to redirect on custom situation.
 - **form_init_event_name**: (optional) event dispatched after form creation but before process it
   Dispatches Softspring\Component\CrudlController\Event\GetResponseEntityEvent object
@@ -154,7 +154,7 @@ Events configuration:
   Dispatches Softspring\Component\CrudlController\Event\GetResponseFormEvent object
   It allows to process form errors.
 - **view_event_name**: (optional)
-  Dispatches Softspring\CoreBundle\Event\ViewEvent object
+  Dispatches Softspring\Component\Events\ViewEvent object
   Allows data adding for the view.
 
 ## Delete action configuration
@@ -185,7 +185,7 @@ Main fields:
 Events configuration:
 
 - **initialize_event_name**: (optional) event dispatched after checking is_granded and before form processing.
-  Dispatches Softspring\CoreBundle\Event\GetResponseRequestEvent object
+  Dispatches Softspring\Component\Events\GetResponseRequestEvent object
   It allows, for example, to redirect on custom situation.
 - **form_init_event_name**: (optional) event dispatched after form creation but before process it
   Dispatches Softspring\Component\CrudlController\Event\GetResponseEntityEvent object
@@ -203,7 +203,7 @@ Events configuration:
   Dispatches Softspring\Component\CrudlController\Event\GetResponseExceptionFormEvent object
   It allows to process exception, show errors or redirect.
 - **view_event_name**: (optional)
-  Dispatches Softspring\CoreBundle\Event\ViewEvent object
+  Dispatches Softspring\Component\Events\ViewEvent object
   Allows data adding for the view.
 
 ## List action configuration
@@ -233,13 +233,13 @@ Main fields:
 Events configuration:
 
 - **initialize_event_name**: (optional) event dispatched after checking is_granded and before form processing.
-  Dispatches Softspring\CoreBundle\Event\GetResponseRequestEvent object
+  Dispatches Softspring\Component\Events\GetResponseRequestEvent object
   It allows, for example, to redirect on custom situation.
 - **filter_event_name**: (optional) event dispatched after form processing and before quering.
   Dispatches Softspring\Component\CrudlController\Event\FilterEvent object
   With this event you are able to modify quering criteria or other data before quering.
 - **view_event_name**: (optional)
-  Dispatches Softspring\CoreBundle\Event\ViewEvent object
+  Dispatches Softspring\Component\Events\ViewEvent object
   Allows data adding for the view.
 
 Other fields:
