@@ -7,7 +7,6 @@
     "prefer-stable": true,
     "require": {
         "php": ">=7.4",
-        "softspring/core-bundle": "^5.0",
         "softspring/events": "^5.0"
     },
     "require-dev": {
