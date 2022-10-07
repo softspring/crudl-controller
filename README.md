@@ -1,4 +1,4 @@
-# Crudl Bundle
+# Crudl Controller component
 
 [![Latest Stable Version](https://poser.pugx.org/softspring/crudl-controller/v/stable.svg)](https://packagist.org/packages/softspring/crudl-controller)
 [![Latest Unstable Version](https://poser.pugx.org/softspring/crudl-controller/v/unstable.svg)](https://packagist.org/packages/softspring/crudl-controller)
