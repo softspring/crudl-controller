@@ -17,10 +17,8 @@ jobs:
         runs-on: ubuntu-latest
         strategy:
             matrix:
-                php-versions: [ '7.4' ]
-#                php-versions: [ '7.4', '8.0' ]
-                composer-prefer: [ '' ]
-#                composer-prefer: [ '', '--prefer-lowest' ]
+                php-versions: [ '7.4', '8.0' ]
+                composer-prefer: [ '', '--prefer-lowest' ]
 
         steps:
             - uses: actions/checkout@v3
@@ -56,18 +54,9 @@ jobs:
             - name: Run tests
               run: ./vendor/bin/phpunit --coverage-text --coverage-html=.phpunit.cache/html-report
 
-            - name: Check test coverage
-              uses: johanvanhelden/gha-clover-test-coverage-check@v1
-              id: coverage
+            - name: phpunit-coverage-badge
+              uses: timkrase/phpunit-coverage-badge@v1.2.0
               with:
-                percentage: "50"
-                filename: "clover.xml"
-
-            - name: Generate the badge SVG image
-              uses: emibcn/badge-action@v1
-              id: badge
-              with:
-                label: 'Coverage'
-                status: ${{ steps.coverage.outputs.coverage }}
-                path: '.github/badges/coverage.svg'
-                color: ${{ steps.coverage.outputs.coveragelines > 75 && 'green' || 'red' }}
+                push_badge: true
+                coverage_badge_path: .github/badges/coverage.svg
+                repo_token: ${{ secrets.GITHUB_TOKEN }}
