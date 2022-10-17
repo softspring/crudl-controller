@@ -4,3 +4,5 @@ composer.lock
 .coverage-report/
 .php-cs-fixer.cache
 .phpunit.result.cache
+.phpunit.cache
+clover.xml

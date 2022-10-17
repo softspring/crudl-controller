@@ -52,4 +52,4 @@ jobs:
               run: ./vendor/bin/php-cs-fixer fix -v --diff --dry-run
 
             - name: Run tests
-              run: ./vendor/bin/phpunit --coverage-text
+              run: ./vendor/bin/phpunit --coverage-text --coverage-html=.phpunit.cache/html-report
