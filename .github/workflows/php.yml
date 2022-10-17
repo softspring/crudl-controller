@@ -17,8 +17,10 @@ jobs:
         runs-on: ubuntu-latest
         strategy:
             matrix:
-                php-versions: [ '7.4', '8.0' ]
-                composer-prefer: [ '', '--prefer-lowest' ]
+                php-versions: [ '7.4' ]
+#                php-versions: [ '7.4', '8.0' ]
+                composer-prefer: [ '' ]
+#                composer-prefer: [ '', '--prefer-lowest' ]
 
         steps:
             - uses: actions/checkout@v3
@@ -67,5 +69,5 @@ jobs:
               with:
                 label: 'Coverage'
                 status: ${{ steps.coverage.outputs.coverage }}
-                path: ./badges/test-coverage.svg
+                path: '.github/badges/coverage.svg'
                 color: ${{ steps.coverage.outputs.coveragelines > 75 && 'green' || 'red' }}
