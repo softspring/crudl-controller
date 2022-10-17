@@ -54,9 +54,18 @@ jobs:
             - name: Run tests
               run: ./vendor/bin/phpunit --coverage-text --coverage-html=.phpunit.cache/html-report
 
-            - name: phpunit-coverage-badge
-              uses: timkrase/phpunit-coverage-badge@v1.2.0
+            - name: Check test coverage
+              uses: johanvanhelden/gha-clover-test-coverage-check@v1
+              id: coverage
               with:
-                push_badge: true
-                coverage_badge_path: .github/badges/coverage.svg
-                repo_token: ${{ secrets.GITHUB_TOKEN }}
+                percentage: "50"
+                filename: "clover.xml"
+
+            - name: Generate the badge SVG image
+              uses: emibcn/badge-action@v1
+              id: badge
+              with:
+                label: 'Coverage'
+                status: ${{ steps.coverage.outputs.coverage }}
+                path: ./badges/test-coverage.svg
+                color: ${{ steps.coverage.outputs.coveragelines > 75 && 'green' || 'red' }}
