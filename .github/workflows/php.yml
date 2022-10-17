@@ -53,3 +53,6 @@ jobs:
 
             - name: Run tests
               run: ./vendor/bin/phpunit --coverage-text --coverage-html=.phpunit.cache/html-report
+
+            - name: phpunit-coverage-badge
+              uses: timkrase/phpunit-coverage-badge@v1.2.0
