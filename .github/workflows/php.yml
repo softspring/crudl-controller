@@ -58,3 +58,5 @@ jobs:
               uses: timkrase/phpunit-coverage-badge@v1.2.0
               with:
                 push_badge: true
+                coverage_badge_path: .github/badges/coverage.svg
+                repo_token: ${{ secrets.GITHUB_TOKEN }}
