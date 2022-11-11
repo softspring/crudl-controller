@@ -2,6 +2,7 @@
 
 namespace Softspring\Component\CrudlController\Controller;
 
+use Jhg\DoctrinePagination\ORM\PaginatedRepositoryInterface;
 use Softspring\Component\CrudlController\Event\FilterEvent;
 use Softspring\Component\CrudlController\Form\EntityListFilterFormInterface;
 use Softspring\Component\CrudlController\Form\FormOptionsInterface;
