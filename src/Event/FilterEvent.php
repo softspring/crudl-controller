@@ -10,14 +10,11 @@ class FilterEvent extends Event
 
     protected array $orderSort;
 
-    protected int $page;
+    protected ?int $page;
 
     protected ?int $rpp;
 
-    /**
-     * FilterEvent constructor.
-     */
-    public function __construct(array $filters, array $orderSort, int $page, ?int $rpp)
+    public function __construct(array $filters, array $orderSort, ?int $page = null, ?int $rpp = null)
     {
         $this->filters = $filters;
         $this->orderSort = $orderSort;

@@ -80,19 +80,17 @@ trait ListCrudlTrait
             $page = $request->get($formCompiledOptions['page_field_name'], 1);
             $rpp = $form->get($formCompiledOptions['rpp_field_name'])->getData() ?? $formCompiledOptions['rpp_default_value'];
             $orderSort = [$form->get($formCompiledOptions['order_field_name'])->getData() ?? $formCompiledOptions['order_default_value'] => $form->get($formCompiledOptions['order_direction_field_name'])->getData() ?? $formCompiledOptions['order_direction_default_value']];
+
+            $this->dispatchFromConfig($config, 'filter_event_name', $filterEvent = new FilterEvent($filters, $orderSort, $page, $rpp));
         } else {
-            $page = null;
-            $rpp = null;
-            $orderSort = $config['default_order_sort'] ?? [];
-            $form = null;
-            $filters = [];
+            // without filter form, query all entities without filtering and pagination
+            $this->dispatchFromConfig($config, 'filter_event_name', $filterEvent = new FilterEvent([], $config['default_order_sort'] ?? []));
         }
 
-        $this->dispatchFromConfig($config, 'filter_event_name', $filterEvent = new FilterEvent($filters, $orderSort, $page, $rpp));
         $entities = Paginator::queryPage($repo->createQueryBuilder('a'), $filterEvent->getPage(), $filterEvent->getRpp(), $filterEvent->getFilters(), $filterEvent->getOrderSort());
 
         $this->dispatchFromConfig($config, 'view_event_name', $event = new ViewEvent([
-                $config['entities_attribute'] ?? 'entities' => $entities,
+            $config['entities_attribute'] ?? 'entities' => $entities,
             'filterForm' => $form instanceof FormInterface ? $form->createView() : null,
             'read_route' => $config['read_route'] ?? null,
         ], $request));
