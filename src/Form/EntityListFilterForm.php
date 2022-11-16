@@ -9,6 +9,9 @@ use Symfony\Component\Form\FormBuilderInterface;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\OptionsResolver\OptionsResolver;
 
+/**
+ * @deprecated this class will be deleted, use Softspring\Component\DoctrineQueryFilters\FiltersForm
+ */
 class EntityListFilterForm extends AbstractType implements EntityListFilterFormInterface
 {
     public function getBlockPrefix(): string

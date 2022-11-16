@@ -2,7 +2,6 @@
 
 namespace Softspring\Component\CrudlController\Controller;
 
-use Softspring\Component\CrudlController\Form\EntityListFilterFormInterface;
 use Softspring\Component\CrudlController\Manager\CrudlEntityManagerInterface;
 use Softspring\Component\Events\DispatchGetResponseTrait;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
@@ -28,7 +27,7 @@ class CrudlController extends AbstractController
     /**
      * @deprecated
      */
-    protected ?EntityListFilterFormInterface $listFilterForm;
+    protected $listFilterForm;
 
     /**
      * @var FormTypeInterface|string|null
@@ -60,7 +59,7 @@ class CrudlController extends AbstractController
      * @param FormTypeInterface|string|null $updateForm
      * @param FormTypeInterface|string|null $deleteForm
      */
-    public function __construct(CrudlEntityManagerInterface $manager, EventDispatcherInterface $eventDispatcher, ?EntityListFilterFormInterface $listFilterForm = null, $createForm = null, $updateForm = null, $deleteForm = null, array $config = [])
+    public function __construct(CrudlEntityManagerInterface $manager, EventDispatcherInterface $eventDispatcher, $listFilterForm = null, $createForm = null, $updateForm = null, $deleteForm = null, array $config = [])
     {
         $this->manager = $manager;
         $this->eventDispatcher = $eventDispatcher;

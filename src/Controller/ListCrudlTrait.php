@@ -2,10 +2,13 @@
 
 namespace Softspring\Component\CrudlController\Controller;
 
+use Doctrine\ORM\EntityRepository;
 use Jhg\DoctrinePagination\ORM\PaginatedRepositoryInterface;
 use Softspring\Component\CrudlController\Event\FilterEvent;
 use Softspring\Component\CrudlController\Form\EntityListFilterFormInterface;
 use Softspring\Component\CrudlController\Form\FormOptionsInterface;
+use Softspring\Component\DoctrinePaginator\Paginator;
+use Softspring\Component\DoctrineQueryFilters\FilterFormInterface;
 use Softspring\Component\Events\GetResponseRequestEvent;
 use Softspring\Component\Events\ViewEvent;
 use Symfony\Component\DependencyInjection\Exception\ServiceNotFoundException;
@@ -17,7 +20,7 @@ use Symfony\Component\HttpFoundation\Response;
 trait ListCrudlTrait
 {
     /**
-     * @param string|EntityListFilterFormInterface|null $listFilterForm
+     * @param string|null $listFilterForm
      */
     public function list(Request $request, $listFilterForm = null, array $config = []): Response
     {
@@ -49,6 +52,66 @@ trait ListCrudlTrait
         }
 
         $repo = $this->manager->getRepository();
+
+        // TODO REMOVE THIS OLD CODE WHEN EVERY BUNDLE IS MIGRATED TO NEW FilterFormInterface
+        if (!$listFilterForm instanceof FilterFormInterface) {
+            return $this->listOldCode($config, $repo, $request, $listFilterForm);
+        }
+        // TODO REMOVE THIS OLD CODE WHEN EVERY BUNDLE IS MIGRATED TO NEW FilterFormInterface
+
+        if ($listFilterForm) {
+            if (!$listFilterForm instanceof FilterFormInterface) {
+                throw new \InvalidArgumentException(sprintf('List filter form must be an instance of %s', FilterFormInterface::class));
+            }
+
+            $formClassName = get_class($listFilterForm);
+
+            if ($listFilterForm instanceof FormOptionsInterface) {
+                $formOptions = $listFilterForm->formOptions(null, $request);
+            } else {
+                $formOptions = ['method' => 'GET'];
+            }
+
+            // filter form
+            $form = $this->createForm($formClassName, [], $formOptions)->handleRequest($request);
+            $filters = $form->isSubmitted() && $form->isValid() ? array_filter($form->getData()) : [];
+
+            $formCompiledOptions = $form->getConfig()->getOptions();
+            $page = $request->get($formCompiledOptions['page_field_name'], 1);
+            $rpp = $form->get($formCompiledOptions['rpp_field_name'])->getData() ?? $formCompiledOptions['rpp_default_value'];
+            $orderSort = [$form->get($formCompiledOptions['order_field_name'])->getData() ?? $formCompiledOptions['order_default_value'] => $form->get($formCompiledOptions['order_direction_field_name'])->getData() ?? $formCompiledOptions['order_direction_default_value']];
+        } else {
+            $page = null;
+            $rpp = null;
+            $orderSort = $config['default_order_sort'] ?? [];
+            $form = null;
+            $filters = [];
+        }
+
+        $this->dispatchFromConfig($config, 'filter_event_name', $filterEvent = new FilterEvent($filters, $orderSort, $page, $rpp));
+        $entities = Paginator::queryPage($repo->createQueryBuilder('a'), $filterEvent->getPage(), $filterEvent->getRpp(), $filterEvent->getFilters(), $filterEvent->getOrderSort());
+
+        $this->dispatchFromConfig($config, 'view_event_name', $event = new ViewEvent([
+                $config['entities_attribute'] ?? 'entities' => $entities,
+            'filterForm' => $form instanceof FormInterface ? $form->createView() : null,
+            'read_route' => $config['read_route'] ?? null,
+        ], $request));
+
+        if ($request->isXmlHttpRequest()) {
+            return $this->render($config['view_page'], $event->getData()->getArrayCopy());
+        } else {
+            return $this->render($config['view'], $event->getData()->getArrayCopy());
+        }
+    }
+
+    /**
+     * @param string|EntityListFilterFormInterface|null $listFilterForm
+     *
+     * @deprecated the code below is deprecated, use FilterForm
+     */
+    protected function listOldCode(array $config, EntityRepository $repo, Request $request, $listFilterForm = null): Response
+    {
+        trigger_deprecation('softspring/crudl-controller', '5.x', 'Crudl list action will use softspring/doctrine-query-filter and softspring/doctrine-paginator packages');
 
         if ($listFilterForm) {
             if (!$listFilterForm instanceof EntityListFilterFormInterface) {
