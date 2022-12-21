@@ -23,7 +23,7 @@
         "symfony/twig-bridge": "^5.4|^6.0",
         "symfony/yaml": "^5.4|^6.0",
         "twig/twig": "^2.0",
-        "friendsofphp/php-cs-fixer": "^3.3"
+        "friendsofphp/php-cs-fixer": "9999999-dev"
     },
     "autoload": {
         "psr-4": {
