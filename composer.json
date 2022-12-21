@@ -12,6 +12,8 @@
         "softspring/doctrine-query-filters": "^5.0"
     },
     "require-dev": {
+        "javihgil/doctrine-pagination-bundle": "^1.0",
+        "phpstan/phpstan": "^1.9",
         "phpunit/phpunit": "^9.5.25",
         "doctrine/orm": "^2.5",
         "symfony/console": "^5.4|^6.0",

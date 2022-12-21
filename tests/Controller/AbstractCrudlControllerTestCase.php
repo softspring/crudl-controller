@@ -24,7 +24,7 @@ abstract class AbstractCrudlControllerTestCase extends TestCase
     protected $repository;
 
     /**
-     * @var MockObject|EventDispatcher
+     * @var MockObject|EventDispatcherInterface
      */
     protected $dispatcher;
 
@@ -61,18 +61,14 @@ abstract class AbstractCrudlControllerTestCase extends TestCase
                     case 'form.factory':
                         return $test->formFactory;
 
-                    return null;
+                    default:
+                        return null;
                 }
             }))
         ;
     }
 
     /**
-     * @param null $listFilterForm
-     * @param null $createForm
-     * @param null $updateForm
-     * @param null $deleteForm
-     *
      * @return MockObject|CrudlController
      */
     protected function getControllerMock(array $config, array $onlyMethods = [], $listFilterForm = null, $createForm = null, $updateForm = null, $deleteForm = null)

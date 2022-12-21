@@ -20,7 +20,7 @@ use Symfony\Component\HttpFoundation\Response;
 trait ListCrudlTrait
 {
     /**
-     * @param string|null $listFilterForm
+     * @param ?mixed $listFilterForm
      */
     public function list(Request $request, $listFilterForm = null, array $config = []): Response
     {
@@ -54,7 +54,7 @@ trait ListCrudlTrait
         $repo = $this->manager->getRepository();
 
         // TODO REMOVE THIS OLD CODE WHEN EVERY BUNDLE IS MIGRATED TO NEW FilterFormInterface
-        if (!$listFilterForm instanceof FilterFormInterface) {
+        if ($listFilterForm && !$listFilterForm instanceof FilterFormInterface) {
             return $this->listOldCode($config, $repo, $request, $listFilterForm);
         }
         // TODO REMOVE THIS OLD CODE WHEN EVERY BUNDLE IS MIGRATED TO NEW FilterFormInterface
@@ -85,6 +85,7 @@ trait ListCrudlTrait
         } else {
             // without filter form, query all entities without filtering and pagination
             $this->dispatchFromConfig($config, 'filter_event_name', $filterEvent = new FilterEvent([], $config['default_order_sort'] ?? []));
+            $form = null;
         }
 
         $entities = Paginator::queryPage($repo->createQueryBuilder('a'), $filterEvent->getPage(), $filterEvent->getRpp(), $filterEvent->getFilters(), $filterEvent->getOrderSort());
