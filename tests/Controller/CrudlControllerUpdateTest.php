@@ -3,6 +3,8 @@
 namespace Softspring\Component\CrudlController\Tests\Controller;
 
 use Softspring\Component\CrudlController\Controller\CrudlController;
+use Softspring\Component\CrudlController\Exception\EmptyConfigException;
+use Softspring\Component\CrudlController\Exception\InvalidFormException;
 use Softspring\Component\CrudlController\Tests\Controller\Example\UpdateForm;
 use Symfony\Component\Finder\Exception\AccessDeniedException;
 use Symfony\Component\Form\Form;
@@ -17,7 +19,7 @@ class CrudlControllerUpdateTest extends AbstractCrudlControllerTestCase
     {
         $controller = new CrudlController($this->manager, $this->dispatcher);
 
-        $this->expectException(\InvalidArgumentException::class);
+        $this->expectException(EmptyConfigException::class);
 
         $controller->update(new Request([], [], ['entity' => 'id']));
     }
@@ -47,7 +49,7 @@ class CrudlControllerUpdateTest extends AbstractCrudlControllerTestCase
 
         $this->repository->expects($this->once())->method('findOneBy')->willReturn(null);
 
-        $controller = new CrudlController($this->manager, $this->dispatcher, null, null, null, null, $config);
+        $controller = new CrudlController($this->manager, $this->dispatcher, $config);
 
         $this->expectException(NotFoundHttpException::class);
 
@@ -64,9 +66,9 @@ class CrudlControllerUpdateTest extends AbstractCrudlControllerTestCase
 
         $this->repository->expects($this->once())->method('findOneBy')->willReturn(new \stdClass());
 
-        $controller = new CrudlController($this->manager, $this->dispatcher, null, null, null, null, $config);
+        $controller = new CrudlController($this->manager, $this->dispatcher, $config);
 
-        $this->expectException(\InvalidArgumentException::class);
+        $this->expectException(InvalidFormException::class);
 
         $controller->update(new Request([], [], ['entity' => 'id']));
     }
@@ -77,16 +79,15 @@ class CrudlControllerUpdateTest extends AbstractCrudlControllerTestCase
             'update' => [
                 'initialize_event_name' => 'test_event',
                 'view' => 'test_view.html.twig',
+                'form' => $this->getMockBuilder(UpdateForm::class)->getMock(),
             ],
         ];
 
         $this->repository->expects($this->once())->method('findOneBy')->willReturn($entity = new \stdClass());
 
-        $updateForm = $this->getMockBuilder(UpdateForm::class)->getMock();
-
         $expectedResponse = new Response();
 
-        $controller = $this->getControllerMock($config, ['dispatchGetResponse'], null, null, $updateForm);
+        $controller = $this->getControllerMock($config, ['dispatchGetResponse']);
         $controller->expects($this->once())->method('dispatchGetResponse')->willReturn($expectedResponse);
 
         $response = $controller->update(new Request([], [], ['entity' => 'id']));
@@ -100,6 +101,7 @@ class CrudlControllerUpdateTest extends AbstractCrudlControllerTestCase
             'update' => [
                 'view' => 'test_view.html.twig',
                 'view_event_name' => 'test_event',
+                'form' => $this->getMockBuilder(UpdateForm::class)->getMock(),
             ],
         ];
 
@@ -108,13 +110,11 @@ class CrudlControllerUpdateTest extends AbstractCrudlControllerTestCase
         // assertion only one dispatch call
         $this->dispatcher->expects($this->once())->method('dispatch');
 
-        $updateForm = $this->getMockBuilder(UpdateForm::class)->getMock();
-
         $form = $this->getMockBuilder(Form::class)->disableOriginalConstructor()->getMock();
         $this->formFactory->expects($this->once())->method('create')->willReturn($form);
         $form->expects($this->once())->method('handleRequest')->willReturn($form);
 
-        $controller = $this->getControllerMock($config, ['renderView'], null, null, $updateForm);
+        $controller = $this->getControllerMock($config, ['renderView']);
         $controller->expects($this->once())->method('renderView')->willReturn($config['update']['view']);
 
         $response = $controller->update(new Request([], [], ['entity' => 'id']));
@@ -127,12 +127,11 @@ class CrudlControllerUpdateTest extends AbstractCrudlControllerTestCase
         $config = [
             'update' => [
                 'form_invalid_event_name' => 'test_event',
+                'form' => $this->getMockBuilder(UpdateForm::class)->getMock(),
             ],
         ];
 
         $this->repository->expects($this->once())->method('findOneBy')->willReturn($entity = new \stdClass());
-
-        $updateForm = $this->getMockBuilder(UpdateForm::class)->getMock();
 
         $form = $this->getMockBuilder(Form::class)->disableOriginalConstructor()->getMock();
         $this->formFactory->expects($this->once())->method('create')->willReturn($form);
@@ -140,7 +139,7 @@ class CrudlControllerUpdateTest extends AbstractCrudlControllerTestCase
         $form->expects($this->once())->method('isSubmitted')->willReturn(true);
         $form->expects($this->once())->method('isValid')->willReturn(false);
 
-        $controller = $this->getControllerMock($config, ['dispatchGetResponse'], null, null, $updateForm);
+        $controller = $this->getControllerMock($config, ['dispatchGetResponse']);
         $expectedResponse = new Response();
         $controller->expects($this->once())->method('dispatchGetResponse')->willReturn($expectedResponse);
 
@@ -153,12 +152,11 @@ class CrudlControllerUpdateTest extends AbstractCrudlControllerTestCase
         $config = [
             'update' => [
                 'form_valid_event_name' => 'test_event',
+                'form' => $this->getMockBuilder(UpdateForm::class)->getMock(),
             ],
         ];
 
         $this->repository->expects($this->once())->method('findOneBy')->willReturn($entity = new \stdClass());
-
-        $updateForm = $this->getMockBuilder(UpdateForm::class)->getMock();
 
         $form = $this->getMockBuilder(Form::class)->disableOriginalConstructor()->getMock();
         $this->formFactory->expects($this->once())->method('create')->willReturn($form);
@@ -166,7 +164,7 @@ class CrudlControllerUpdateTest extends AbstractCrudlControllerTestCase
         $form->expects($this->once())->method('isSubmitted')->willReturn(true);
         $form->expects($this->once())->method('isValid')->willReturn(true);
 
-        $controller = $this->getControllerMock($config, ['dispatchGetResponse'], null, null, $updateForm);
+        $controller = $this->getControllerMock($config, ['dispatchGetResponse']);
         $expectedResponse = new Response();
         $controller->expects($this->once())->method('dispatchGetResponse')->willReturn($expectedResponse);
 
@@ -179,19 +177,18 @@ class CrudlControllerUpdateTest extends AbstractCrudlControllerTestCase
         $config = [
             'update' => [
                 'success_event_name' => 'test_event',
+                'form' => $this->getMockBuilder(UpdateForm::class)->getMock(),
             ],
         ];
 
         $this->repository->expects($this->once())->method('findOneBy')->willReturn($entity = new \stdClass());
-        $updateForm = $this->getMockBuilder(UpdateForm::class)->getMock();
-
         $form = $this->getMockBuilder(Form::class)->disableOriginalConstructor()->getMock();
         $this->formFactory->expects($this->once())->method('create')->willReturn($form);
         $form->expects($this->once())->method('handleRequest')->willReturn($form);
         $form->expects($this->once())->method('isSubmitted')->willReturn(true);
         $form->expects($this->once())->method('isValid')->willReturn(true);
 
-        $controller = $this->getControllerMock($config, ['dispatchGetResponse'], null, null, $updateForm);
+        $controller = $this->getControllerMock($config, ['dispatchGetResponse']);
         $expectedResponse = new Response();
         $controller->expects($this->once())->method('dispatchGetResponse')->willReturn($expectedResponse);
 
@@ -204,12 +201,11 @@ class CrudlControllerUpdateTest extends AbstractCrudlControllerTestCase
         $config = [
             'update' => [
                 'success_redirect_to' => 'redirect_route',
+                'form' => $this->getMockBuilder(UpdateForm::class)->getMock(),
             ],
         ];
 
         $this->repository->expects($this->once())->method('findOneBy')->willReturn($entity = new \stdClass());
-
-        $updateForm = $this->getMockBuilder(UpdateForm::class)->getMock();
 
         $form = $this->getMockBuilder(Form::class)->disableOriginalConstructor()->getMock();
         $this->formFactory->expects($this->once())->method('create')->willReturn($form);
@@ -217,7 +213,7 @@ class CrudlControllerUpdateTest extends AbstractCrudlControllerTestCase
         $form->expects($this->once())->method('isSubmitted')->willReturn(true);
         $form->expects($this->once())->method('isValid')->willReturn(true);
 
-        $controller = $this->getControllerMock($config, ['generateUrl'], null, null, $updateForm);
+        $controller = $this->getControllerMock($config, ['generateUrl']);
         $controller->expects($this->once())->method('generateUrl')->with($this->equalTo('redirect_route'))->willReturn('/redirect/to/route');
 
         /** @var RedirectResponse $response */
@@ -231,12 +227,11 @@ class CrudlControllerUpdateTest extends AbstractCrudlControllerTestCase
         $config = [
             'update' => [
                 'success_redirect_to' => '',
+                'form' => $this->getMockBuilder(UpdateForm::class)->getMock(),
             ],
         ];
 
         $this->repository->expects($this->once())->method('findOneBy')->willReturn($entity = new \stdClass());
-
-        $updateForm = $this->getMockBuilder(UpdateForm::class)->getMock();
 
         $form = $this->getMockBuilder(Form::class)->disableOriginalConstructor()->getMock();
         $this->formFactory->expects($this->once())->method('create')->willReturn($form);
@@ -244,7 +239,7 @@ class CrudlControllerUpdateTest extends AbstractCrudlControllerTestCase
         $form->expects($this->once())->method('isSubmitted')->willReturn(true);
         $form->expects($this->once())->method('isValid')->willReturn(true);
 
-        $controller = $this->getControllerMock($config, [], null, null, $updateForm);
+        $controller = $this->getControllerMock($config, []);
 
         /** @var RedirectResponse $response */
         $response = $controller->update(new Request([], [], ['entity' => 'id']));

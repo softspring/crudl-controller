@@ -4,6 +4,8 @@ namespace Softspring\Component\CrudlController\Controller;
 
 use Softspring\Component\CrudlController\Event\GetResponseEntityEvent;
 use Softspring\Component\CrudlController\Event\GetResponseFormEvent;
+use Softspring\Component\CrudlController\Exception\EmptyConfigException;
+use Softspring\Component\CrudlController\Exception\InvalidFormException;
 use Softspring\Component\Events\FormEvent;
 use Softspring\Component\Events\ViewEvent;
 use Symfony\Component\Form\FormTypeInterface;
@@ -17,7 +19,7 @@ trait UpdateCrudlTrait
         $config = array_replace_recursive($this->config['update'] ?? [], $config);
 
         if (empty($config)) {
-            throw new \InvalidArgumentException('Update action configuration is empty');
+            throw new EmptyConfigException('Update');
         }
 
         $updateForm = $config['form'] ?? null;
@@ -35,7 +37,7 @@ trait UpdateCrudlTrait
         }
 
         if (!$updateForm instanceof FormTypeInterface && !is_string($updateForm)) {
-            throw new \InvalidArgumentException(sprintf('Update form must be an instance of %s or a class name', FormTypeInterface::class));
+            throw new InvalidFormException('Update');
         }
 
         if ($response = $this->dispatchGetResponseFromConfig($config, 'initialize_event_name', new GetResponseEntityEvent($entity, $request))) {

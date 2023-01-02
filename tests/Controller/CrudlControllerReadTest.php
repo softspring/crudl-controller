@@ -3,6 +3,7 @@
 namespace Softspring\Component\CrudlController\Tests\Controller;
 
 use Softspring\Component\CrudlController\Controller\CrudlController;
+use Softspring\Component\CrudlController\Exception\EmptyConfigException;
 use Symfony\Component\Finder\Exception\AccessDeniedException;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
@@ -14,7 +15,7 @@ class CrudlControllerReadTest extends AbstractCrudlControllerTestCase
     {
         $controller = new CrudlController($this->manager, $this->dispatcher);
 
-        $this->expectException(\InvalidArgumentException::class);
+        $this->expectException(EmptyConfigException::class);
 
         $controller->read(new Request([], [], ['entity' => 'id']));
     }
@@ -45,7 +46,7 @@ class CrudlControllerReadTest extends AbstractCrudlControllerTestCase
 
         $this->repository->expects($this->once())->method('findOneBy')->willReturn(null);
 
-        $controller = new CrudlController($this->manager, $this->dispatcher, null, null, null, null, $config);
+        $controller = new CrudlController($this->manager, $this->dispatcher, $config);
         $controller->setContainer($this->container);
 
         $this->expectException(NotFoundHttpException::class);

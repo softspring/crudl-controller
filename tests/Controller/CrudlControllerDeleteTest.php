@@ -3,6 +3,7 @@
 namespace Softspring\Component\CrudlController\Tests\Controller;
 
 use Softspring\Component\CrudlController\Controller\CrudlController;
+use Softspring\Component\CrudlController\Exception\EmptyConfigException;
 use Softspring\Component\CrudlController\Tests\Controller\Example\DeleteForm;
 use Symfony\Component\Finder\Exception\AccessDeniedException;
 use Symfony\Component\Form\Form;
@@ -17,7 +18,7 @@ class CrudlControllerDeleteTest extends AbstractCrudlControllerTestCase
     {
         $controller = new CrudlController($this->manager, $this->dispatcher);
 
-        $this->expectException(\InvalidArgumentException::class);
+        $this->expectException(EmptyConfigException::class);
 
         $controller->delete(new Request([], [], ['entity' => 'id']));
     }
@@ -47,7 +48,7 @@ class CrudlControllerDeleteTest extends AbstractCrudlControllerTestCase
 
         $this->repository->expects($this->once())->method('findOneBy')->willReturn(null);
 
-        $controller = new CrudlController($this->manager, $this->dispatcher, null, null, null, null, $config);
+        $controller = new CrudlController($this->manager, $this->dispatcher, $config);
 
         $this->expectException(NotFoundHttpException::class);
 
@@ -60,16 +61,15 @@ class CrudlControllerDeleteTest extends AbstractCrudlControllerTestCase
             'delete' => [
                 'initialize_event_name' => 'test_event',
                 'view' => 'test_view.html.twig',
+                'form' => $this->getMockBuilder(DeleteForm::class)->getMock(),
             ],
         ];
 
         $this->repository->expects($this->once())->method('findOneBy')->willReturn($entity = new \stdClass());
 
-        $deleteForm = $this->getMockBuilder(DeleteForm::class)->getMock();
-
         $expectedResponse = new Response();
 
-        $controller = $this->getControllerMock($config, ['dispatchGetResponse'], null, null, null, $deleteForm);
+        $controller = $this->getControllerMock($config, ['dispatchGetResponse']);
         $controller->expects($this->once())->method('dispatchGetResponse')->willReturn($expectedResponse);
 
         $response = $controller->delete(new Request([], [], ['entity' => 'id']));
@@ -83,6 +83,7 @@ class CrudlControllerDeleteTest extends AbstractCrudlControllerTestCase
             'delete' => [
                 'view' => 'test_view.html.twig',
                 'view_event_name' => 'test_event',
+                'form' => $this->getMockBuilder(DeleteForm::class)->getMock(),
             ],
         ];
 
@@ -91,13 +92,11 @@ class CrudlControllerDeleteTest extends AbstractCrudlControllerTestCase
         // assertion only one dispatch call
         $this->dispatcher->expects($this->once())->method('dispatch');
 
-        $deleteForm = $this->getMockBuilder(DeleteForm::class)->getMock();
-
         $form = $this->getMockBuilder(Form::class)->disableOriginalConstructor()->getMock();
         $this->formFactory->expects($this->once())->method('create')->willReturn($form);
         $form->expects($this->once())->method('handleRequest')->willReturn($form);
 
-        $controller = $this->getControllerMock($config, ['renderView'], null, null, null, $deleteForm);
+        $controller = $this->getControllerMock($config, ['renderView']);
         $controller->expects($this->once())->method('renderView')->willReturn($config['delete']['view']);
 
         $response = $controller->delete(new Request([], [], ['entity' => 'id']));
@@ -110,12 +109,11 @@ class CrudlControllerDeleteTest extends AbstractCrudlControllerTestCase
         $config = [
             'delete' => [
                 'form_invalid_event_name' => 'test_event',
+                'form' => $this->getMockBuilder(DeleteForm::class)->getMock(),
             ],
         ];
 
         $this->repository->expects($this->once())->method('findOneBy')->willReturn($entity = new \stdClass());
-
-        $deleteForm = $this->getMockBuilder(DeleteForm::class)->getMock();
 
         $form = $this->getMockBuilder(Form::class)->disableOriginalConstructor()->getMock();
         $this->formFactory->expects($this->once())->method('create')->willReturn($form);
@@ -123,7 +121,7 @@ class CrudlControllerDeleteTest extends AbstractCrudlControllerTestCase
         $form->expects($this->once())->method('isSubmitted')->willReturn(true);
         $form->expects($this->once())->method('isValid')->willReturn(false);
 
-        $controller = $this->getControllerMock($config, ['dispatchGetResponse'], null, null, null, $deleteForm);
+        $controller = $this->getControllerMock($config, ['dispatchGetResponse']);
         $expectedResponse = new Response();
         $controller->expects($this->once())->method('dispatchGetResponse')->willReturn($expectedResponse);
 
@@ -136,12 +134,11 @@ class CrudlControllerDeleteTest extends AbstractCrudlControllerTestCase
         $config = [
             'delete' => [
                 'form_valid_event_name' => 'test_event',
+                'form' => $this->getMockBuilder(DeleteForm::class)->getMock(),
             ],
         ];
 
         $this->repository->expects($this->once())->method('findOneBy')->willReturn($entity = new \stdClass());
-
-        $deleteForm = $this->getMockBuilder(DeleteForm::class)->getMock();
 
         $form = $this->getMockBuilder(Form::class)->disableOriginalConstructor()->getMock();
         $this->formFactory->expects($this->once())->method('create')->willReturn($form);
@@ -149,7 +146,7 @@ class CrudlControllerDeleteTest extends AbstractCrudlControllerTestCase
         $form->expects($this->once())->method('isSubmitted')->willReturn(true);
         $form->expects($this->once())->method('isValid')->willReturn(true);
 
-        $controller = $this->getControllerMock($config, ['dispatchGetResponse'], null, null, null, $deleteForm);
+        $controller = $this->getControllerMock($config, ['dispatchGetResponse']);
         $expectedResponse = new Response();
         $controller->expects($this->once())->method('dispatchGetResponse')->willReturn($expectedResponse);
 
@@ -162,19 +159,18 @@ class CrudlControllerDeleteTest extends AbstractCrudlControllerTestCase
         $config = [
             'delete' => [
                 'success_event_name' => 'test_event',
+                'form' => $this->getMockBuilder(DeleteForm::class)->getMock(),
             ],
         ];
 
         $this->repository->expects($this->once())->method('findOneBy')->willReturn($entity = new \stdClass());
-        $deleteForm = $this->getMockBuilder(DeleteForm::class)->getMock();
-
         $form = $this->getMockBuilder(Form::class)->disableOriginalConstructor()->getMock();
         $this->formFactory->expects($this->once())->method('create')->willReturn($form);
         $form->expects($this->once())->method('handleRequest')->willReturn($form);
         $form->expects($this->once())->method('isSubmitted')->willReturn(true);
         $form->expects($this->once())->method('isValid')->willReturn(true);
 
-        $controller = $this->getControllerMock($config, ['dispatchGetResponse'], null, null, null, $deleteForm);
+        $controller = $this->getControllerMock($config, ['dispatchGetResponse']);
         $expectedResponse = new Response();
         $controller->expects($this->once())->method('dispatchGetResponse')->willReturn($expectedResponse);
         $this->manager->expects($this->once())->method('deleteEntity');
@@ -188,12 +184,11 @@ class CrudlControllerDeleteTest extends AbstractCrudlControllerTestCase
         $config = [
             'delete' => [
                 'success_redirect_to' => 'redirect_route',
+                'form' => $this->getMockBuilder(DeleteForm::class)->getMock(),
             ],
         ];
 
         $this->repository->expects($this->once())->method('findOneBy')->willReturn($entity = new \stdClass());
-
-        $deleteForm = $this->getMockBuilder(DeleteForm::class)->getMock();
 
         $form = $this->getMockBuilder(Form::class)->disableOriginalConstructor()->getMock();
         $this->formFactory->expects($this->once())->method('create')->willReturn($form);
@@ -201,7 +196,7 @@ class CrudlControllerDeleteTest extends AbstractCrudlControllerTestCase
         $form->expects($this->once())->method('isSubmitted')->willReturn(true);
         $form->expects($this->once())->method('isValid')->willReturn(true);
 
-        $controller = $this->getControllerMock($config, ['generateUrl'], null, null, null, $deleteForm);
+        $controller = $this->getControllerMock($config, ['generateUrl']);
         $controller->expects($this->once())->method('generateUrl')->with($this->equalTo('redirect_route'))->willReturn('/redirect/to/route');
         $this->manager->expects($this->once())->method('deleteEntity');
 
@@ -216,12 +211,11 @@ class CrudlControllerDeleteTest extends AbstractCrudlControllerTestCase
         $config = [
             'delete' => [
                 'success_redirect_to' => '',
+                'form' => $this->getMockBuilder(DeleteForm::class)->getMock(),
             ],
         ];
 
         $this->repository->expects($this->once())->method('findOneBy')->willReturn($entity = new \stdClass());
-
-        $deleteForm = $this->getMockBuilder(DeleteForm::class)->getMock();
 
         $form = $this->getMockBuilder(Form::class)->disableOriginalConstructor()->getMock();
         $this->formFactory->expects($this->once())->method('create')->willReturn($form);
@@ -229,7 +223,7 @@ class CrudlControllerDeleteTest extends AbstractCrudlControllerTestCase
         $form->expects($this->once())->method('isSubmitted')->willReturn(true);
         $form->expects($this->once())->method('isValid')->willReturn(true);
 
-        $controller = $this->getControllerMock($config, [], null, null, null, $deleteForm);
+        $controller = $this->getControllerMock($config, []);
         $this->manager->expects($this->once())->method('deleteEntity');
 
         /** @var RedirectResponse $response */

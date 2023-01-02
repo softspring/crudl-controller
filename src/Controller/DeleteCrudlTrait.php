@@ -5,6 +5,8 @@ namespace Softspring\Component\CrudlController\Controller;
 use Softspring\Component\CrudlController\Event\GetResponseEntityEvent;
 use Softspring\Component\CrudlController\Event\GetResponseEntityExceptionEvent;
 use Softspring\Component\CrudlController\Event\GetResponseFormEvent;
+use Softspring\Component\CrudlController\Exception\EmptyConfigException;
+use Softspring\Component\CrudlController\Exception\InvalidFormException;
 use Softspring\Component\CrudlController\Form\DefaultDeleteForm;
 use Softspring\Component\Events\FormEvent;
 use Softspring\Component\Events\ViewEvent;
@@ -19,7 +21,7 @@ trait DeleteCrudlTrait
         $config = array_replace_recursive($this->config['delete'] ?? [], $config);
 
         if (empty($config)) {
-            throw new \InvalidArgumentException('Delete action configuration is empty');
+            throw new EmptyConfigException('Delete');
         }
 
         $deleteForm = $config['form'] ?? DefaultDeleteForm::class;
@@ -37,7 +39,7 @@ trait DeleteCrudlTrait
         }
 
         if (!$deleteForm instanceof FormTypeInterface && !is_string($deleteForm)) {
-            throw new \InvalidArgumentException(sprintf('Delete form must be an instance of %s or a class name', FormTypeInterface::class));
+            throw new InvalidFormException('Delete');
         }
 
         if ($response = $this->dispatchGetResponseFromConfig($config, 'initialize_event_name', new GetResponseEntityEvent($entity, $request))) {

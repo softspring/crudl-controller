@@ -4,6 +4,8 @@ namespace Softspring\Component\CrudlController\Controller;
 
 use Softspring\Component\CrudlController\Event\GetResponseEntityEvent;
 use Softspring\Component\CrudlController\Event\GetResponseFormEvent;
+use Softspring\Component\CrudlController\Exception\EmptyConfigException;
+use Softspring\Component\CrudlController\Exception\InvalidFormException;
 use Softspring\Component\Events\FormEvent;
 use Softspring\Component\Events\ViewEvent;
 use Symfony\Component\Form\FormTypeInterface;
@@ -17,7 +19,7 @@ trait CreateCrudlTrait
         $config = array_replace_recursive($this->config['create'] ?? [], $config);
 
         if (empty($config)) {
-            throw new \InvalidArgumentException('Create action configuration is empty');
+            throw new EmptyConfigException('Create');
         }
 
         $createForm = $config['form'] ?? null;
@@ -27,7 +29,7 @@ trait CreateCrudlTrait
         }
 
         if (!$createForm instanceof FormTypeInterface && !is_string($createForm)) {
-            throw new \InvalidArgumentException(sprintf('Create form must be an instance of %s or a class name', FormTypeInterface::class));
+            throw new InvalidFormException('Create');
         }
 
         $entity = $this->manager->createEntity();

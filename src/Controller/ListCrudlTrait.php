@@ -3,6 +3,7 @@
 namespace Softspring\Component\CrudlController\Controller;
 
 use Softspring\Component\CrudlController\Event\FilterEvent;
+use Softspring\Component\CrudlController\Exception\EmptyConfigException;
 use Softspring\Component\DoctrinePaginator\Paginator;
 use Softspring\Component\DoctrineQueryFilters\FilterFormInterface;
 use Softspring\Component\DoctrineQueryFilters\Filters;
@@ -20,7 +21,7 @@ trait ListCrudlTrait
         $config = array_replace_recursive($this->config['list'] ?? [], $config);
 
         if (empty($config)) {
-            throw new \InvalidArgumentException('List action configuration is empty');
+            throw new EmptyConfigException('List');
         }
 
         $listFilterForm = $config['filter_form'] ?? null;
