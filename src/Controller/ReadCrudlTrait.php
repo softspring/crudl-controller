@@ -13,11 +13,11 @@ trait ReadCrudlTrait
     {
         $config = array_replace_recursive($this->config['read'] ?? [], $config);
 
-        $entity = $request->attributes->get($this->config['entity_attribute']);
-
         if (empty($config)) {
             throw new \InvalidArgumentException('Read action configuration is empty');
         }
+
+        $entity = $request->attributes->get($this->config['entity_attribute']);
 
         // convert entity
         $entity = $this->manager->getRepository()->findOneBy([$config['param_converter_key'] ?? 'id' => $entity]);

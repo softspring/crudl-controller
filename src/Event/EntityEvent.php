@@ -11,9 +11,6 @@ class EntityEvent extends Event
 
     protected ?Request $request;
 
-    /**
-     * AccountEvent constructor.
-     */
     public function __construct(object $entity, ?Request $request)
     {
         $this->entity = $entity;

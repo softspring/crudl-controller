@@ -4,7 +4,6 @@ namespace Softspring\Component\CrudlController\Controller;
 
 use Softspring\Component\CrudlController\Event\GetResponseEntityEvent;
 use Softspring\Component\CrudlController\Event\GetResponseFormEvent;
-use Softspring\Component\CrudlController\Form\FormOptionsInterface;
 use Softspring\Component\Events\FormEvent;
 use Softspring\Component\Events\ViewEvent;
 use Symfony\Component\Form\FormTypeInterface;
@@ -13,21 +12,15 @@ use Symfony\Component\HttpFoundation\Response;
 
 trait CreateCrudlTrait
 {
-    /**
-     * @param string|FormTypeInterface|null $createForm
-     */
-    public function create(Request $request, $createForm = null, array $config = []): Response
+    public function create(Request $request, array $config = []): Response
     {
-        if (is_object($createForm)) {
-            trigger_deprecation('softspring/crudl-controller', '5.x', '$createForm method parameter is deprecated and will be removed in future versions. Please user the form option in the config section.');
-        }
-
         $config = array_replace_recursive($this->config['create'] ?? [], $config);
-        $createForm = $createForm ?: $this->createForm ?: $config['form'] ?? null;
 
         if (empty($config)) {
             throw new \InvalidArgumentException('Create action configuration is empty');
         }
+
+        $createForm = $config['form'] ?? null;
 
         if (!empty($config['is_granted'])) {
             $this->denyAccessUnlessGranted($config['is_granted'], null, sprintf('Access denied, user is not %s.', $config['is_granted']));
@@ -43,14 +36,7 @@ trait CreateCrudlTrait
             return $response;
         }
 
-        if ($createForm instanceof FormOptionsInterface) {
-            $formOptions = $createForm->formOptions($entity, $request);
-        } elseif ($createForm instanceof FormTypeInterface && method_exists($createForm, 'formOptions')) {
-            trigger_deprecation('softspring/crudl-controller', '5.x', 'If you want to use formOptions method you must implement %s interface.', FormOptionsInterface::class);
-            $formOptions = $createForm->formOptions($entity, $request);
-        } else {
-            $formOptions = ['method' => 'POST'];
-        }
+        $formOptions = ['method' => 'POST'];
 
         $formClassName = $createForm instanceof FormTypeInterface ? get_class($createForm) : $createForm;
 

@@ -4,7 +4,6 @@ namespace Softspring\Component\CrudlController\Controller;
 
 use Softspring\Component\CrudlController\Event\GetResponseEntityEvent;
 use Softspring\Component\CrudlController\Event\GetResponseFormEvent;
-use Softspring\Component\CrudlController\Form\FormOptionsInterface;
 use Softspring\Component\Events\FormEvent;
 use Softspring\Component\Events\ViewEvent;
 use Symfony\Component\Form\FormTypeInterface;
@@ -13,23 +12,17 @@ use Symfony\Component\HttpFoundation\Response;
 
 trait UpdateCrudlTrait
 {
-    /**
-     * @param string|FormTypeInterface|null $updateForm
-     */
-    public function update(Request $request, $updateForm = null, array $config = []): Response
+    public function update(Request $request, array $config = []): Response
     {
-        if (is_object($updateForm)) {
-            trigger_deprecation('softspring/crudl-controller', '5.x', '$updateForm method parameter is deprecated and will be removed in future versions. Please user the form option in the config section.');
-        }
-
         $config = array_replace_recursive($this->config['update'] ?? [], $config);
-        $updateForm = $updateForm ?: $this->updateForm ?: $config['form'] ?? null;
-
-        $entity = $request->attributes->get($this->config['entity_attribute']);
 
         if (empty($config)) {
             throw new \InvalidArgumentException('Update action configuration is empty');
         }
+
+        $updateForm = $config['form'] ?? null;
+
+        $entity = $request->attributes->get($this->config['entity_attribute']);
 
         $entity = $this->manager->getRepository()->findOneBy([$config['param_converter_key'] ?? 'id' => $entity]);
 
@@ -49,14 +42,7 @@ trait UpdateCrudlTrait
             return $response;
         }
 
-        if ($updateForm instanceof FormOptionsInterface) {
-            $formOptions = $updateForm->formOptions($entity, $request);
-        } elseif ($updateForm instanceof FormTypeInterface && method_exists($updateForm, 'formOptions')) {
-            trigger_deprecation('softspring/crudl-controller', '5.x', 'If you want to use formOptions method you must implement %s interface.', FormOptionsInterface::class);
-            $formOptions = $updateForm->formOptions($entity, $request);
-        } else {
-            $formOptions = ['method' => 'POST'];
-        }
+        $formOptions = ['method' => 'POST'];
 
         $formClassName = $updateForm instanceof FormTypeInterface ? get_class($updateForm) : $updateForm;
 

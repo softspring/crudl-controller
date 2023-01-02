@@ -6,7 +6,6 @@ use Softspring\Component\CrudlController\Event\GetResponseEntityEvent;
 use Softspring\Component\CrudlController\Event\GetResponseEntityExceptionEvent;
 use Softspring\Component\CrudlController\Event\GetResponseFormEvent;
 use Softspring\Component\CrudlController\Form\DefaultDeleteForm;
-use Softspring\Component\CrudlController\Form\FormOptionsInterface;
 use Softspring\Component\Events\FormEvent;
 use Softspring\Component\Events\ViewEvent;
 use Symfony\Component\Form\FormTypeInterface;
@@ -15,23 +14,17 @@ use Symfony\Component\HttpFoundation\Response;
 
 trait DeleteCrudlTrait
 {
-    /**
-     * @param string|FormTypeInterface|null $deleteForm
-     */
-    public function delete(Request $request, $deleteForm = null, array $config = []): Response
+    public function delete(Request $request, array $config = []): Response
     {
-        if (is_object($deleteForm)) {
-            trigger_deprecation('softspring/crudl-controller', '5.x', '$deleteForm method parameter is deprecated and will be removed in future versions. Please user the form option in the config section.');
-        }
-
         $config = array_replace_recursive($this->config['delete'] ?? [], $config);
-        $deleteForm = $deleteForm ?: $this->deleteForm ?: $config['form'] ?? DefaultDeleteForm::class;
-
-        $entity = $request->attributes->get($this->config['entity_attribute']);
 
         if (empty($config)) {
             throw new \InvalidArgumentException('Delete action configuration is empty');
         }
+
+        $deleteForm = $config['form'] ?? DefaultDeleteForm::class;
+
+        $entity = $request->attributes->get($this->config['entity_attribute']);
 
         $entity = $this->manager->getRepository()->findOneBy([$config['param_converter_key'] ?? 'id' => $entity]);
 
@@ -51,14 +44,7 @@ trait DeleteCrudlTrait
             return $response;
         }
 
-        if ($deleteForm instanceof FormOptionsInterface) {
-            $formOptions = $deleteForm->formOptions($entity, $request);
-        } elseif ($deleteForm instanceof FormTypeInterface && method_exists($deleteForm, 'formOptions')) {
-            trigger_deprecation('softspring/crudl-controller', '5.x', 'If you want to use formOptions method you must implement %s interface.', FormOptionsInterface::class);
-            $formOptions = $deleteForm->formOptions($entity, $request);
-        } else {
-            $formOptions = ['method' => 'POST'];
-        }
+        $formOptions = ['method' => 'POST'];
 
         $formClassName = $deleteForm instanceof FormTypeInterface ? get_class($deleteForm) : $deleteForm;
 
