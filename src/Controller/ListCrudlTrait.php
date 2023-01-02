@@ -2,18 +2,14 @@
 
 namespace Softspring\Component\CrudlController\Controller;
 
-use Doctrine\ORM\EntityRepository;
-use Jhg\DoctrinePagination\ORM\PaginatedRepositoryInterface;
 use Softspring\Component\CrudlController\Event\FilterEvent;
-use Softspring\Component\CrudlController\Form\EntityListFilterFormInterface;
-use Softspring\Component\CrudlController\Form\FormOptionsInterface;
 use Softspring\Component\DoctrinePaginator\Paginator;
 use Softspring\Component\DoctrineQueryFilters\FilterFormInterface;
+use Softspring\Component\DoctrineQueryFilters\Filters;
 use Softspring\Component\Events\GetResponseRequestEvent;
 use Softspring\Component\Events\ViewEvent;
 use Symfony\Component\DependencyInjection\Exception\ServiceNotFoundException;
 use Symfony\Component\Form\FormInterface;
-use Symfony\Component\Form\FormTypeInterface;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 
@@ -80,15 +76,18 @@ trait ListCrudlTrait
             $page = $request->get($formCompiledOptions['page_field_name'], 1);
             $rpp = $form->get($formCompiledOptions['rpp_field_name'])->getData() ?? $formCompiledOptions['rpp_default_value'];
             $orderSort = [$form->get($formCompiledOptions['order_field_name'])->getData() ?? $formCompiledOptions['order_default_value'] => $form->get($formCompiledOptions['order_direction_field_name'])->getData() ?? $formCompiledOptions['order_direction_default_value']];
+            $filterMode = $formCompiledOptions['query_builder_mode'];
 
-            $this->dispatchFromConfig($config, 'filter_event_name', $filterEvent = new FilterEvent($filters, $orderSort, $page, $rpp));
+            $filterEvent = new FilterEvent($filters, $orderSort, $page, $rpp);
         } else {
             // without filter form, query all entities without filtering and pagination
-            $this->dispatchFromConfig($config, 'filter_event_name', $filterEvent = new FilterEvent([], $config['default_order_sort'] ?? []));
-            $form = null;
+            $filterEvent = new FilterEvent([], $config['default_order_sort'] ?? []);
+            $filterMode = Filters::MODE_AND;
         }
 
-        $entities = Paginator::queryPage($repo->createQueryBuilder('a'), $filterEvent->getPage(), $filterEvent->getRpp(), $filterEvent->getFilters(), $filterEvent->getOrderSort());
+        $this->dispatchFromConfig($config, 'filter_event_name', $filterEvent);
+
+        $entities = Paginator::queryPage($repo->createQueryBuilder('a'), $filterEvent->getPage(), $filterEvent->getRpp(), $filterEvent->getFilters(), $filterEvent->getOrderSort(), $filterMode);
 
         $this->dispatchFromConfig($config, 'view_event_name', $event = new ViewEvent([
             $config['entities_attribute'] ?? 'entities' => $entities,
