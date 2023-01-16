@@ -2,6 +2,7 @@
 
 namespace Softspring\Component\CrudlController\Controller;
 
+use Softspring\Component\CrudlController\Event\FormPrepareEvent;
 use Softspring\Component\CrudlController\Event\GetResponseEntityEvent;
 use Softspring\Component\CrudlController\Event\GetResponseEntityExceptionEvent;
 use Softspring\Component\CrudlController\Event\GetResponseFormEvent;
@@ -46,11 +47,9 @@ trait DeleteCrudlTrait
             return $response;
         }
 
-        $formOptions = ['method' => 'POST'];
-
+        $this->dispatchFromConfig($config, 'form_prepare_event_name', $formPrepareEvent = new FormPrepareEvent($entity, $request, ['method' => 'POST']));
         $formClassName = $deleteForm instanceof FormTypeInterface ? get_class($deleteForm) : $deleteForm;
-
-        $form = $this->createForm($formClassName, $entity, $formOptions)->handleRequest($request);
+        $form = $this->createForm($formClassName, $entity, $formPrepareEvent->getFormOptions())->handleRequest($request);
 
         $this->dispatchFromConfig($config, 'form_init_event_name', new FormEvent($form, $request));
 

@@ -2,6 +2,7 @@
 
 namespace Softspring\Component\CrudlController\Controller;
 
+use Softspring\Component\CrudlController\Event\FormPrepareEvent;
 use Softspring\Component\CrudlController\Event\GetResponseEntityEvent;
 use Softspring\Component\CrudlController\Event\GetResponseFormEvent;
 use Softspring\Component\CrudlController\Exception\EmptyConfigException;
@@ -44,11 +45,9 @@ trait UpdateCrudlTrait
             return $response;
         }
 
-        $formOptions = ['method' => 'POST'];
-
+        $this->dispatchFromConfig($config, 'form_prepare_event_name', $formPrepareEvent = new FormPrepareEvent($entity, $request, ['method' => 'POST']));
         $formClassName = $updateForm instanceof FormTypeInterface ? get_class($updateForm) : $updateForm;
-
-        $form = $this->createForm($formClassName, $entity, $formOptions)->handleRequest($request);
+        $form = $this->createForm($formClassName, $entity, $formPrepareEvent->getFormOptions())->handleRequest($request);
 
         $this->dispatchFromConfig($config, 'form_init_event_name', new FormEvent($form, $request));
 
