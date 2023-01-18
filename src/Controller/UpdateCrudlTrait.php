@@ -15,9 +15,9 @@ use Symfony\Component\HttpFoundation\Response;
 
 trait UpdateCrudlTrait
 {
-    public function update(Request $request, array $config = []): Response
+    public function update(Request $request, array $config = [], string $configKey = 'update'): Response
     {
-        $config = array_replace_recursive($this->config['update'] ?? [], $config);
+        $config = array_replace_recursive($this->config[$configKey] ?? [], $config);
 
         if (empty($config)) {
             throw new EmptyConfigException('Update');

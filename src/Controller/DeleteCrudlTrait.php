@@ -17,9 +17,9 @@ use Symfony\Component\HttpFoundation\Response;
 
 trait DeleteCrudlTrait
 {
-    public function delete(Request $request, array $config = []): Response
+    public function delete(Request $request, array $config = [], string $configKey = 'delete'): Response
     {
-        $config = array_replace_recursive($this->config['delete'] ?? [], $config);
+        $config = array_replace_recursive($this->config[$configKey] ?? [], $config);
 
         if (empty($config)) {
             throw new EmptyConfigException('Delete');

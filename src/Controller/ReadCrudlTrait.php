@@ -10,9 +10,9 @@ use Symfony\Component\HttpFoundation\Response;
 
 trait ReadCrudlTrait
 {
-    public function read(Request $request, array $config = []): Response
+    public function read(Request $request, array $config = [], string $configKey = 'read'): Response
     {
-        $config = array_replace_recursive($this->config['read'] ?? [], $config);
+        $config = array_replace_recursive($this->config[$configKey] ?? [], $config);
 
         if (empty($config)) {
             throw new EmptyConfigException('Read');

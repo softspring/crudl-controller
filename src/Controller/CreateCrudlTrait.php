@@ -15,9 +15,9 @@ use Symfony\Component\HttpFoundation\Response;
 
 trait CreateCrudlTrait
 {
-    public function create(Request $request, array $config = []): Response
+    public function create(Request $request, array $config = [], string $configKey = 'create'): Response
     {
-        $config = array_replace_recursive($this->config['create'] ?? [], $config);
+        $config = array_replace_recursive($this->config[$configKey] ?? [], $config);
 
         if (empty($config)) {
             throw new EmptyConfigException('Create');

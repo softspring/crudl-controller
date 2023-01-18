@@ -16,9 +16,9 @@ use Symfony\Component\HttpFoundation\Response;
 
 trait ListCrudlTrait
 {
-    public function list(Request $request, array $config = []): Response
+    public function list(Request $request, array $config = [], string $configKey = 'list'): Response
     {
-        $config = array_replace_recursive($this->config['list'] ?? [], $config);
+        $config = array_replace_recursive($this->config[$configKey] ?? [], $config);
 
         if (empty($config)) {
             throw new EmptyConfigException('List');
@@ -30,7 +30,7 @@ trait ListCrudlTrait
             try {
                 $listFilterForm = $this->container->get($listFilterForm);
             } catch (ServiceNotFoundException $e) {
-                throw new \InvalidArgumentException('List filter is a string, if it\'s a service must be public');
+                throw new \InvalidArgumentException("List filter is a string, if it's a service must be public.\nIf you are using 'controller.service_arguments' tag for your controller you must .... TODO");
             }
         }
 
