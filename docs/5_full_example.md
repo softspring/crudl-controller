@@ -70,39 +70,38 @@ class ProductListFilterForm extends EntityListFilterForm
 ```yaml
 # config/services.yaml
 services:
-  _defaults:
-    autowire: true
-    autoconfigure: true
-    public: false
+    _defaults:
+        autowire: true
+        autoconfigure: true
+        public: false
 
-  product_manager:
-    class: Softspring\Component\CrudlController\Manager\DefaultCrudlEntityManager
-    arguments:
-      $targetClass: 'App\Entity\Product'
+    product_manager:
+        class: Softspring\Component\CrudlController\Manager\DefaultCrudlEntityManager
+        arguments:
+            $targetClass: 'App\Entity\Product'
 
-  product.controller:
-    class: Softspring\Component\CrudlController\Controller\CrudlController
-    public: true
-    calls:
-      - { method: setContainer, arguments: ['@service_container'] }
-    arguments:
-      $manager: '@product_manager'
-      $createForm: '@App\Form\Admin\ProductCreateForm'
-      $updateForm: '@App\Form\Admin\ProductUpdateForm'
-      $deleteForm: '@App\Form\Admin\ProductDeleteForm'
-      $listFilterForm: '@App\Form\Admin\ProductListFilterForm'
-      $config:
-        entity_attribute: 'product'
-        create:
-          view: 'admin/products/create.html.twig'
-        read:
-          view: 'admin/products/read.html.twig'
-        update:
-          view: 'admin/products/update.html.twig'
-        delete:
-          view: 'admin/products/delete.html.twig'
-        list:
-          view: 'admin/products/list.html.twig'
+    product.controller:
+        class: Softspring\Component\CrudlController\Controller\CrudlController
+        public: true
+        tags: [ 'controller.service_arguments' ]
+        arguments:
+            $manager: '@product_manager'
+            $config:
+                entity_attribute: 'product'
+                create:
+                    form: '@App\Form\Admin\ProductCreateForm'
+                    view: 'admin/products/create.html.twig'
+                read:
+                    view: 'admin/products/read.html.twig'
+                update:
+                    form: '@App\Form\Admin\ProductUpdateForm'
+                    view: 'admin/products/update.html.twig'
+                delete:
+                    form: '@App\Form\Admin\ProductDeleteForm'
+                    view: 'admin/products/delete.html.twig'
+                list:
+                    filterForm: '@App\Form\Admin\ProductListFilterForm'
+                    view: 'admin/products/list.html.twig'
 ```
 
 ```yaml

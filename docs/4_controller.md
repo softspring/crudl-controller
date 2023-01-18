@@ -13,26 +13,21 @@ The controller requires 6 arguments:
 
 ```yaml
 services:
-  product.controller:
-    class: Softspring\Component\CrudlController\Controller\CrudlController
-    public: true
-    calls:
-      - { method: setContainer, arguments: ['@service_container'] }
-    arguments:
-      $manager: '@App\Manager\ProductManagerInterface'
-      $createForm: '@App\Form\Admin\ProductCreateFormInterface'
-      $updateForm: null
-      $deleteForm: null
-      $listFilterForm: '@App\Form\Admin\ProductListFilterFormInterface'
-      $config:
-        ...
+    product.controller:
+        class: Softspring\Component\CrudlController\Controller\CrudlController
+        public: true
+        tags: [ 'controller.service_arguments' ]
+        arguments:
+            $manager: '@App\Manager\ProductManagerInterface'
+            $config:
+                ...
 ```
 
 ## General configuration
 
 ```yaml
 $config:
-  entity_attribute: 'product'
+    entity_attribute: 'product'
 ```
 
 This is used for route attribute and view data passing.
@@ -91,7 +86,7 @@ This is the list action configuration reference:
 ```yaml
 $config:
     read:
-      is_granted: 'ROLE_ADMIN_PRODUCT_READ'
+        is_granted: 'ROLE_ADMIN_PRODUCT_READ'
         param_converter_key: 'id'
         view: 'admin/products/read.html.twig'
         initialize_event_name: 'product_admin.read.initialize'
@@ -163,17 +158,17 @@ This is the list action configuration reference:
 
 ```yaml
 $config:
-  delete:
-    is_granted: 'ROLE_ADMIN_PRODUCT_DELETE'
-    success_redirect_to: 'app_admin_product_list'
-    view: 'admin/products/delete.html.twig'
-    initialize_event_name: 'product_admin.delete.initialize'
-    form_init_event_name: 'product_admin.delete.form_init'
-    form_valid_event_name: 'product_admin.delete.form_valid'
-    success_event_name: 'product_admin.delete.success'
-    form_invalid_event_name: 'product_admin.delete.form_invalid'
-    delete_exception_event_name: 'product_admin.delete.exception'
-    view_event_name: 'product_admin.delete.view'
+    delete:
+        is_granted: 'ROLE_ADMIN_PRODUCT_DELETE'
+        success_redirect_to: 'app_admin_product_list'
+        view: 'admin/products/delete.html.twig'
+        initialize_event_name: 'product_admin.delete.initialize'
+        form_init_event_name: 'product_admin.delete.form_init'
+        form_valid_event_name: 'product_admin.delete.form_valid'
+        success_event_name: 'product_admin.delete.success'
+        form_invalid_event_name: 'product_admin.delete.form_invalid'
+        delete_exception_event_name: 'product_admin.delete.exception'
+        view_event_name: 'product_admin.delete.view'
 ```
 
 Main fields:
