@@ -6,9 +6,10 @@ $finder = PhpCsFixer\Finder::create()
 ;
 
 $config = new PhpCsFixer\Config();
-return $config->setRules([
+    return $config->setRules([
         '@Symfony' => true,
         'full_opening_tag' => false,
+        'phpdoc_separation' => false,
     ])
     ->setFinder($finder)
 ;

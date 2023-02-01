@@ -13,7 +13,7 @@
     },
     "require-dev": {
         "doctrine/orm": "^2.5",
-        "friendsofphp/php-cs-fixer": "9999999-dev",
+        "friendsofphp/php-cs-fixer": "^3.14",
         "phpstan/phpstan": "^1.9",
         "phpunit/phpunit": "^9.5.25",
         "symfony/console": "^5.4|^6.0",
