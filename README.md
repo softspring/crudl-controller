@@ -5,8 +5,8 @@
 [![License](https://poser.pugx.org/softspring/crudl-controller/license.svg)](https://packagist.org/packages/softspring/crudl-controller)
 [![PHP Version Require](http://poser.pugx.org/softspring/crudl-controller/require/php)](https://packagist.org/packages/softspring/crudl-controller)
 [![Total Downloads](https://poser.pugx.org/softspring/crudl-controller/downloads)](https://packagist.org/packages/softspring/crudl-controller)
-[![Build status](https://github.com/softspring/crudl-controller/actions/workflows/php.yml/badge.svg?branch=5.0)](https://github.com/softspring/crudl-controller/actions/workflows/php.yml)
-![Coverage](https://raw.githubusercontent.com/softspring/crudl-controller/5.0/.github/badges/coverage.svg)
+[![Build status](https://github.com/softspring/crudl-controller/actions/workflows/php.yml/badge.svg?branch=5.1)](https://github.com/softspring/crudl-controller/actions/workflows/php.yml)
+![Coverage](https://raw.githubusercontent.com/softspring/crudl-controller/5.1/.github/badges/coverage.svg)
 
 This tool aims to provide an easy CRUD+List (CRUDL from now on) feature for any doctrine entity you want to manage.
 
