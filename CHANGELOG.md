@@ -1,6 +1,6 @@
 # CHANGELOG
 
-## [4.1.0](https://github.com/softspring/crudl-controller/releases/tag/4.1.0) (07 mar 2022)
+## [v5.0.5](https://github.com/softspring/crudl-controller/releases/tag/v5.0.5)
 
 ### Upgrading
 
@@ -8,10 +8,31 @@
 
 ### Commits
 
-- 8725ccf Remove dev version in composer.json file
-- 85b6130 Configure new 4.1-dev version to main branch in composer.json file
-- 9a8e7e7 Remove dev version in composer.json file
+- [f400075](https://github.com/softspring/crudl-controller/commit/f400075085fd8f51b505589bfbc25e3eff2fb594): Update changelog
 
 ### Changes
 
-*Nothing has changed since last 4.0 branch version*
+```
+ CHANGELOG.md | 22 +++++++++++++---------
+ 1 file changed, 13 insertions(+), 9 deletions(-)
+```
+
+## [v5.0.4](https://github.com/softspring/crudl-controller/releases/tag/v5.0.4)
+
+*Nothing has changed since last v5.0.3 version*
+
+## [v5.0.3](https://github.com/softspring/crudl-controller/releases/tag/v5.0.3)
+
+*Nothing has changed since last v5.0.2 version*
+
+## [v5.0.2](https://github.com/softspring/crudl-controller/releases/tag/v5.0.2)
+
+*Nothing has changed since last v5.0.1 version*
+
+## [v5.0.1](https://github.com/softspring/crudl-controller/releases/tag/v5.0.1)
+
+*Nothing has changed since last v5.0.0 version*
+
+## [v5.0.0](https://github.com/softspring/crudl-controller/releases/tag/v5.0.0)
+
+*Previous versions are not in changelog*
