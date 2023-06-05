@@ -30,7 +30,7 @@ class FilterEvent extends Event
         return new FilterEvent($filters, $orderSort, $page, $rpp, $qb, $filtersMode);
     }
 
-    public function __construct(array $filters, array $orderSort, ?int $page = null, ?int $rpp = null, ?QueryBuilder $queryBuilder = null, ?int $filtersMode = null)
+    public function __construct(array $filters, array $orderSort, int $page = null, int $rpp = null, QueryBuilder $queryBuilder = null, int $filtersMode = null)
     {
         $this->filters = $filters;
         $this->orderSort = $orderSort;
