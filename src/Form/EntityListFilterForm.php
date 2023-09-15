@@ -19,7 +19,7 @@ class EntityListFilterForm extends AbstractType implements EntityListFilterFormI
         return '';
     }
 
-    public function configureOptions(OptionsResolver $resolver)
+    public function configureOptions(OptionsResolver $resolver): void
     {
         $resolver->setDefaults([
             'csrf_protection' => false,
@@ -30,7 +30,7 @@ class EntityListFilterForm extends AbstractType implements EntityListFilterFormI
         ]);
     }
 
-    public function buildForm(FormBuilderInterface $builder, array $options)
+    public function buildForm(FormBuilderInterface $builder, array $options): void
     {
         $builder->add(static::orderFieldParamName(), HiddenType::class, [
             'mapped' => false,
