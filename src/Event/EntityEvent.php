@@ -7,14 +7,10 @@ use Symfony\Contracts\EventDispatcher\Event;
 
 class EntityEvent extends Event
 {
-    protected object $entity;
-
-    protected ?Request $request;
-
-    public function __construct(object $entity, ?Request $request)
-    {
-        $this->entity = $entity;
-        $this->request = $request;
+    public function __construct(
+        protected object $entity,
+        protected ?Request $request
+    ) {
     }
 
     public function getEntity(): object

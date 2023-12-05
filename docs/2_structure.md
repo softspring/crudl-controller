@@ -1,47 +1,36 @@
-
 # Structure
 
-The CRUDL is based on a Manager, a Controller, some forms and a lot of events.
+CRUDL bundle provides a set of classes that allows to create a CRUD+List controller for any entity.
+
+It's mainly based on a Controller and a Manager.
 
 ## Manager
 
 The Manager will take care of entity management, acting as a factory of entities and doing the doctrine calls.
 
-Every CRUDL manager must implements Softspring\Component\CrudlController\Manager\CrudlEntityManagerInterface interface, witch defines:
+Managers must implement *Softspring\Component\CrudlController\Manager\CrudlEntityManagerInterface* interface.
 
-- getTargetClass()
-- getEntityClass()
-- getEntityClassReflection()
-- getRepository()
-- createEntity()
-- saveEntity()
-- deleteEntity()
+For more info about managers, check [Manager](docs/3_manager.md) section.
 
 ## Controller
 
 The CRUDL controller performs the following actions:
 
-- create
-- read
-- update
-- delete
-- list
+- Create
+- Read
+- Update
+- Delete
+- List
 
 None of those actions are required, you will be able to enable just one or more of them.
 
 ## Forms
 
-Controller actions (all except read action) requires a form to work. These forms must
-extend the provided interfaces:
-
-- Softspring\Component\CrudlController\Form\EntityCreateFormInterface
-- Softspring\Component\CrudlController\Form\EntityDeleteFormInterface
-- Softspring\Component\CrudlController\Form\EntityListFilterFormInterface
-- Softspring\Component\CrudlController\Form\EntityUpdateFormInterface
+Controller actions (all except read action) requires a form to work. They could be any AbstractType form.
 
 ## Events
 
-Every form action dispatches a lot of events, that allows to extend functionality, checking
+Every CRUDL action dispatches a lot of events, that allows to extend functionality, checking
 values, security, adding view data, or anything we need to do into the action flow.
 
 For example, create action dispatches following events:

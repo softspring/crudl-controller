@@ -1,90 +1,90 @@
 # Configure your controller
 
-You need to configure your controller as a service.
+You need to configure your controller as a pure Symfony service.
 
 The controller requires 6 arguments:
 
 - The manager implementing Softspring\Component\CrudlController\Manager\CrudlEntityManagerInterface
-- listFilterForm or null
-- createForm or null
-- updateForm or null
-- deleteForm or null
-- config: an array with controller configuration
+- Symfony event dispatcher
+- Symfony twig environment
+- Symfony form factory
+- Symfony authorization Checker
+- Symfony router
+- configs: an optional array with controller configuration (also can be configured each method separately)
+
+You can set autowire to true to avoid configuring Symfony components manually.
 
 ```yaml
 services:
+    _defaults:
+        autowire: true
+        
     product.controller:
         class: Softspring\Component\CrudlController\Controller\CrudlController
         public: true
-        tags: [ 'controller.service_arguments' ]
         arguments:
             $manager: '@App\Manager\ProductManagerInterface'
-            $config:
+            $configs:
                 ...
 ```
 
-## General configuration
+## Configure actions
+
+- [Create action configuration](docs/4_1_create_action.md)
+- [Read action configuration](docs/4_2_read_action.md)
+- [Update action configuration](docs/4_3_update_action.md)
+- [Delete action configuration](docs/4_4_delete_action.md)
+- List action configuration
+
+## Routing configuration
+
+Now you need to configure the routes.
+
+Remember, none of them is mandatory, you can configure just the ones you need.
 
 ```yaml
-$config:
-    entity_attribute: 'product'
+# config/routes/admin_product.yaml
+app_admin_product_list:
+    controller: product.controller::list
+    path: /
+
+app_admin_product_create:
+    controller: product.controller::create
+    path: /create
+
+app_admin_product_update:
+    controller: product.controller::update
+    path: /{product}/update
+
+app_admin_product_delete:
+    controller: product.controller::delete
+    path: /{product}/delete
+
+app_admin_product_read:
+    controller: product.controller::read
+    path: /{product}
 ```
-
-This is used for route attribute and view data passing.
-
-If no entity_attribute is set, 'entity' name will be used.
-
-## Create action configuration
-
-This is the list action configuration reference:
 
 ```yaml
-$config:
-    create:
-        is_granted: 'ROLE_ADMIN_PRODUCT_CREATE'
-        success_redirect_to: 'app_admin_product_list'
-        view: 'admin/products/create.html.twig'
-        initialize_event_name: 'product_admin.create.initialize'
-        form_init_event_name: 'product_admin.create.form_init'
-        form_valid_event_name: 'product_admin.create.form_valid'
-        success_event_name: 'product_admin.create.success'
-        form_invalid_event_name: 'product_admin.create.form_invalid'
-        view_event_name: 'product_admin.create.view'
+# config/routes.yaml
+app_admin_product_routes:
+    resource: 'routes/admin_product.yaml'
+    prefix: "/admin/product"
 ```
 
-Main fields:
 
-- **is_granted**: (optional) role name to check at the begining
-- **view**: (required) the view path for rendering list
-- **success_redirect_to**: (optional) route name to redirect o success
 
-Events configuration:
 
-- **initialize_event_name**: (optional) event dispatched after checking is_granded and before form processing.
-  Dispatches Softspring\Component\Events\GetResponseRequestEvent object
-  It allows, for example, to redirect on custom situation.
-- **form_init_event_name**: (optional) event dispatched after form creation but before process it
-  Dispatches Softspring\Component\CrudlController\Event\GetResponseEntityEvent object
-  It allows to modify form.
-- **form_valid_event_name**: (optional) dispatched on form submitted and valid
-  Dispatches Softspring\Component\CrudlController\Event\GetResponseFormEvent object
-  It allows to modify model before saving it.
-- **success_event_name**: (optional)
-  Dispatches Softspring\Component\CrudlController\Event\GetResponseEntityEvent object
-  It allows to make changes after changes are applied, or redirect.
-- **form_invalid_event_name**: (optional) dispatched on form submitted and invalid
-  Dispatches Softspring\Component\CrudlController\Event\GetResponseFormEvent object
-  It allows to process form errors.
-- **view_event_name**: (optional)
-  Dispatches Softspring\Component\Events\ViewEvent object
-  Allows data adding for the view.
+
+
+
 
 ## Read action configuration
 
 This is the list action configuration reference:
 
 ```yaml
-$config:
+$configs:
     read:
         is_granted: 'ROLE_ADMIN_PRODUCT_READ'
         param_converter_key: 'id'
@@ -112,7 +112,7 @@ Events configuration:
 This is the list action configuration reference:
 
 ```yaml
-$config:
+$configs:
     update:
         is_granted: 'ROLE_ADMIN_PRODUCT_UPDATE'
         success_redirect_to: 'app_admin_product_list'
@@ -157,7 +157,7 @@ Events configuration:
 This is the list action configuration reference:
 
 ```yaml
-$config:
+$configs:
     delete:
         is_granted: 'ROLE_ADMIN_PRODUCT_DELETE'
         success_redirect_to: 'app_admin_product_list'
@@ -206,7 +206,7 @@ Events configuration:
 This is the list action configuration reference:
 
 ```yaml
-$config:
+$configs:
     list:
         is_granted: 'ROLE_ADMIN_PRODUCT_LIST'
         read_route: 'app_admin_product_details'
@@ -241,38 +241,3 @@ Other fields:
 
 - **default_order_sort**: (optional) is used in case no list filter form configured.
 
-## Routing configuration
-
-Now you need to configure the routes.
-
-Remembrer, none of them is mandatory, you can configure just the ones you need.
-
-```yaml
-# config/routes/admin_product.yaml
-app_admin_product_list:
-    controller: product.controller::list
-    path: /
-
-app_admin_product_create:
-    controller: product.controller::create
-    path: /create
-
-app_admin_product_update:
-    controller: product.controller::update
-    path: /{product}/update
-
-app_admin_product_delete:
-    controller: product.controller::delete
-    path: /{product}/delete
-
-app_admin_product_read:
-    controller: product.controller::read
-    path: /{product}
-```
-
-```yaml
-# config/routes.yaml
-app_admin_product_routes:
-    resource: 'routes/admin_product.yaml'
-    prefix: "/admin/product"
-```

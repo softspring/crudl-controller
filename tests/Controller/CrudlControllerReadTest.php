@@ -2,76 +2,98 @@
 
 namespace Softspring\Component\CrudlController\Tests\Controller;
 
-use Softspring\Component\CrudlController\Controller\CrudlController;
-use Softspring\Component\CrudlController\Exception\EmptyConfigException;
-use Symfony\Component\Finder\Exception\AccessDeniedException;
+use Softspring\Component\Events\GetResponseRequestEvent;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
+use Symfony\Component\Security\Core\Exception\AccessDeniedException;
 
 class CrudlControllerReadTest extends AbstractCrudlControllerTestCase
 {
-    public function testReadEmptyConfiguration()
-    {
-        $controller = new CrudlController($this->manager, $this->dispatcher);
-
-        $this->expectException(EmptyConfigException::class);
-
-        $controller->read(new Request([], [], ['entity' => 'id']));
-    }
-
     public function testReadDenyUnlessGranted()
     {
-        $config = [
+        $configs = [
             'read' => [
+                'entity_attribute' => 'entity',
+                'param_converter_key' => 'id',
+                'view' => 'template.html.twig',
                 'is_granted' => 'ROLE_MISSING',
             ],
         ];
 
         $this->expectException(AccessDeniedException::class);
 
-        $controller = $this->getControllerMock($config, ['denyAccessUnlessGranted']);
-        $controller->expects($this->once())->method('denyAccessUnlessGranted')->willThrowException(new AccessDeniedException());
-
-        $controller->read(new Request([], [], ['entity' => 'id']));
+        $controller = $this->createController($configs);
+        $controller->read(new Request());
     }
 
-    public function testReadWithNotFoundEntity()
+    public function testReadWithNotFoundEventReturningResponse()
     {
-        $config = [
+        $configs = [
             'read' => [
-                'initialize_event_name' => '',
+                'entity_attribute' => 'entity',
+                'param_converter_key' => 'id',
+                'view' => 'template.html.twig',
+                'is_granted' => null,
+                'not_found_event_name' => 'not_found_event',
             ],
         ];
 
-        $this->repository->expects($this->once())->method('findOneBy')->willReturn(null);
+        $expectedResponse = new Response();
 
-        $controller = new CrudlController($this->manager, $this->dispatcher, $config);
-        $controller->setContainer($this->container);
+        $this->dispatcher->expects($this->once())->method('dispatch')->willReturnCallback(function ($event, string $eventName) use ($expectedResponse) {
+            $eventName == 'not_found_event' && $event instanceof GetResponseRequestEvent && $event->setResponse($expectedResponse);
+
+            return $event;
+        });
+
+        $controller = $this->createController($configs);
+        $response = $controller->read(new Request());
+        $this->assertEquals($expectedResponse, $response);
+    }
+
+    public function testReadWithNotFoundDefault()
+    {
+        $configs = [
+            'read' => [
+                'entity_attribute' => 'entity',
+                'param_converter_key' => 'id',
+                'view' => 'template.html.twig',
+                'is_granted' => null,
+                'not_found_event_name' => null,
+            ],
+        ];
 
         $this->expectException(NotFoundHttpException::class);
-
-        $controller->read(new Request([], [], ['entity' => 'id']));
+        $controller = $this->createController($configs);
+        $controller->read(new Request());
     }
 
     public function testReadWithInitializeEventReturningResponse()
     {
-        $config = [
+        $configs = [
             'read' => [
-                'initialize_event_name' => 'test_event',
-                'view' => 'test_view.html.twig',
+                'entity_attribute' => 'entity',
+                'param_converter_key' => 'id',
+                'view' => 'template.html.twig',
+                'is_granted' => null,
+                'not_found_event_name' => null,
+                'initialize_event_name' => 'initialize_event',
+                'view_event_name' => null,
             ],
         ];
 
-        $this->repository->expects($this->once())->method('findOneBy')->willReturn($entity = new \stdClass());
+        $this->repository->expects($this->once())->method('findOneBy')->willReturn(new \stdClass());
 
         $expectedResponse = new Response();
+        $this->dispatcher->expects($this->once())->method('dispatch')->willReturnCallback(function ($event, string $eventName) use ($expectedResponse) {
+            $eventName == 'initialize_event' && $event instanceof GetResponseRequestEvent && $event->setResponse($expectedResponse);
 
-        $controller = $this->getControllerMock($config, ['dispatchGetResponse']);
-        $controller->expects($this->once())->method('dispatchGetResponse')->willReturn($expectedResponse);
+            return $event;
+        });
 
-        $response = $controller->read(new Request([], [], ['entity' => 'id']));
-
+        $controller = $this->createController($configs);
+        $response = $controller->read(new Request());
         $this->assertEquals($expectedResponse, $response);
     }
 
@@ -79,21 +101,22 @@ class CrudlControllerReadTest extends AbstractCrudlControllerTestCase
     {
         $config = [
             'read' => [
-                'view' => 'test_view.html.twig',
-                'view_event_name' => 'test_event',
+                'entity_attribute' => 'entity',
+                'param_converter_key' => 'id',
+                'view' => 'template.html.twig',
+                'is_granted' => null,
+                'not_found_event_name' => null,
+                'initialize_event_name' => null,
+                'view_event_name' => 'view_event',
             ],
         ];
 
-        $this->repository->expects($this->once())->method('findOneBy')->willReturn($entity = new \stdClass());
+        $this->repository->expects($this->once())->method('findOneBy')->willReturn(new \stdClass());
 
-        // assertion only one dispatch call
-        $this->dispatcher->expects($this->once())->method('dispatch');
+        $this->twig->expects($this->once())->method('render')->willReturn($config['read']['view']);
 
-        $controller = $this->getControllerMock($config, ['renderView']);
-        $controller->expects($this->once())->method('renderView')->willReturn($config['read']['view']);
-
-        $response = $controller->read(new Request([], [], ['entity' => 'id']));
-
+        $controller = $this->createController($config);
+        $response = $controller->read(new Request());
         $this->assertEquals($config['read']['view'], $response->getContent());
     }
 }

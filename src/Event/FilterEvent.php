@@ -2,9 +2,14 @@
 
 namespace Softspring\Component\CrudlController\Event;
 
+use Doctrine\ORM\NonUniqueResultException;
+use Doctrine\ORM\NoResultException;
 use Doctrine\ORM\QueryBuilder;
 use Softspring\Component\DoctrinePaginator\Collection\PaginatedCollection;
+use Softspring\Component\DoctrinePaginator\Exception\InvalidFormTypeException;
 use Softspring\Component\DoctrinePaginator\Paginator;
+use Softspring\Component\DoctrineQueryFilters\Exception\InvalidFilterValueException;
+use Softspring\Component\DoctrineQueryFilters\Exception\MissingFromInQueryBuilderException;
 use Symfony\Component\Form\FormInterface;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Contracts\EventDispatcher\Event;
@@ -23,6 +28,9 @@ class FilterEvent extends Event
 
     protected ?int $filtersMode;
 
+    /**
+     * @throws InvalidFormTypeException
+     */
     public static function createFromFilterForm(FormInterface $form, Request $request): FilterEvent
     {
         [$qb, $page, $rpp, $filters, $orderSort, $filtersMode] = Paginator::processPaginatedFilterForm($form, $request);
@@ -100,6 +108,12 @@ class FilterEvent extends Event
         $this->filtersMode = $filtersMode;
     }
 
+    /**
+     * @throws InvalidFilterValueException
+     * @throws MissingFromInQueryBuilderException
+     * @throws NonUniqueResultException
+     * @throws NoResultException
+     */
     public function queryPage(): PaginatedCollection
     {
         return Paginator::queryPage($this->getQueryBuilder(), $this->getPage(), $this->getRpp(), $this->getFilters(), $this->getOrderSort(), $this->getFiltersMode());

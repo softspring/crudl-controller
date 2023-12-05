@@ -25,10 +25,7 @@ trait CrudlEntityManagerTrait
 
     public function getRepository(): EntityRepository
     {
-        /** @var EntityRepository $repo */
-        $repo = $this->em->getRepository($this->getTargetClass());
-
-        return $repo;
+        return $this->em->getRepository($this->getTargetClass());
     }
 
     public function createEntity(): object

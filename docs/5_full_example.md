@@ -20,10 +20,9 @@ class Product
 # src/Form/Admin/ProductCreateForm.php
 namespace App\Form\Admin;
 
-use Softspring\Component\CrudlController\Form\EntityCreateFormInterface;
 use Symfony\Component\Form\AbstractType;
 
-class ProductCreateForm extends AbstractType implements EntityCreateFormInterface
+class ProductCreateForm extends AbstractType
 {
     ...
 }
@@ -33,10 +32,9 @@ class ProductCreateForm extends AbstractType implements EntityCreateFormInterfac
 # src/Form/Admin/ProductCreateForm.php
 namespace App\Form\Admin;
 
-use Softspring\Component\CrudlController\Form\EntityUpdateFormInterface;
 use Symfony\Component\Form\AbstractType;
 
-class ProductUpdateForm extends AbstractType implements EntityUpdateFormInterface
+class ProductUpdateForm extends AbstractType
 {
     ...
 }
@@ -46,10 +44,9 @@ class ProductUpdateForm extends AbstractType implements EntityUpdateFormInterfac
 # src/Form/Admin/ProductCreateForm.php
 namespace App\Form\Admin;
 
-use Softspring\Component\CrudlController\Form\EntityDeleteFormInterface;
 use Symfony\Component\Form\AbstractType;
 
-class ProductDeleteForm extends AbstractType implements EntityDeleteFormInterface
+class ProductDeleteForm extends AbstractType
 {
     ...
 }
