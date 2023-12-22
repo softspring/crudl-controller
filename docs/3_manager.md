@@ -1,3 +1,16 @@
+# Manager
+
+Manager interface defines 
+
+- getTargetClass()
+- getEntityClass()
+- getEntityClassReflection()
+- getRepository()
+- createEntity()
+- saveEntity()
+- deleteEntity()
+- getEntityManager()
+
 # Create your Manager
 
 It's recommended to create an interface, especially if you are creating a bundle and you

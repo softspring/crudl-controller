@@ -2,42 +2,44 @@
 
 namespace Softspring\Component\CrudlController\Event;
 
+use Doctrine\ORM\NonUniqueResultException;
+use Doctrine\ORM\NoResultException;
 use Doctrine\ORM\QueryBuilder;
 use Softspring\Component\DoctrinePaginator\Collection\PaginatedCollection;
+use Softspring\Component\DoctrinePaginator\Exception\InvalidFormTypeException;
 use Softspring\Component\DoctrinePaginator\Paginator;
+use Softspring\Component\DoctrineQueryFilters\Exception\InvalidFilterValueException;
+use Softspring\Component\DoctrineQueryFilters\Exception\MissingFromInQueryBuilderException;
 use Symfony\Component\Form\FormInterface;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Contracts\EventDispatcher\Event;
 
 class FilterEvent extends Event
 {
-    protected array $filters;
-
-    protected array $orderSort;
-
-    protected ?int $page;
-
-    protected ?int $rpp;
-
-    protected ?QueryBuilder $queryBuilder;
-
-    protected ?int $filtersMode;
-
+    /**
+     * @throws InvalidFormTypeException
+     */
     public static function createFromFilterForm(FormInterface $form, Request $request): FilterEvent
     {
         [$qb, $page, $rpp, $filters, $orderSort, $filtersMode] = Paginator::processPaginatedFilterForm($form, $request);
 
-        return new FilterEvent($filters, $orderSort, $page, $rpp, $qb, $filtersMode);
+        return new FilterEvent($request, $filters, $orderSort, $page, $rpp, $qb, $filtersMode);
     }
 
-    public function __construct(array $filters, array $orderSort, int $page = null, int $rpp = null, QueryBuilder $queryBuilder = null, int $filtersMode = null)
+    public function __construct(
+        protected Request $request,
+        protected array $filters,
+        protected array $orderSort,
+        protected ?int $page = null,
+        protected ?int $rpp = null,
+        protected ?QueryBuilder $queryBuilder = null,
+        protected ?int $filtersMode = null
+    ) {
+    }
+
+    public function getRequest(): Request
     {
-        $this->filters = $filters;
-        $this->orderSort = $orderSort;
-        $this->page = $page;
-        $this->rpp = $rpp;
-        $this->queryBuilder = $queryBuilder;
-        $this->filtersMode = $filtersMode;
+        return $this->request;
     }
 
     public function getFilters(): array
@@ -60,12 +62,12 @@ class FilterEvent extends Event
         $this->orderSort = $orderSort;
     }
 
-    public function getPage(): int
+    public function getPage(): ?int
     {
         return $this->page;
     }
 
-    public function setPage(int $page): void
+    public function setPage(?int $page): void
     {
         $this->page = $page;
     }
@@ -100,6 +102,12 @@ class FilterEvent extends Event
         $this->filtersMode = $filtersMode;
     }
 
+    /**
+     * @throws InvalidFilterValueException
+     * @throws MissingFromInQueryBuilderException
+     * @throws NonUniqueResultException
+     * @throws NoResultException
+     */
     public function queryPage(): PaginatedCollection
     {
         return Paginator::queryPage($this->getQueryBuilder(), $this->getPage(), $this->getRpp(), $this->getFilters(), $this->getOrderSort(), $this->getFiltersMode());

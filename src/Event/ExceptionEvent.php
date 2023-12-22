@@ -5,17 +5,21 @@ namespace Softspring\Component\CrudlController\Event;
 use Softspring\Component\Events\GetResponseEventInterface;
 use Softspring\Component\Events\GetResponseTrait;
 use Symfony\Component\HttpFoundation\Request;
+use Symfony\Contracts\EventDispatcher\Event;
 
-class GetResponseEntityExceptionEvent extends EntityEvent implements GetResponseEventInterface
+class ExceptionEvent extends Event implements GetResponseEventInterface
 {
     use GetResponseTrait;
 
-    protected \Throwable $exception;
+    public function __construct(
+        protected ?Request $request,
+        protected \Throwable $exception
+    ) {
+    }
 
-    public function __construct($entity, ?Request $request, \Throwable $exception)
+    public function getRequest(): ?Request
     {
-        parent::__construct($entity, $request);
-        $this->exception = $exception;
+        return $this->request;
     }
 
     public function getException(): \Throwable

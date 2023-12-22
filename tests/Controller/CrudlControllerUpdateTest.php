@@ -2,96 +2,107 @@
 
 namespace Softspring\Component\CrudlController\Tests\Controller;
 
-use Softspring\Component\CrudlController\Controller\CrudlController;
-use Softspring\Component\CrudlController\Exception\EmptyConfigException;
-use Softspring\Component\CrudlController\Exception\InvalidFormException;
+use Softspring\Component\CrudlController\Event\GetResponseEntityEvent;
+use Softspring\Component\CrudlController\Event\GetResponseFormEvent;
 use Softspring\Component\CrudlController\Tests\Controller\Example\UpdateForm;
-use Symfony\Component\Finder\Exception\AccessDeniedException;
+use Softspring\Component\Events\GetResponseRequestEvent;
 use Symfony\Component\Form\Form;
 use Symfony\Component\HttpFoundation\RedirectResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
+use Symfony\Component\Security\Core\Exception\AccessDeniedException;
 
 class CrudlControllerUpdateTest extends AbstractCrudlControllerTestCase
 {
-    public function testUpdateEmptyConfiguration()
-    {
-        $controller = new CrudlController($this->manager, $this->dispatcher);
-
-        $this->expectException(EmptyConfigException::class);
-
-        $controller->update(new Request([], [], ['entity' => 'id']));
-    }
-
     public function testUpdateDenyUnlessGranted()
     {
-        $config = [
+        $configs = [
             'update' => [
+                'entity_attribute' => 'entity',
+                'param_converter_key' => 'id',
+                'view' => 'template.html.twig',
+                'form' => UpdateForm::class,
                 'is_granted' => 'ROLE_MISSING',
             ],
         ];
 
         $this->expectException(AccessDeniedException::class);
 
-        $controller = $this->getControllerMock($config, ['denyAccessUnlessGranted']);
-        $controller->expects($this->once())->method('denyAccessUnlessGranted')->willThrowException(new AccessDeniedException());
-        $controller->update(new Request([], [], ['entity' => 'id']));
+        $controller = $this->createController($configs);
+        $controller->update(new Request());
     }
 
-    public function testUpdateWithNotFoundEntity()
+    public function testUpdateWithNotFoundEventReturningResponse()
     {
-        $config = [
+        $configs = [
             'update' => [
-                'initialize_event_name' => '',
+                'entity_attribute' => 'entity',
+                'param_converter_key' => 'id',
+                'view' => 'template.html.twig',
+                'form' => UpdateForm::class,
+                'is_granted' => null,
+                'not_found_event_name' => 'not_found_event',
             ],
         ];
 
-        $this->repository->expects($this->once())->method('findOneBy')->willReturn(null);
+        $expectedResponse = new Response();
 
-        $controller = new CrudlController($this->manager, $this->dispatcher, $config);
+        $this->dispatcher->expects($this->once())->method('dispatch')->willReturnCallback(function ($event, string $eventName) use ($expectedResponse) {
+            $eventName == 'not_found_event' && $event instanceof GetResponseRequestEvent  && $event->setResponse($expectedResponse);
+
+            return $event;
+        });
+
+        $controller = $this->createController($configs);
+        $response = $controller->update(new Request());
+        $this->assertEquals($expectedResponse, $response);
+    }
+
+    public function testUpdateWithNotFoundDefault()
+    {
+        $configs = [
+            'update' => [
+                'entity_attribute' => 'entity',
+                'param_converter_key' => 'id',
+                'view' => 'template.html.twig',
+                'form' => UpdateForm::class,
+                'is_granted' => null,
+                'not_found_event_name' => null,
+            ],
+        ];
 
         $this->expectException(NotFoundHttpException::class);
-
-        $controller->update(new Request([], [], ['entity' => 'id']));
-    }
-
-    public function testUpdateWithNoForm()
-    {
-        $config = [
-            'update' => [
-                'initialize_event_name' => '',
-            ],
-        ];
-
-        $this->repository->expects($this->once())->method('findOneBy')->willReturn(new \stdClass());
-
-        $controller = new CrudlController($this->manager, $this->dispatcher, $config);
-
-        $this->expectException(InvalidFormException::class);
-
-        $controller->update(new Request([], [], ['entity' => 'id']));
+        $controller = $this->createController($configs);
+        $controller->update(new Request());
     }
 
     public function testUpdateWithInitializeEventReturningResponse()
     {
-        $config = [
+        $configs = [
             'update' => [
-                'initialize_event_name' => 'test_event',
-                'view' => 'test_view.html.twig',
-                'form' => $this->getMockBuilder(UpdateForm::class)->getMock(),
+                'entity_attribute' => 'entity',
+                'param_converter_key' => 'id',
+                'view' => 'template.html.twig',
+                'form' => UpdateForm::class,
+                'is_granted' => null,
+                'not_found_event_name' => null,
+                'initialize_event_name' => 'initialize_event',
+                'form_prepare_event_name' => null,
+                'form_init_event_name' => null,
+                'view_event_name' => null,
             ],
         ];
 
-        $this->repository->expects($this->once())->method('findOneBy')->willReturn($entity = new \stdClass());
-
         $expectedResponse = new Response();
+        $this->dispatcher->expects($this->once())->method('dispatch')->willReturnCallback(function ($event, string $eventName) use ($expectedResponse) {
+            $eventName == 'initialize_event' && $event instanceof GetResponseRequestEvent && $event->setResponse($expectedResponse);
 
-        $controller = $this->getControllerMock($config, ['dispatchGetResponse']);
-        $controller->expects($this->once())->method('dispatchGetResponse')->willReturn($expectedResponse);
+            return $event;
+        });
 
-        $response = $controller->update(new Request([], [], ['entity' => 'id']));
-
+        $controller = $this->createController($configs);
+        $response = $controller->update(new Request());
         $this->assertEquals($expectedResponse, $response);
     }
 
@@ -99,39 +110,55 @@ class CrudlControllerUpdateTest extends AbstractCrudlControllerTestCase
     {
         $config = [
             'update' => [
-                'view' => 'test_view.html.twig',
-                'view_event_name' => 'test_event',
-                'form' => $this->getMockBuilder(UpdateForm::class)->getMock(),
+                'entity_attribute' => 'entity',
+                'param_converter_key' => 'id',
+                'view' => 'template.html.twig',
+                'form' => UpdateForm::class,
+                'is_granted' => null,
+                'not_found_event_name' => null,
+                'initialize_event_name' => null,
+                'form_prepare_event_name' => null,
+                'form_init_event_name' => null,
+                'view_event_name' => 'view_event',
             ],
         ];
 
-        $this->repository->expects($this->once())->method('findOneBy')->willReturn($entity = new \stdClass());
+        $this->formFactory->expects($this->once())->method('create')->willReturn($this->getMockBuilder(Form::class)->disableOriginalConstructor()->getMock());
 
-        // assertion only one dispatch call
-        $this->dispatcher->expects($this->once())->method('dispatch');
+        $this->repository->expects($this->once())->method('findOneBy')->willReturn(new \stdClass());
 
-        $form = $this->getMockBuilder(Form::class)->disableOriginalConstructor()->getMock();
-        $this->formFactory->expects($this->once())->method('create')->willReturn($form);
-        $form->expects($this->once())->method('handleRequest')->willReturn($form);
+        $this->twig->expects($this->once())->method('render')->willReturn($config['update']['view']);
 
-        $controller = $this->getControllerMock($config, ['renderView']);
-        $controller->expects($this->once())->method('renderView')->willReturn($config['update']['view']);
-
-        $response = $controller->update(new Request([], [], ['entity' => 'id']));
-
+        $controller = $this->createController($config);
+        $response = $controller->update(new Request());
         $this->assertEquals($config['update']['view'], $response->getContent());
     }
 
     public function testUpdateWithFormSubmittedAndInvalidReceivingEventResponse()
     {
-        $config = [
+        $configs = [
             'update' => [
-                'form_invalid_event_name' => 'test_event',
-                'form' => $this->getMockBuilder(UpdateForm::class)->getMock(),
+                'entity_attribute' => 'entity',
+                'param_converter_key' => 'id',
+                'view' => 'template.html.twig',
+                'form' => UpdateForm::class,
+                'is_granted' => null,
+                'not_found_event_name' => null,
+                'initialize_event_name' => null,
+                'form_prepare_event_name' => null,
+                'form_init_event_name' => null,
+                'form_invalid_event_name' => 'form_invalid_event',
             ],
         ];
 
-        $this->repository->expects($this->once())->method('findOneBy')->willReturn($entity = new \stdClass());
+        $this->repository->expects($this->once())->method('findOneBy')->willReturn(new \stdClass());
+
+        $expectedResponse = new RedirectResponse('/');
+        $this->dispatcher->expects($this->once())->method('dispatch')->willReturnCallback(function ($event, string $eventName) use ($expectedResponse) {
+            $eventName == 'form_invalid_event' && $event instanceof GetResponseFormEvent && $event->setResponse($expectedResponse);
+
+            return $event;
+        });
 
         $form = $this->getMockBuilder(Form::class)->disableOriginalConstructor()->getMock();
         $this->formFactory->expects($this->once())->method('create')->willReturn($form);
@@ -139,24 +166,37 @@ class CrudlControllerUpdateTest extends AbstractCrudlControllerTestCase
         $form->expects($this->once())->method('isSubmitted')->willReturn(true);
         $form->expects($this->once())->method('isValid')->willReturn(false);
 
-        $controller = $this->getControllerMock($config, ['dispatchGetResponse']);
-        $expectedResponse = new Response();
-        $controller->expects($this->once())->method('dispatchGetResponse')->willReturn($expectedResponse);
-
-        $response = $controller->update(new Request([], [], ['entity' => 'id']));
+        $controller = $this->createController($configs);
+        $response = $controller->update(new Request());
         $this->assertEquals($expectedResponse, $response);
     }
 
     public function testUpdateWithFormSubmittedAndValidReceivingFormEventResponse()
     {
-        $config = [
+        $configs = [
             'update' => [
-                'form_valid_event_name' => 'test_event',
-                'form' => $this->getMockBuilder(UpdateForm::class)->getMock(),
+                'entity_attribute' => 'entity',
+                'param_converter_key' => 'id',
+                'view' => 'template.html.twig',
+                'form' => UpdateForm::class,
+                'is_granted' => null,
+                'not_found_event_name' => null,
+                'initialize_event_name' => null,
+                'form_prepare_event_name' => null,
+                'form_init_event_name' => null,
+                'form_invalid_event_name' => null,
+                'form_valid_event_name' => 'form_valid_event',
             ],
         ];
 
-        $this->repository->expects($this->once())->method('findOneBy')->willReturn($entity = new \stdClass());
+        $this->repository->expects($this->once())->method('findOneBy')->willReturn(new \stdClass());
+
+        $expectedResponse = new RedirectResponse('/');
+        $this->dispatcher->expects($this->once())->method('dispatch')->willReturnCallback(function ($event, string $eventName) use ($expectedResponse) {
+            $eventName == 'form_valid_event' && $event instanceof GetResponseFormEvent && $event->setResponse($expectedResponse);
+
+            return $event;
+        });
 
         $form = $this->getMockBuilder(Form::class)->disableOriginalConstructor()->getMock();
         $this->formFactory->expects($this->once())->method('create')->willReturn($form);
@@ -164,48 +204,73 @@ class CrudlControllerUpdateTest extends AbstractCrudlControllerTestCase
         $form->expects($this->once())->method('isSubmitted')->willReturn(true);
         $form->expects($this->once())->method('isValid')->willReturn(true);
 
-        $controller = $this->getControllerMock($config, ['dispatchGetResponse']);
-        $expectedResponse = new Response();
-        $controller->expects($this->once())->method('dispatchGetResponse')->willReturn($expectedResponse);
-
-        $response = $controller->update(new Request([], [], ['entity' => 'id']));
+        $controller = $this->createController($configs);
+        $response = $controller->update(new Request());
         $this->assertEquals($expectedResponse, $response);
     }
 
     public function testUpdateWithFormSubmittedAndValidReceivingSuccessEventResponse()
     {
-        $config = [
+        $configs = [
             'update' => [
-                'success_event_name' => 'test_event',
-                'form' => $this->getMockBuilder(UpdateForm::class)->getMock(),
+                'entity_attribute' => 'entity',
+                'param_converter_key' => 'id',
+                'view' => 'template.html.twig',
+                'form' => UpdateForm::class,
+                'is_granted' => null,
+                'not_found_event_name' => null,
+                'initialize_event_name' => null,
+                'form_prepare_event_name' => null,
+                'form_init_event_name' => null,
+                'form_invalid_event_name' => null,
+                'form_valid_event_name' => null,
+                'success_event_name' => 'success_event',
             ],
         ];
 
-        $this->repository->expects($this->once())->method('findOneBy')->willReturn($entity = new \stdClass());
+        $this->repository->expects($this->once())->method('findOneBy')->willReturn(new \stdClass());
+
+        $expectedResponse = new RedirectResponse('/');
+        $this->dispatcher->expects($this->once())->method('dispatch')->willReturnCallback(function ($event, string $eventName) use ($expectedResponse) {
+            $eventName == 'success_event' && $event instanceof GetResponseEntityEvent && $event->setResponse($expectedResponse);
+
+            return $event;
+        });
+
         $form = $this->getMockBuilder(Form::class)->disableOriginalConstructor()->getMock();
         $this->formFactory->expects($this->once())->method('create')->willReturn($form);
         $form->expects($this->once())->method('handleRequest')->willReturn($form);
         $form->expects($this->once())->method('isSubmitted')->willReturn(true);
         $form->expects($this->once())->method('isValid')->willReturn(true);
 
-        $controller = $this->getControllerMock($config, ['dispatchGetResponse']);
-        $expectedResponse = new Response();
-        $controller->expects($this->once())->method('dispatchGetResponse')->willReturn($expectedResponse);
-
-        $response = $controller->update(new Request([], [], ['entity' => 'id']));
+        $controller = $this->createController($configs);
+        $response = $controller->update(new Request());
         $this->assertEquals($expectedResponse, $response);
     }
 
     public function testUpdateWithFormSubmittedAndValidWithRedirectRoute()
     {
-        $config = [
+        $configs = [
             'update' => [
+                'entity_attribute' => 'entity',
+                'param_converter_key' => 'id',
+                'view' => 'template.html.twig',
+                'form' => UpdateForm::class,
+                'is_granted' => null,
+                'not_found_event_name' => null,
+                'initialize_event_name' => null,
+                'form_prepare_event_name' => null,
+                'form_init_event_name' => null,
+                'form_invalid_event_name' => null,
+                'form_valid_event_name' => null,
+                'success_event_name' => null,
                 'success_redirect_to' => 'redirect_route',
-                'form' => $this->getMockBuilder(UpdateForm::class)->getMock(),
             ],
         ];
 
-        $this->repository->expects($this->once())->method('findOneBy')->willReturn($entity = new \stdClass());
+        $this->repository->expects($this->once())->method('findOneBy')->willReturn(new \stdClass());
+
+        $this->router->expects($this->once())->method('generate')->with($this->equalTo('redirect_route'))->willReturn('/redirect/to/route');
 
         $form = $this->getMockBuilder(Form::class)->disableOriginalConstructor()->getMock();
         $this->formFactory->expects($this->once())->method('create')->willReturn($form);
@@ -213,25 +278,34 @@ class CrudlControllerUpdateTest extends AbstractCrudlControllerTestCase
         $form->expects($this->once())->method('isSubmitted')->willReturn(true);
         $form->expects($this->once())->method('isValid')->willReturn(true);
 
-        $controller = $this->getControllerMock($config, ['generateUrl']);
-        $controller->expects($this->once())->method('generateUrl')->with($this->equalTo('redirect_route'))->willReturn('/redirect/to/route');
-
+        $controller = $this->createController($configs);
         /** @var RedirectResponse $response */
-        $response = $controller->update(new Request([], [], ['entity' => 'id']));
+        $response = $controller->update(new Request());
         $this->assertInstanceOf(RedirectResponse::class, $response);
         $this->assertEquals('/redirect/to/route', $response->getTargetUrl());
     }
 
     public function testUpdateWithFormSubmittedAndValidWithDefaultRedirect()
     {
-        $config = [
+        $configs = [
             'update' => [
-                'success_redirect_to' => '',
-                'form' => $this->getMockBuilder(UpdateForm::class)->getMock(),
+                'entity_attribute' => 'entity',
+                'param_converter_key' => 'id',
+                'view' => 'template.html.twig',
+                'form' => UpdateForm::class,
+                'is_granted' => null,
+                'not_found_event_name' => null,
+                'initialize_event_name' => null,
+                'form_prepare_event_name' => null,
+                'form_init_event_name' => null,
+                'form_invalid_event_name' => null,
+                'form_valid_event_name' => null,
+                'success_event_name' => null,
+                'success_redirect_to' => null,
             ],
         ];
 
-        $this->repository->expects($this->once())->method('findOneBy')->willReturn($entity = new \stdClass());
+        $this->repository->expects($this->once())->method('findOneBy')->willReturn(new \stdClass());
 
         $form = $this->getMockBuilder(Form::class)->disableOriginalConstructor()->getMock();
         $this->formFactory->expects($this->once())->method('create')->willReturn($form);
@@ -239,10 +313,10 @@ class CrudlControllerUpdateTest extends AbstractCrudlControllerTestCase
         $form->expects($this->once())->method('isSubmitted')->willReturn(true);
         $form->expects($this->once())->method('isValid')->willReturn(true);
 
-        $controller = $this->getControllerMock($config, []);
+        $controller = $this->createController($configs);
 
         /** @var RedirectResponse $response */
-        $response = $controller->update(new Request([], [], ['entity' => 'id']));
+        $response = $controller->update(new Request());
         $this->assertInstanceOf(RedirectResponse::class, $response);
         $this->assertEquals('/', $response->getTargetUrl());
     }

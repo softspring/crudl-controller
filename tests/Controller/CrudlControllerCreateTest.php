@@ -2,74 +2,60 @@
 
 namespace Softspring\Component\CrudlController\Tests\Controller;
 
-use Softspring\Component\CrudlController\Controller\CrudlController;
-use Softspring\Component\CrudlController\Exception\EmptyConfigException;
-use Softspring\Component\CrudlController\Exception\InvalidFormException;
+use Softspring\Component\CrudlController\Event\GetResponseEntityEvent;
+use Softspring\Component\CrudlController\Event\GetResponseFormEvent;
 use Softspring\Component\CrudlController\Tests\Controller\Example\CreateForm;
-use Symfony\Component\Finder\Exception\AccessDeniedException;
+use Softspring\Component\Events\GetResponseRequestEvent;
 use Symfony\Component\Form\Form;
 use Symfony\Component\HttpFoundation\RedirectResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
+use Symfony\Component\Security\Core\Exception\AccessDeniedException;
 
 class CrudlControllerCreateTest extends AbstractCrudlControllerTestCase
 {
-    public function testCreateEmptyConfiguration()
-    {
-        $controller = new CrudlController($this->manager, $this->dispatcher);
-
-        $this->expectException(EmptyConfigException::class);
-
-        $controller->create(new Request());
-    }
-
     public function testCreateDenyUnlessGranted()
     {
-        $config = [
+        $configs = [
             'create' => [
+                'entity_attribute' => 'entity',
+                'view' => 'template.html.twig',
+                'form' => CreateForm::class,
                 'is_granted' => 'ROLE_MISSING',
             ],
         ];
 
         $this->expectException(AccessDeniedException::class);
 
-        $controller = $this->getControllerMock($config, ['denyAccessUnlessGranted']);
-        $controller->expects($this->once())->method('denyAccessUnlessGranted')->willThrowException(new AccessDeniedException());
-        $controller->create(new Request());
-    }
-
-    public function testCreateWithNoForm()
-    {
-        $config = [
-            'create' => [
-                'initialize_event_name' => '',
-            ],
-        ];
-
-        $controller = new CrudlController($this->manager, $this->dispatcher, $config);
-
-        $this->expectException(InvalidFormException::class);
-
+        $controller = $this->createController($configs);
         $controller->create(new Request());
     }
 
     public function testCreateWithInitializeEventReturningResponse()
     {
-        $config = [
+        $configs = [
             'create' => [
-                'initialize_event_name' => 'test_event',
-                'view' => 'test_view.html.twig',
-                'form' => $this->getMockBuilder(CreateForm::class)->getMock(),
+                'entity_attribute' => 'entity',
+                'view' => 'template.html.twig',
+                'form' => CreateForm::class,
+                'is_granted' => null,
+                'initialize_event_name' => 'initialize_event',
+                'form_prepare_event_name' => null,
+                'form_init_event_name' => null,
+                'view_event_name' => null,
             ],
         ];
 
         $expectedResponse = new Response();
 
-        $controller = $this->getControllerMock($config, ['dispatchGetResponse']);
-        $controller->expects($this->once())->method('dispatchGetResponse')->willReturn($expectedResponse);
+        $this->dispatcher->expects($this->once())->method('dispatch')->willReturnCallback(function ($event, string $eventName) use ($expectedResponse) {
+            $eventName == 'initialize_event' && $event instanceof GetResponseRequestEvent && $event->setResponse($expectedResponse);
 
+            return $event;
+        });
+
+        $controller = $this->createController($configs);
         $response = $controller->create(new Request());
-
         $this->assertEquals($expectedResponse, $response);
     }
 
@@ -77,35 +63,47 @@ class CrudlControllerCreateTest extends AbstractCrudlControllerTestCase
     {
         $config = [
             'create' => [
-                'view' => 'test_view.html.twig',
-                'view_event_name' => 'test_event',
-                'form' => $this->getMockBuilder(CreateForm::class)->getMock(),
+                'entity_attribute' => 'entity',
+                'view' => 'template.html.twig',
+                'form' => CreateForm::class,
+                'is_granted' => null,
+                'initialize_event_name' => null,
+                'form_prepare_event_name' => null,
+                'form_init_event_name' => null,
+                'view_event_name' => 'view_event',
             ],
         ];
 
-        // assertion only one dispatch call
-        $this->dispatcher->expects($this->once())->method('dispatch');
+        $this->formFactory->expects($this->once())->method('create')->willReturn($this->getMockBuilder(Form::class)->disableOriginalConstructor()->getMock());
 
-        $form = $this->getMockBuilder(Form::class)->disableOriginalConstructor()->getMock();
-        $this->formFactory->expects($this->once())->method('create')->willReturn($form);
-        $form->expects($this->once())->method('handleRequest')->willReturn($form);
+        $this->twig->expects($this->once())->method('render')->willReturn($config['create']['view']);
 
-        $controller = $this->getControllerMock($config, ['renderView']);
-        $controller->expects($this->once())->method('renderView')->willReturn($config['create']['view']);
-
+        $controller = $this->createController($config);
         $response = $controller->create(new Request());
-
         $this->assertEquals($config['create']['view'], $response->getContent());
     }
 
     public function testCreateWithFormSubmittedAndInvalidReceivingEventResponse()
     {
-        $config = [
+        $configs = [
             'create' => [
-                'form_invalid_event_name' => 'test_event',
-                'form' => $this->getMockBuilder(CreateForm::class)->getMock(),
+                'entity_attribute' => 'entity',
+                'view' => 'template.html.twig',
+                'form' => CreateForm::class,
+                'is_granted' => null,
+                'initialize_event_name' => null,
+                'form_prepare_event_name' => null,
+                'form_init_event_name' => null,
+                'form_invalid_event_name' => 'form_invalid_event',
             ],
         ];
+
+        $expectedResponse = new RedirectResponse('/');
+        $this->dispatcher->expects($this->once())->method('dispatch')->willReturnCallback(function ($event, string $eventName) use ($expectedResponse) {
+            $eventName == 'form_invalid_event' && $event instanceof GetResponseFormEvent && $event->setResponse($expectedResponse);
+
+            return $event;
+        });
 
         $form = $this->getMockBuilder(Form::class)->disableOriginalConstructor()->getMock();
         $this->formFactory->expects($this->once())->method('create')->willReturn($form);
@@ -113,22 +111,33 @@ class CrudlControllerCreateTest extends AbstractCrudlControllerTestCase
         $form->expects($this->once())->method('isSubmitted')->willReturn(true);
         $form->expects($this->once())->method('isValid')->willReturn(false);
 
-        $controller = $this->getControllerMock($config, ['dispatchGetResponse']);
-        $expectedResponse = new Response();
-        $controller->expects($this->once())->method('dispatchGetResponse')->willReturn($expectedResponse);
-
+        $controller = $this->createController($configs);
         $response = $controller->create(new Request());
         $this->assertEquals($expectedResponse, $response);
     }
 
     public function testCreateWithFormSubmittedAndValidReceivingFormEventResponse()
     {
-        $config = [
+        $configs = [
             'create' => [
-                'form_valid_event_name' => 'test_event',
-                'form' => $this->getMockBuilder(CreateForm::class)->getMock(),
+                'entity_attribute' => 'entity',
+                'view' => 'template.html.twig',
+                'form' => CreateForm::class,
+                'is_granted' => null,
+                'initialize_event_name' => null,
+                'form_prepare_event_name' => null,
+                'form_init_event_name' => null,
+                'form_invalid_event_name' => null,
+                'form_valid_event_name' => 'form_valid_event',
             ],
         ];
+
+        $expectedResponse = new RedirectResponse('/');
+        $this->dispatcher->expects($this->once())->method('dispatch')->willReturnCallback(function ($event, string $eventName) use ($expectedResponse) {
+            $eventName == 'form_valid_event' && $event instanceof GetResponseFormEvent && $event->setResponse($expectedResponse);
+
+            return $event;
+        });
 
         $form = $this->getMockBuilder(Form::class)->disableOriginalConstructor()->getMock();
         $this->formFactory->expects($this->once())->method('create')->willReturn($form);
@@ -136,22 +145,34 @@ class CrudlControllerCreateTest extends AbstractCrudlControllerTestCase
         $form->expects($this->once())->method('isSubmitted')->willReturn(true);
         $form->expects($this->once())->method('isValid')->willReturn(true);
 
-        $controller = $this->getControllerMock($config, ['dispatchGetResponse']);
-        $expectedResponse = new Response();
-        $controller->expects($this->once())->method('dispatchGetResponse')->willReturn($expectedResponse);
-
+        $controller = $this->createController($configs);
         $response = $controller->create(new Request());
         $this->assertEquals($expectedResponse, $response);
     }
 
     public function testCreateWithFormSubmittedAndValidReceivingSuccessEventResponse()
     {
-        $config = [
+        $configs = [
             'create' => [
-                'success_event_name' => 'test_event',
-                'form' => $this->getMockBuilder(CreateForm::class)->getMock(),
+                'entity_attribute' => 'entity',
+                'view' => 'template.html.twig',
+                'form' => CreateForm::class,
+                'is_granted' => null,
+                'initialize_event_name' => null,
+                'form_prepare_event_name' => null,
+                'form_init_event_name' => null,
+                'form_invalid_event_name' => null,
+                'form_valid_event_name' => null,
+                'success_event_name' => 'success_event',
             ],
         ];
+
+        $expectedResponse = new RedirectResponse('/');
+        $this->dispatcher->expects($this->once())->method('dispatch')->willReturnCallback(function ($event, string $eventName) use ($expectedResponse) {
+            $eventName == 'success_event' && $event instanceof GetResponseEntityEvent && $event->setResponse($expectedResponse);
+
+            return $event;
+        });
 
         $form = $this->getMockBuilder(Form::class)->disableOriginalConstructor()->getMock();
         $this->formFactory->expects($this->once())->method('create')->willReturn($form);
@@ -159,22 +180,30 @@ class CrudlControllerCreateTest extends AbstractCrudlControllerTestCase
         $form->expects($this->once())->method('isSubmitted')->willReturn(true);
         $form->expects($this->once())->method('isValid')->willReturn(true);
 
-        $controller = $this->getControllerMock($config, ['dispatchGetResponse']);
-        $expectedResponse = new Response();
-        $controller->expects($this->once())->method('dispatchGetResponse')->willReturn($expectedResponse);
-
+        $controller = $this->createController($configs);
         $response = $controller->create(new Request());
         $this->assertEquals($expectedResponse, $response);
     }
 
     public function testCreateWithFormSubmittedAndValidWithRedirectRoute()
     {
-        $config = [
+        $configs = [
             'create' => [
+                'entity_attribute' => 'entity',
+                'view' => 'template.html.twig',
+                'form' => CreateForm::class,
+                'is_granted' => null,
+                'initialize_event_name' => null,
+                'form_prepare_event_name' => null,
+                'form_init_event_name' => null,
+                'form_invalid_event_name' => null,
+                'form_valid_event_name' => null,
+                'success_event_name' => null,
                 'success_redirect_to' => 'redirect_route',
-                'form' => $this->getMockBuilder(CreateForm::class)->getMock(),
             ],
         ];
+
+        $this->router->expects($this->once())->method('generate')->with($this->equalTo('redirect_route'))->willReturn('/redirect/to/route');
 
         $form = $this->getMockBuilder(Form::class)->disableOriginalConstructor()->getMock();
         $this->formFactory->expects($this->once())->method('create')->willReturn($form);
@@ -182,9 +211,7 @@ class CrudlControllerCreateTest extends AbstractCrudlControllerTestCase
         $form->expects($this->once())->method('isSubmitted')->willReturn(true);
         $form->expects($this->once())->method('isValid')->willReturn(true);
 
-        $controller = $this->getControllerMock($config, ['generateUrl']);
-        $controller->expects($this->once())->method('generateUrl')->with($this->equalTo('redirect_route'))->willReturn('/redirect/to/route');
-
+        $controller = $this->createController($configs);
         /** @var RedirectResponse $response */
         $response = $controller->create(new Request());
         $this->assertInstanceOf(RedirectResponse::class, $response);
@@ -193,10 +220,19 @@ class CrudlControllerCreateTest extends AbstractCrudlControllerTestCase
 
     public function testCreateWithFormSubmittedAndValidWithDefaultRedirect()
     {
-        $config = [
+        $configs = [
             'create' => [
-                'success_redirect_to' => '',
-                'form' => $this->getMockBuilder(CreateForm::class)->getMock(),
+                'entity_attribute' => 'entity',
+                'view' => 'template.html.twig',
+                'form' => CreateForm::class,
+                'is_granted' => null,
+                'initialize_event_name' => null,
+                'form_prepare_event_name' => null,
+                'form_init_event_name' => null,
+                'form_invalid_event_name' => null,
+                'form_valid_event_name' => null,
+                'success_event_name' => null,
+                'success_redirect_to' => null,
             ],
         ];
 
@@ -206,7 +242,7 @@ class CrudlControllerCreateTest extends AbstractCrudlControllerTestCase
         $form->expects($this->once())->method('isSubmitted')->willReturn(true);
         $form->expects($this->once())->method('isValid')->willReturn(true);
 
-        $controller = $this->getControllerMock($config, []);
+        $controller = $this->createController($configs);
 
         /** @var RedirectResponse $response */
         $response = $controller->create(new Request());

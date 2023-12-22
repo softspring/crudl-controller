@@ -1,4 +1,4 @@
-# Crudl Controller component
+# Crudl Controller
 
 [![Latest Stable Version](https://poser.pugx.org/softspring/crudl-controller/v/stable.svg)](https://packagist.org/packages/softspring/crudl-controller)
 [![Latest Unstable Version](https://poser.pugx.org/softspring/crudl-controller/v/unstable.svg)](https://packagist.org/packages/softspring/crudl-controller)
@@ -8,9 +8,10 @@
 [![Build status](https://github.com/softspring/crudl-controller/actions/workflows/php.yml/badge.svg?branch=5.2)](https://github.com/softspring/crudl-controller/actions/workflows/php.yml)
 ![Coverage](https://raw.githubusercontent.com/softspring/crudl-controller/5.2/.github/badges/coverage.svg)
 
-This tool aims to provide an easy CRUD+List (CRUDL from now on) feature for any doctrine entity you want to manage.
+This component provides an easy CRUD+List (CRUDL from now on) feature for any doctrine entity you want to manage in your
+Symfony projects.
 
-## Documentation
+## Table of contents
 
 - [1. Installation](docs/1_installation.md)
 - [2. Structure](docs/2_structure.md)
