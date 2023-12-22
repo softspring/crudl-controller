@@ -15,22 +15,27 @@ class ListActionConfiguration implements ConfigurationInterface
         $rootNode
             ->children()
                 // events
-                ->scalarNode('initialize_event_name')->end()
-                ->scalarNode('filter_event_name')->end()
-                ->scalarNode('view_event_name')->end()
+                ->scalarNode('initialize_event_name')->defaultNull()->end()
+                ->scalarNode('filter_form_prepare_event_name')->defaultNull()->end()
+                ->scalarNode('filter_form_init_event_name')->defaultNull()->end()
+                ->scalarNode('filter_event_name')->defaultNull()->end()
+                ->scalarNode('view_event_name')->defaultNull()->end()
+                ->scalarNode('exception_event_name')->defaultNull()->end()
 
                 // entity management
+                ->scalarNode('entity_attribute')->defaultValue('entity')->end()
                 ->scalarNode('entities_attribute')->defaultValue('entities')->end()
 
                 // access
-                ->scalarNode('is_granted')->end()
+                ->scalarNode('is_granted')->defaultNull()->end()
 
                 // filters
-                ->scalarNode('filter_form')->end()
+                ->variableNode('filter_form')->defaultNull()->end()
 
                 // templates
-                ->scalarNode('view')->isRequired()->end()
-                ->scalarNode('read_route')->end()
+                ->scalarNode('view')->defaultNull()->end()
+                ->scalarNode('view_page')->defaultNull()->end()
+                ->scalarNode('read_route')->defaultNull()->end()
             ->end()
         ;
 

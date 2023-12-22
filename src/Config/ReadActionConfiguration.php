@@ -15,19 +15,22 @@ class ReadActionConfiguration implements ConfigurationInterface
         $rootNode
             ->children()
                 // events
-                ->scalarNode('initialize_event_name')->end()
-                ->scalarNode('not_found_event_name')->end()
-                ->scalarNode('view_event_name')->end()
+                ->scalarNode('initialize_event_name')->defaultNull()->end()
+                ->scalarNode('load_entity_event_name')->defaultNull()->end()
+                ->scalarNode('not_found_event_name')->defaultNull()->end()
+                ->scalarNode('found_event_name')->defaultNull()->end()
+                ->scalarNode('view_event_name')->defaultNull()->end()
+                ->scalarNode('exception_event_name')->defaultNull()->end()
 
                 // entity management
                 ->scalarNode('entity_attribute')->defaultValue('entity')->end()
-                ->scalarNode('param_converter_key')->isRequired()->end()
+                ->scalarNode('param_converter_key')->defaultNull()->end()
 
                 // access
-                ->scalarNode('is_granted')->end()
+                ->scalarNode('is_granted')->defaultNull()->end()
 
                 // templates
-                ->scalarNode('view')->isRequired()->end()
+                ->scalarNode('view')->defaultNull()->end()
             ->end()
         ;
 

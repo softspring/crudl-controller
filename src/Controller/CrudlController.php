@@ -13,7 +13,7 @@ use Softspring\Component\DoctrinePaginator\Exception\InvalidFormTypeException;
 use Softspring\Component\DoctrineQueryFilters\Exception\InvalidFilterValueException;
 use Softspring\Component\DoctrineQueryFilters\Exception\MissingFromInQueryBuilderException;
 use Symfony\Component\EventDispatcher\EventDispatcherInterface;
-use Symfony\Component\Form\FormFactory;
+use Symfony\Component\Form\FormFactoryInterface;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
@@ -27,14 +27,31 @@ class CrudlController
         protected CrudlEntityManagerInterface $manager,
         protected EventDispatcherInterface $eventDispatcher,
         protected Environment $twig,
-        protected FormFactory $formFactory,
+        protected FormFactoryInterface $formFactory,
         protected AuthorizationCheckerInterface $authorizationChecker,
         protected RouterInterface $router,
+        protected array $config = [],
         protected array $configs = [],
     ) {
+        if (!empty($config)) {
+            trigger_deprecation('softspring/crudl-controller', '5.2', 'Passing $config argument to CrudlController constructor is deprecated, use $configs instead');
+            $this->configs = $this->configs ?: $config;
+        }
+
+        if ($this->configs['entity_attribute'] ?? false) {
+            foreach ($this->configs as $configName => $actionConfig) {
+                if (is_array($actionConfig)) {
+                    // if not defined, use global entity_attribute
+                    $this->configs[$configName]['entity_attribute'] = $actionConfig['entity_attribute'] ?? $this->configs['entity_attribute'];
+                }
+            }
+        }
     }
 
-    /** @noinspection DuplicatedCode */
+    /**
+     * @noinspection DuplicatedCode
+     * @throws \Exception
+     */
     public function create(Request $request, array $config = [], string $configKey = 'create'): Response
     {
         // create helper
@@ -42,55 +59,70 @@ class CrudlController
         $helper->setConfig(Configuration::createAction($configKey, $this->configs, $config));
         $helper->setRequest($request);
 
-        // init entity
-        $helper->createEntity();
+        try {
+            if ($response = $helper->dispatchInitialize()) {
+                return $response;
+            }
 
-        // init action
-        $helper->checkIsGranted();
+            // init entity
+            if (!$helper->dispatchCreateEntityEvent()) {
+                $helper->createEntity();
+            }
 
-        if ($response = $helper->dispatchInitializeEvent()) {
-            return $response;
-        }
+            // init action
+            $helper->checkIsGranted();
 
-        // create form
-        $formPrepareEvent = $helper->dispatchFormPrepare();
-        $form = $helper->createForm($formPrepareEvent);
-        $helper->dispatchFormInit();
+            $formPrepareEvent = $helper->dispatchFormPrepare();
+            $form = $helper->createForm($formPrepareEvent);
+            $helper->dispatchFormInit();
 
-        // process form
-        if ($form->isSubmitted()) {
-            if ($form->isValid()) {
-                if ($response = $helper->dispatchFormValid()) {
-                    return $response;
-                }
-
-                try {
-                    $this->manager->saveEntity($helper->getEntity());
-
-                    if ($response = $helper->dispatchSuccess()) {
+            // process form
+            if ($form->isSubmitted()) {
+                if ($form->isValid()) {
+                    if ($response = $helper->dispatchFormValid()) {
                         return $response;
                     }
 
-                    return $helper->successRedirect();
-                } catch (\Exception $e) {
-                    if ($response = $helper->dispatchException($e)) {
+                    try {
+                        if (!$helper->dispatchApplyEvent()) {
+                            $this->manager->saveEntity($helper->getEntity());
+                        }
+
+                        if ($response = $helper->dispatchSuccess()) {
+                            return $response;
+                        }
+
+                        return $helper->successRedirect();
+                    } catch (\Exception $e) {
+                        if ($response = $helper->dispatchFailure($e)) {
+                            return $response;
+                        }
+                    }
+                } else {
+                    if ($response = $helper->dispatchFormInvalid()) {
                         return $response;
                     }
-                }
-            } else {
-                if ($response = $helper->dispatchFormInvalid()) {
-                    return $response;
                 }
             }
+
+            // create and render view
+            $helper->createViewData();
+            $viewEvent = $helper->dispatchViewEvent();
+
+            return $helper->renderResponse($viewEvent);
+        } catch (\Exception $e) {
+            if ($response = $helper->dispatchException($e)) {
+                return $response;
+            }
+
+            throw $e;
         }
-
-        // create and render view
-        $helper->createViewData();
-        $helper->dispatchViewEvent();
-
-        return $helper->renderResponse();
     }
 
+    /**
+     * @noinspection DuplicatedCode
+     * @throws \Exception
+     */
     public function read(Request $request, array $config = [], string $configKey = 'read'): Response
     {
         // create helper
@@ -98,32 +130,49 @@ class CrudlController
         $helper->setConfig(Configuration::readAction($configKey, $this->configs, $config));
         $helper->setRequest($request);
 
-        // init entity
-        $helper->findEntity();
-
-        // init action
-        $helper->checkIsGranted();
-
-        if ($helper->notFound()) {
-            if ($response = $helper->dispatchNotFoundEvent()) {
+        try {
+            if ($response = $helper->dispatchInitialize()) {
                 return $response;
             }
 
-            throw new NotFoundHttpException('Entity not found');
+            // init entity
+            if (!$helper->dispatchLoadEntityEvent()) {
+                $helper->findEntity();
+            }
+
+            // init action
+            $helper->checkIsGranted();
+
+            if ($helper->notFound()) {
+                if ($response = $helper->dispatchNotFoundEvent()) {
+                    return $response;
+                }
+
+                throw new NotFoundHttpException('Entity not found');
+            } else {
+                if ($response = $helper->dispatchFoundEvent()) {
+                    return $response;
+                }
+            }
+
+            // create and render view
+            $helper->createViewData();
+            $viewEvent = $helper->dispatchViewEvent();
+
+            return $helper->renderResponse($viewEvent);
+        } catch (\Exception $e) {
+            if ($response = $helper->dispatchException($e)) {
+                return $response;
+            }
+
+            throw $e;
         }
-
-        if ($response = $helper->dispatchInitializeEvent()) {
-            return $response;
-        }
-
-        // create and render view
-        $helper->createViewData();
-        $helper->dispatchViewEvent();
-
-        return $helper->renderResponse();
     }
 
-    /** @noinspection DuplicatedCode */
+    /**
+     * @noinspection DuplicatedCode
+     * @throws \Exception
+     */
     public function update(Request $request, array $config = [], string $configKey = 'update'): Response
     {
         // update helper
@@ -131,64 +180,82 @@ class CrudlController
         $helper->setConfig(Configuration::updateAction($configKey, $this->configs, $config));
         $helper->setRequest($request);
 
-        // init entity
-        $helper->findEntity();
-
-        // init action
-        $helper->checkIsGranted();
-
-        if ($helper->notFound()) {
-            if ($response = $helper->dispatchNotFoundEvent()) {
+        try {
+            if ($response = $helper->dispatchInitialize()) {
                 return $response;
             }
 
-            throw new NotFoundHttpException('Entity not found');
-        }
+            // init entity
+            if (!$helper->dispatchLoadEntityEvent()) {
+                $helper->findEntity();
+            }
 
-        if ($response = $helper->dispatchInitializeEvent()) {
-            return $response;
-        }
+            // init action
+            $helper->checkIsGranted();
 
-        // create form
-        $formPrepareEvent = $helper->dispatchFormPrepare();
-        $form = $helper->createForm($formPrepareEvent);
-        $helper->dispatchFormInit();
-
-        // process form
-        if ($form->isSubmitted()) {
-            if ($form->isValid()) {
-                if ($response = $helper->dispatchFormValid()) {
+            if ($helper->notFound()) {
+                if ($response = $helper->dispatchNotFoundEvent()) {
                     return $response;
                 }
 
-                try {
-                    $this->manager->saveEntity($helper->getEntity());
-
-                    if ($response = $helper->dispatchSuccess()) {
-                        return $response;
-                    }
-
-                    return $helper->successRedirect();
-                } catch (\Exception $e) {
-                    if ($response = $helper->dispatchException($e)) {
-                        return $response;
-                    }
-                }
+                throw new NotFoundHttpException('Entity not found');
             } else {
-                if ($response = $helper->dispatchFormInvalid()) {
+                if ($response = $helper->dispatchFoundEvent()) {
                     return $response;
                 }
             }
+
+            $formPrepareEvent = $helper->dispatchFormPrepare();
+            $form = $helper->createForm($formPrepareEvent);
+            $helper->dispatchFormInit();
+
+            // process form
+            if ($form->isSubmitted()) {
+                if ($form->isValid()) {
+                    if ($response = $helper->dispatchFormValid()) {
+                        return $response;
+                    }
+
+                    try {
+                        if (!$helper->dispatchApplyEvent()) {
+                            $this->manager->saveEntity($helper->getEntity());
+                        }
+
+                        if ($response = $helper->dispatchSuccess()) {
+                            return $response;
+                        }
+
+                        return $helper->successRedirect();
+                    } catch (\Exception $e) {
+                        if ($response = $helper->dispatchFailure($e)) {
+                            return $response;
+                        }
+                    }
+                } else {
+                    if ($response = $helper->dispatchFormInvalid()) {
+                        return $response;
+                    }
+                }
+            }
+
+            // create and render view
+            $helper->createViewData();
+            $viewEvent = $helper->dispatchViewEvent();
+
+            return $helper->renderResponse($viewEvent);
+        } catch (\Exception $e) {
+            if ($response = $helper->dispatchException($e)) {
+                return $response;
+            }
+
+            throw $e;
         }
-
-        // create and render view
-        $helper->createViewData();
-        $helper->dispatchViewEvent();
-
-        return $helper->renderResponse();
     }
 
-    /** @noinspection DuplicatedCode */
+    /**
+     * @noinspection DuplicatedCode
+     * @throws \Exception
+     */
     public function delete(Request $request, array $config = [], string $configKey = 'delete'): Response
     {
         // delete helper
@@ -196,61 +263,76 @@ class CrudlController
         $helper->setConfig(Configuration::deleteAction($configKey, $this->configs, $config));
         $helper->setRequest($request);
 
-        // init entity
-        $helper->findEntity();
-
-        // init action
-        $helper->checkIsGranted();
-
-        if ($helper->notFound()) {
-            if ($response = $helper->dispatchNotFoundEvent()) {
+        try {
+            if ($response = $helper->dispatchInitialize()) {
                 return $response;
             }
 
-            throw new NotFoundHttpException('Entity not found');
-        }
+            // init entity
+            if (!$helper->dispatchLoadEntityEvent()) {
+                $helper->findEntity();
+            }
 
-        if ($response = $helper->dispatchInitializeEvent()) {
-            return $response;
-        }
+            // init action
+            $helper->checkIsGranted();
 
-        // create form
-        $formPrepareEvent = $helper->dispatchFormPrepare();
-        $form = $helper->createForm($formPrepareEvent);
-        $helper->dispatchFormInit();
-
-        // process form
-        if ($form->isSubmitted()) {
-            if ($form->isValid()) {
-                if ($response = $helper->dispatchFormValid()) {
+            if ($helper->notFound()) {
+                if ($response = $helper->dispatchNotFoundEvent()) {
                     return $response;
                 }
 
-                try {
-                    $this->manager->deleteEntity($helper->getEntity());
-
-                    if ($response = $helper->dispatchSuccess()) {
-                        return $response;
-                    }
-
-                    return $helper->successRedirect();
-                } catch (\Exception $e) {
-                    if ($response = $helper->dispatchException($e)) {
-                        return $response;
-                    }
-                }
+                throw new NotFoundHttpException('Entity not found');
             } else {
-                if ($response = $helper->dispatchFormInvalid()) {
+                if ($response = $helper->dispatchFoundEvent()) {
                     return $response;
                 }
             }
+
+            $formPrepareEvent = $helper->dispatchFormPrepare();
+            $form = $helper->createForm($formPrepareEvent);
+            $helper->dispatchFormInit();
+
+            // process form
+            if ($form->isSubmitted()) {
+                if ($form->isValid()) {
+                    if ($response = $helper->dispatchFormValid()) {
+                        return $response;
+                    }
+
+                    try {
+                        if (!$helper->dispatchApplyEvent()) {
+                            $this->manager->deleteEntity($helper->getEntity());
+                        }
+
+                        if ($response = $helper->dispatchSuccess()) {
+                            return $response;
+                        }
+
+                        return $helper->successRedirect();
+                    } catch (\Exception $e) {
+                        if ($response = $helper->dispatchFailure($e)) {
+                            return $response;
+                        }
+                    }
+                } else {
+                    if ($response = $helper->dispatchFormInvalid()) {
+                        return $response;
+                    }
+                }
+            }
+
+            // create and render view
+            $helper->createViewData();
+            $viewEvent = $helper->dispatchViewEvent();
+
+            return $helper->renderResponse($viewEvent);
+        } catch (\Exception $e) {
+            if ($response = $helper->dispatchException($e)) {
+                return $response;
+            }
+
+            throw $e;
         }
-
-        // create and render view
-        $helper->createViewData();
-        $helper->dispatchViewEvent();
-
-        return $helper->renderResponse();
     }
 
     /**
@@ -259,6 +341,7 @@ class CrudlController
      * @throws NonUniqueResultException
      * @throws InvalidFilterValueException
      * @throws MissingFromInQueryBuilderException
+     * @throws \Exception
      */
     public function list(Request $request, array $config = [], string $configKey = 'list'): Response
     {
@@ -267,20 +350,93 @@ class CrudlController
         $helper->setConfig(Configuration::listAction($configKey, $this->configs, $config));
         $helper->setRequest($request);
 
-        // init action
-        $helper->checkIsGranted();
-        if ($response = $helper->dispatchInitializeEvent()) {
-            return $response;
+        try {
+            // init action
+            if ($response = $helper->dispatchInitialize()) {
+                return $response;
+            }
+
+            $helper->checkIsGranted();
+
+            $formPrepareEvent = $helper->dispatchFormPrepare();
+            $helper->createFilterForm($formPrepareEvent);
+            $helper->dispatchFormInit();
+            $helper->dispatchResultFilterEvent();
+            $helper->queryResults();
+
+            // create and render view
+            $helper->createViewData();
+            $viewEvent = $helper->dispatchViewEvent();
+
+            return $helper->renderResponse($viewEvent);
+        } catch (\Exception $e) {
+            if ($response = $helper->dispatchException($e)) {
+                return $response;
+            }
+
+            throw $e;
         }
+    }
 
-        $helper->createFilterForm();
-        $helper->dispatchResultFilterEvent();
-        $helper->queryResults();
+    /**
+     * @noinspection DuplicatedCode
+     * @throws \Exception
+     */
+    public function apply(Request $request, string $configKey, array $config = []): Response
+    {
+        // update helper
+        $helper = new FormActionActionHelper($this->manager, $this->eventDispatcher, $this->twig, $this->authorizationChecker, $this->router, $this->formFactory);
+        $helper->setConfig(Configuration::actionAction($configKey, $this->configs, $config));
+        $helper->setRequest($request);
 
-        // create and render view
-        $helper->createViewData();
-        $helper->dispatchViewEvent();
+        try {
+            if ($response = $helper->dispatchInitialize()) {
+                return $response;
+            }
 
-        return $helper->renderResponse();
+            // init entity
+            if (!$helper->dispatchLoadEntityEvent()) {
+                $helper->findEntity();
+            }
+
+            // init action
+            $helper->checkIsGranted();
+
+            if ($helper->notFound()) {
+                if ($response = $helper->dispatchNotFoundEvent()) {
+                    return $response;
+                }
+
+                throw new NotFoundHttpException('Entity not found');
+            } else {
+                if ($response = $helper->dispatchFoundEvent()) {
+                    return $response;
+                }
+            }
+
+            try {
+                if (!$helper->dispatchApplyEvent()) {
+                    throw new \Exception('Apply action must use apply event and set it to applied');
+                }
+
+                if ($response = $helper->dispatchSuccess()) {
+                    return $response;
+                }
+
+                return $helper->successRedirect();
+            } catch (\Exception $e) {
+                if ($response = $helper->dispatchFailure($e)) {
+                    return $response;
+                }
+
+                throw new \Exception('Apply action must return a response in success or failure events');
+            }
+        } catch (\Exception $e) {
+            if ($response = $helper->dispatchException($e)) {
+                return $response;
+            }
+
+            throw $e;
+        }
     }
 }

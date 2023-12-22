@@ -16,18 +16,6 @@ use Symfony\Contracts\EventDispatcher\Event;
 
 class FilterEvent extends Event
 {
-    protected array $filters;
-
-    protected array $orderSort;
-
-    protected ?int $page;
-
-    protected ?int $rpp;
-
-    protected ?QueryBuilder $queryBuilder;
-
-    protected ?int $filtersMode;
-
     /**
      * @throws InvalidFormTypeException
      */
@@ -35,17 +23,23 @@ class FilterEvent extends Event
     {
         [$qb, $page, $rpp, $filters, $orderSort, $filtersMode] = Paginator::processPaginatedFilterForm($form, $request);
 
-        return new FilterEvent($filters, $orderSort, $page, $rpp, $qb, $filtersMode);
+        return new FilterEvent($request, $filters, $orderSort, $page, $rpp, $qb, $filtersMode);
     }
 
-    public function __construct(array $filters, array $orderSort, int $page = null, int $rpp = null, QueryBuilder $queryBuilder = null, int $filtersMode = null)
+    public function __construct(
+        protected Request $request,
+        protected array $filters,
+        protected array $orderSort,
+        protected ?int $page = null,
+        protected ?int $rpp = null,
+        protected ?QueryBuilder $queryBuilder = null,
+        protected ?int $filtersMode = null
+    ) {
+    }
+
+    public function getRequest(): Request
     {
-        $this->filters = $filters;
-        $this->orderSort = $orderSort;
-        $this->page = $page;
-        $this->rpp = $rpp;
-        $this->queryBuilder = $queryBuilder;
-        $this->filtersMode = $filtersMode;
+        return $this->request;
     }
 
     public function getFilters(): array
@@ -68,12 +62,12 @@ class FilterEvent extends Event
         $this->orderSort = $orderSort;
     }
 
-    public function getPage(): int
+    public function getPage(): ?int
     {
         return $this->page;
     }
 
-    public function setPage(int $page): void
+    public function setPage(?int $page): void
     {
         $this->page = $page;
     }

@@ -21,6 +21,7 @@ The CRUDL controller performs the following actions:
 - Update
 - Delete
 - List
+- Apply
 
 None of those actions are required, you will be able to enable just one or more of them.
 
@@ -31,23 +32,24 @@ Controller actions (all except read action) requires a form to work. They could 
 ## Events
 
 Every CRUDL action dispatches a lot of events, that allows to extend functionality, checking
-values, security, adding view data, or anything we need to do into the action flow.
+values, security, adding view data, or anything you need to do into the action flow.
 
 For example, create action dispatches following events:
 
-- initialize event: before doing anything after creating a new entity
-- form_init event: after form creation
-- form_valid event: on successful submit and before performing flush
-- success event: on successful submit and after performing flush
-- form_invalid event: on failure submit
-- view event: after everything has been processed, and before creating view
+- initialize_event_name
+- create_entity_event_name
+- form_prepare_event_name
+- form_init_event_name
+- form_valid_event_name
+- apply_event_name
+- success_event_name
+- failure_event_name
+- form_invalid_event_name
+- view_event_name
+- exception_event_name
 
-Each of those events, dispatch an object of next classes:
+For more details about events, check actions sections and [Events](docs/5_events.md) documentation.
 
-- Softspring\Component\Events\FormEvent
-- Softspring\Component\Events\GetResponseRequestEvent
-- Softspring\Component\Events\ViewEvent
-- Softspring\Component\CrudlController\Event\FilterEvent
-- Softspring\Component\CrudlController\Event\GetResponseEntityEvent
-- Softspring\Component\CrudlController\Event\GetResponseEntityExceptionEvent
-- Softspring\Component\CrudlController\Event\GetResponseFormEvent
+Most events are dispatched with a *Softspring\Component\Events\GetResponseEventInterface* event object, 
+ that allows to set a response to be returned by the controller, breaking the action flow.
+

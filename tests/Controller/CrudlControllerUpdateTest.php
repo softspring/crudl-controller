@@ -94,8 +94,6 @@ class CrudlControllerUpdateTest extends AbstractCrudlControllerTestCase
             ],
         ];
 
-        $this->repository->expects($this->once())->method('findOneBy')->willReturn(new \stdClass());
-
         $expectedResponse = new Response();
         $this->dispatcher->expects($this->once())->method('dispatch')->willReturnCallback(function ($event, string $eventName) use ($expectedResponse) {
             $eventName == 'initialize_event' && $event instanceof GetResponseRequestEvent && $event->setResponse($expectedResponse);

@@ -2,19 +2,32 @@
 
 Create action is used to create a new entity and provide a form to fill it, and save it.
 
+## Workflow
+
+All this steps are performed by the controller, if they are configured:
+
+- Dispatch initialize event (allows to setResponse and stop the process)
+- Dispatch create entity event, if no entity is setted in the event, create a new one calling to the manager
+- Check is granted
+- Dispatches form prepare event (allows to create form or modify form options)
+- Creates the form
+- Dispatches form init
+- Handles form submit
+  - If form is valid:
+    - Dispatches form valid event (allows to setResponse and stop the process)
+    - Dispatches apply event, if no apply flag is setted in the event, calls to the manager to persist the entity
+    - Dispatches success event (allows to setResponse and stop the process)
+    - Redirects to success route if configured, or a default route
+    - If any of these steps fails, dispatches failure event
+  - If form is invalid:
+    - Dispatches form invalid event (allows to setResponse and stop the process)
+- Creates view data
+- Dispatches view event
+- Renders view
+
+If any exception is thrown during the process, dispatches exception event.
+
 ## Configurations
-
-### form
-
-**type**: string **required**
-
-The form class name
-
-### view
-
-**type**: string **required**
-
-The view path for rendering list
 
 ### entity_attribute
 
@@ -26,7 +39,19 @@ The name of entity field passed to the view, and used for routes
 
 **type**: string **default**: null
 
-Role name to check at the begining
+Role name to check at the beginning
+
+### form
+
+**type**: string **default**: null
+
+The form class name
+
+### view
+
+**type**: string **default**: null
+
+The view path for rendering list
 
 ### success_redirect_to
 
@@ -40,7 +65,7 @@ All events are optional, you can configure just the ones you need.
 
 ### initialize_event_name
 
-**type**: string **default**: null **event**: Softspring\Component\Events\GetResponseRequestEvent
+**type**: string **default**: null **event**: [Softspring\Component\CrudlController\Event\InitializeEvent](src/Event/InitializeEvent.php)
 
 Event dispatched after checking is_granded and before form processing.
   
@@ -64,7 +89,7 @@ services:
             - { name: kernel.event_listener, event: product_admin.create.initialize, method: onInitialize }
 ```
 
-The folloging example shows how to redirect to other route if some condition is met:
+The following example shows how to redirect to other route if some condition is met:
 
 ```php
 <?php
@@ -82,9 +107,57 @@ class ProductCreateListener
 }
 ```
 
+### create_entity_event_name
+
+**type**: string **default**: null **event**: [Softspring\Component\CrudlController\Event\CreateEntityEvent](src/Event/CreateEntityEvent.php)
+
+Event dispatched on creating entity.
+
+It's used to generate a new entity if needed.
+
+**Example**
+
+```yaml
+$configs:
+    create:
+     create_entity_event_name: 'product_admin.create.create_entity'
+```
+
+Once the event name is configured, you can configure your listener for this event:
+
+```yaml
+# config/services.yaml
+services:
+    App\EventListener\ProductCreateListener:
+        tags:
+            - { name: kernel.event_listener, event: product_admin.create.create_entity, method: onCreateEntity }
+```
+
+The following example shows how to create a new entity and initialize some fields:
+
+```php
+<?php
+
+namespace App\EventListener;
+
+use Softspring\Component\CrudlController\Event\CreateEntityEvent;
+
+class ProductCreateListener
+{
+    public function onCreateEntity(CreateEntityEvent $event): void
+    {
+        $product = $this->manager->createEntity();
+        
+        $product->setActive(false)
+        
+        $event->setEntity($product);
+    }
+}
+```
+
 ### form_prepare_event_name
 
-**type**: string **default**: null **event**: Softspring\Component\CrudlController\Event\FormPrepareEvent
+**type**: string **default**: null **event**: [Softspring\Component\CrudlController\Event\FormPrepareEvent](src/Event/FormPrepareEvent.php)
 
 Event dispatched before form is created.
 
@@ -132,7 +205,7 @@ class ProductCreateListener
 
 ### form_init_event_name
 
-**type**: string **default**: null **event**: Softspring\Component\Events\FormEvent
+**type**: string **default**: null **event**: [Softspring\Component\CrudlController\Event\FormEvent](src/Event/FormEvent.php)
 
 Event dispatched after form creation but before process it.
 
@@ -163,7 +236,7 @@ The following example shows how to add a custom field to form:
 
 namespace App\EventListener;
 
-use Softspring\Component\Events\FormEvent;
+use Softspring\Component\CrudlController\Event\FormEvent;
 
 class ProductCreateListener
 {
@@ -181,7 +254,7 @@ class ProductCreateListener
 
 ### form_valid_event_name
 
-**type**: string **default**: null **event**: Softspring\Component\CrudlController\Event\GetResponseFormEvent
+**type**: string **default**: null **event**: [Softspring\Component\CrudlController\Event\FormValidEventFormValidEventApplyEvent](src/Event/FormValidEvent.php)
 
 Event dispatched on form submitted and valid, but before performing save.
 
@@ -212,11 +285,11 @@ The following example shows how to modify a product field or redirect to other r
 
 namespace App\EventListener;
 
-use Softspring\Component\CrudlController\Event\GetResponseFormEvent;
+use Softspring\Component\CrudlController\Event\FormValidEventApplyEvent;
 
 class ProductCreateListener
 {
-    public function onFormValid(GetResponseFormEvent $event): void
+    public function onFormValid(FormValidEvent $event): void
     {
         $request = $event->getRequest();
         $product = $event->getEntity();
@@ -231,9 +304,59 @@ class ProductCreateListener
 }
 ```
 
+### apply_event_name
+
+**type**: string **default**: null **event**: [Softspring\Component\CrudlController\Event\ApplyEvent](src/Event/ApplyEvent.php)
+
+Event dispatched when form is valid and allows to perform entity changes before saving, or change the save process to a custom one.
+
+It allows to setApplied and skip the default saving process.
+
+**Example**
+
+```yaml
+$configs:
+    create:
+        apply_event_name: 'product_admin.create.apply'
+```
+
+Once the event name is configured, you can configure your listener for this event:
+
+```yaml
+# config/services.yaml
+services:
+    App\EventListener\ProductCreateListener:
+        tags:
+            - { name: kernel.event_listener, event: product_admin.create.apply, method: onApply }
+```
+
+The following example shows how to save the entity to an API instead of database:
+
+```php
+<?php
+
+namespace App\EventListener;
+
+use Softspring\Component\CrudlController\Event\ApplyEvent;
+
+class ProductCreateListener
+{
+    public function onApply(ApplyEvent $event): void
+    {
+        $request = $event->getRequest();
+        $product = $event->getEntity();
+        $form = $event->getForm();
+        
+        $this->apiClient->createProduct($product);
+        
+        $event->setApplied(true); // skip default saving process
+    }
+}
+```
+
 ### success_event_name
 
-**type**: string **default**: null **event**: Softspring\Component\CrudlController\Event\GetResponseEntityEvent
+**type**: string **default**: null **event**: [Softspring\Component\CrudlController\Event\GetResponseEntityEvent](src/Event/GetResponseEntityEvent.php)
 
 Event dispatched on form submitted and valid, and after saving new entity.
 
@@ -282,9 +405,9 @@ class ProductCreateListener
 }
 ```
 
-### exception_event_name
+### failure_event_name
 
-**type**: string **default**: null **event**: Softspring\Component\CrudlController\Event\GetResponseEntityExceptionEvent
+**type**: string **default**: null **event**: [Softspring\Component\CrudlController\Event\FailureEvent](src/Event/FailureEvent.php)
 
 Event dispatched if an exception is thrown during entity saving or success event.
 
@@ -293,7 +416,7 @@ Event dispatched if an exception is thrown during entity saving or success event
 ```yaml
 $configs:
     create:
-        exception_event_name: 'product_admin.create.exception'
+        failure_event_name: 'product_admin.create.failure'
 ```
 
 Once the event name is configured, you can configure your listener for this event:
@@ -303,21 +426,21 @@ Once the event name is configured, you can configure your listener for this even
 services:
     App\EventListener\ProductCreateListener:
         tags:
-            - { name: kernel.event_listener, event: product_admin.create.exception, method: onException }
+            - { name: kernel.event_listener, event: product_admin.create.failure, method: onFailure }
 ```
 
-The following example shows how to redirect to other route if some condition is met, or log the exception:
+The following example shows how to redirect to other route if some condition is met, or log the failure:
 
 ```php
 <?php
 
 namespace App\EventListener;
 
-use Softspring\Component\CrudlController\Event\GetResponseEntityExceptionEvent;
+use Softspring\Component\CrudlController\Event\FailureEvent;
 
 class ProductCreateListener
 {
-    public function onException(GetResponseEntityExceptionEvent $event): void
+    public function onFailure(FailureEvent $event): void
     {
         $request = $event->getRequest();
         $product = $event->getEntity();
@@ -337,7 +460,7 @@ class ProductCreateListener
 
 ### form_invalid_event_name
 
-**type**: string **default**: null **event**: Softspring\Component\CrudlController\Event\GetResponseFormEvent
+**type**: string **default**: null **event**: [Softspring\Component\CrudlController\Event\FormInvalidEvent](src/Event/FormInvalidEvent.php)
 
 Event dispatched on form submitted and invalid.
 
@@ -368,11 +491,11 @@ The following example shows how to redirect to other route if some condition is 
 
 namespace App\EventListener;
 
-use Softspring\Component\CrudlController\Event\GetResponseFormEvent;
+use Softspring\Component\CrudlController\Event\FormInvalidEventFormValidEventFormInvalidEvent;
 
 class ProductCreateListener
 {
-    public function onFormInvalid(GetResponseFormEvent $event): void
+    public function onFormInvalid(FormInvalidEvent $event): void
     {
         $request = $event->getRequest();
         $form = $event->getForm();
@@ -388,7 +511,7 @@ class ProductCreateListener
 
 ### view_event_name
 
-**type**: string **default**: null **event**: Softspring\Component\Events\ViewEvent
+**type**: string **default**: null **event**: [Softspring\Component\CrudlController\Event\ViewEvent](src/Event/ViewEvent.php)
 
 Event dispatched before rendering view. View is rendered when no submit is performed, form is invalid or an exception 
  has been produced during form processing, and none of events allowed to setResponse has set it.
@@ -420,7 +543,7 @@ The following example shows how to add data to view:
 
 namespace App\EventListener;
 
-use Softspring\Component\Events\ViewEvent;
+use Softspring\Component\CrudlController\Event\ViewEvent;
 
 class ProductCreateListener
 {
@@ -440,6 +563,59 @@ class ProductCreateListener
 {{ some_data }}
 ```
 
+### exception_event_name
+
+
+**type**: string **default**: null **event**: [Softspring\Component\CrudlController\Event\ExceptionEvent](src/Event/ExceptionEvent.php)
+
+Event dispatched if an exception is thrown during any of the process steps.
+
+**Example**
+
+```yaml
+$configs:
+    create:
+        failure_event_name: 'product_admin.create.exception'
+```
+
+Once the event name is configured, you can configure your listener for this event:
+
+```yaml
+# config/services.yaml
+services:
+    App\EventListener\ProductCreateListener:
+        tags:
+            - { name: kernel.event_listener, event: product_admin.create.exception, method: onException }
+```
+
+The following example shows how to redirect to other route if some condition is met, or log the exception:
+
+```php
+<?php
+
+namespace App\EventListener;
+
+use Softspring\Component\CrudlController\Event\ExceptionEvent;
+
+class ProductCreateListener
+{
+    public function onException(ExceptionEvent $event): void
+    {
+        $request = $event->getRequest();
+        $product = $event->getEntity();
+        $exception = $event->getException();
+        
+        if (...any check you need...) {
+            $event->setResponse(new RedirectResponse('/other')));
+        } else {
+            $this->logger->error('Error creating product', [
+                'exception' => $exception,
+                'product' => $product,
+            ]);
+        }
+    }
+}
+```
 
 ## Configuration reference
 
@@ -448,25 +624,24 @@ This is the list action configuration reference:
 ```yaml
 $configs:
     create:
-        # required fields
-        param_converter_key: 'id'
-        form: 'App\Form\ProductCreateForm'
-        view: 'admin/products/create.html.twig'
-        
-        # optional fields
         entity_attribute: 'product'
         is_granted: 'ROLE_ADMIN_PRODUCT_CREATE'
-        success_event_name: 'product_admin.create.success'
+        form: 'App\Form\ProductCreateForm'
+        view: 'admin/products/create.html.twig'
+        success_redirect_to: 'app_admin_product_list'
         
         # events
         initialize_event_name: 'product_admin.create.initialize'
+        create_entity_event_name: 'product_admin.create.create_entity'
         form_prepare_event_name: 'product_admin.create.form_prepare'
         form_init_event_name: 'product_admin.create.form_init'
         form_valid_event_name: 'product_admin.create.form_valid'
-        success_redirect_to: 'app_admin_product_list'
-        exception_event_name: 'product_admin.create.exception'
+        apply_event_name: 'product_admin.create.apply'
+        success_event_name: 'product_admin.create.success'
+        failure_event_name: 'product_admin.create.failure'
         form_invalid_event_name: 'product_admin.create.form_invalid'
         view_event_name: 'product_admin.create.view'
+        exception_event_name: 'product_admin.create.exception'
 ```
 
 And this is a complete example of event listening:
@@ -484,13 +659,16 @@ class ProductCreateListener implements EventSubscriberInterface
     {
         return [
             'product_admin.create.initialize' => 'onInitialize',
+            'product_admin.create.create_entity' => 'onCreateEntity',
             'product_admin.create.form_prepare' => 'onFormPrepare',
             'product_admin.create.form_init' => 'onFormInit',
             'product_admin.create.form_valid' => 'onFormValid',
+            'product_admin.create.apply' => 'onApply',
             'product_admin.create.success' => 'onSuccess',
-            'product_admin.create.exception' => 'onException',
+            'product_admin.create.failure' => 'onFailure',
             'product_admin.create.form_invalid' => 'onFormInvalid',
             'product_admin.create.view' => 'onView',
+            'product_admin.create.exception' => 'onException',
         ];
     }
     
@@ -499,6 +677,15 @@ class ProductCreateListener implements EventSubscriberInterface
         if (...any check you need...) {
             $event->setResponse(new RedirectResponse('/other')));
         }
+    }
+    
+    public function onCreateEntity(CreateEntityEvent $event): void
+    {
+        $product = $this->manager->createEntity();
+        
+        $product->setActive(false)
+        
+        $event->setEntity($product);
     }
     
     public function onFormPrepare(FormPrepareEvent $event): void
@@ -520,7 +707,7 @@ class ProductCreateListener implements EventSubscriberInterface
         ]);
     }
     
-    public function onFormValid(GetResponseFormEvent $event): void
+    public function onFormValid(FormValidEvent $event): void
     {
         $request = $event->getRequest();
         $product = $event->getEntity();
@@ -531,6 +718,17 @@ class ProductCreateListener implements EventSubscriberInterface
         } else {
             $product->setCustomField('changed value');
         }
+    }
+    
+    public function onApply(ApplyEvent $event): void
+    {
+        $request = $event->getRequest();
+        $product = $event->getEntity();
+        $form = $event->getForm();
+        
+        $this->apiClient->createProduct($product);
+        
+        $event->setApplied(true); // skip default saving process
     }
     
     public function onSuccess(GetResponseEntityEvent $event): void
@@ -545,7 +743,7 @@ class ProductCreateListener implements EventSubscriberInterface
         }
     }
     
-    public function onException(GetResponseEntityExceptionEvent $event): void
+    public function onFailure(FailureEvent $event): void
     {
         $request = $event->getRequest();
         $product = $event->getEntity();
@@ -561,7 +759,7 @@ class ProductCreateListener implements EventSubscriberInterface
         }
     }
     
-    public function onFormInvalid(GetResponseFormEvent $event): void
+    public function onFormInvalid(FormInvalidEvent $event): void
     {
         $request = $event->getRequest();
         $form = $event->getForm();
@@ -579,6 +777,23 @@ class ProductCreateListener implements EventSubscriberInterface
         $data = $event->getData();
         
         $data->set('some_data', 'some_value');
+    }
+    
+    
+    public function onException(ExceptionEvent $event): void
+    {
+        $request = $event->getRequest();
+        $product = $event->getEntity();
+        $exception = $event->getException();
+        
+        if (...any check you need...) {
+            $event->setResponse(new RedirectResponse('/other')));
+        } else {
+            $this->logger->error('Error creating product', [
+                'exception' => $exception,
+                'product' => $product,
+            ]);
+        }
     }
 } 
 ```

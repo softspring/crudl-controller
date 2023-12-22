@@ -6,6 +6,8 @@ use Doctrine\ORM\EntityRepository;
 use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
 use Softspring\Component\CrudlController\Event\GetResponseEntityEvent;
+use Softspring\Component\CrudlController\Event\InitializeEvent;
+use Softspring\Component\CrudlController\Event\NotFoundEvent;
 use Softspring\Component\CrudlController\Helper\EntityActionHelper;
 use Softspring\Component\CrudlController\Manager\CrudlEntityManagerInterface;
 use Softspring\Component\Events\GetResponseRequestEvent;
@@ -106,7 +108,7 @@ class EntityActionHelperTest extends TestCase
             'initialize_event_name' => null,
         ]);
         $this->eventDispatcherMock->expects($this->never())->method('dispatch');
-        $helper->dispatchInitializeEvent();
+        $helper->dispatchInitialize();
     }
 
     public function testDispatchInitializeEventNoResponse(): void
@@ -119,7 +121,7 @@ class EntityActionHelperTest extends TestCase
         $helper->createEntity();
 
         $this->eventDispatcherMock->expects($this->once())->method('dispatch');
-        $response = $helper->dispatchInitializeEvent();
+        $response = $helper->dispatchInitialize();
         $this->assertNull($response);
     }
 
@@ -133,12 +135,12 @@ class EntityActionHelperTest extends TestCase
         $helper->createEntity();
 
         $expectedResponse = new Response();
-        $this->eventDispatcherMock->expects($this->once())->method('dispatch')->willReturnCallback(function (GetResponseEntityEvent $event) use ($expectedResponse) {
+        $this->eventDispatcherMock->expects($this->once())->method('dispatch')->willReturnCallback(function (InitializeEvent $event) use ($expectedResponse) {
             $event->setResponse($expectedResponse);
 
             return $event;
         });
-        $response = $helper->dispatchInitializeEvent();
+        $response = $helper->dispatchInitialize();
         $this->assertEquals($expectedResponse, $response);
     }
 
@@ -177,7 +179,7 @@ class EntityActionHelperTest extends TestCase
         $helper->createEntity();
 
         $expectedResponse = new Response();
-        $this->eventDispatcherMock->expects($this->once())->method('dispatch')->willReturnCallback(function (GetResponseRequestEvent $event) use ($expectedResponse) {
+        $this->eventDispatcherMock->expects($this->once())->method('dispatch')->willReturnCallback(function (NotFoundEvent $event) use ($expectedResponse) {
             $event->setResponse($expectedResponse);
 
             return $event;

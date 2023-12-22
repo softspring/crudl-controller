@@ -2,14 +2,17 @@
 
 namespace Softspring\Component\CrudlController\Helper;
 
+use Softspring\Component\CrudlController\Event\ApplyEvent;
+use Softspring\Component\CrudlController\Event\FailureEvent;
+use Softspring\Component\CrudlController\Event\FormInitEvent;
+use Softspring\Component\CrudlController\Event\FormInvalidEvent;
 use Softspring\Component\CrudlController\Event\FormPrepareEvent;
-use Softspring\Component\CrudlController\Event\GetResponseEntityEvent;
-use Softspring\Component\CrudlController\Event\GetResponseEntityExceptionEvent;
-use Softspring\Component\CrudlController\Event\GetResponseFormEvent;
+use Softspring\Component\CrudlController\Event\FormValidEvent;
+use Softspring\Component\CrudlController\Event\SuccessEvent;
 use Softspring\Component\CrudlController\Manager\CrudlEntityManagerInterface;
 use Softspring\Component\Events\FormEvent;
 use Symfony\Component\EventDispatcher\EventDispatcherInterface;
-use Symfony\Component\Form\FormFactory;
+use Symfony\Component\Form\FormFactoryInterface;
 use Symfony\Component\Form\FormInterface;
 use Symfony\Component\Form\FormTypeInterface;
 use Symfony\Component\HttpFoundation\RedirectResponse;
@@ -20,7 +23,7 @@ use Twig\Environment;
 
 class FormActionActionHelper extends EntityActionHelper
 {
-    protected FormInterface $form;
+    protected ?FormInterface $form = null;
 
     public function __construct(
         protected CrudlEntityManagerInterface $manager,
@@ -28,16 +31,49 @@ class FormActionActionHelper extends EntityActionHelper
         protected Environment $twig,
         protected AuthorizationCheckerInterface $authorizationChecker,
         protected RouterInterface $router,
-        protected FormFactory $formFactory,
+        protected FormFactoryInterface $formFactory,
     ) {
         parent::__construct($manager, $eventDispatcher, $twig, $authorizationChecker, $router);
     }
 
-    public function createForm(?FormPrepareEvent $formPrepareEvent): FormInterface
+    public function dispatchFormPrepare(array $options = ['method' => 'POST']): FormPrepareEvent
     {
-        $type = $this->resolveFormClass();
+        $event = new FormPrepareEvent($this->entity, $this->request, $options);
+
+        if ($this->config['form_prepare_event_name']) {
+            $this->_dispatch($event, $this->config['form_prepare_event_name']);
+        }
+
+        if (!$event->getType()) {
+            $event->setType($this->resolveFormClass());
+        }
+
+        return $event;
+    }
+
+    public function resolveFormClass(): ?string
+    {
+        if (empty($this->config['form'])) {
+            return null;
+        }
+
+        if ($this->config['form'] instanceof FormTypeInterface) {
+            return get_class($this->config['form']);
+        }
+
+        return $this->config['form'];
+    }
+
+    public function createForm(FormPrepareEvent $formPrepareEvent): FormInterface
+    {
+        $type = $formPrepareEvent->getType();
+
+        if (!$type) {
+            throw new \RuntimeException('Form type not defined');
+        }
+
         $data = $this->entity;
-        $options = $formPrepareEvent?->getFormOptions() ?? [];
+        $options = $formPrepareEvent->getFormOptions();
 
         $this->form = $this->formFactory->create($type, $data, $options);
 
@@ -46,9 +82,21 @@ class FormActionActionHelper extends EntityActionHelper
         return $this->form;
     }
 
+    public function dispatchFormInit(): ?FormEvent
+    {
+        if (!$this->config['form_init_event_name']) {
+            return null;
+        }
+
+        $this->_dispatch($event = new FormInitEvent($this->form, $this->request), $this->config['form_init_event_name']);
+
+        return $event;
+    }
+
     public function createViewData(array $data = []): \ArrayObject
     {
-        $data['form'] = $this->form->createView();
+        $data['form'] = $this->form?->createView();
+        $data[$this->config['entity_attribute']] = $this->entity;
 
         return parent::createViewData($data);
     }
@@ -64,44 +112,29 @@ class FormActionActionHelper extends EntityActionHelper
         return new RedirectResponse($url, Response::HTTP_FOUND);
     }
 
-    public function resolveFormClass(): string
-    {
-        if ($this->config['form'] instanceof FormTypeInterface) {
-            return get_class($this->config['form']);
-        }
-
-        return $this->config['form'];
-    }
-
-    public function dispatchFormPrepare(array $options = ['method' => 'POST']): ?FormPrepareEvent
-    {
-        if (!$this->config['form_prepare_event_name']) {
-            return null;
-        }
-
-        $this->_dispatch($event = new FormPrepareEvent($this->entity, $this->request, $options), $this->config['form_prepare_event_name']);
-
-        return $event;
-    }
-
-    public function dispatchFormInit(): ?FormEvent
-    {
-        if (!$this->config['form_init_event_name']) {
-            return null;
-        }
-
-        $this->_dispatch($event = new FormEvent($this->form, $this->request), $this->config['form_init_event_name']);
-
-        return $event;
-    }
-
     public function dispatchFormValid(): ?Response
     {
         if (!$this->config['form_valid_event_name']) {
             return null;
         }
 
-        return $this->_dispatchGetResponse(new GetResponseFormEvent($this->form, $this->request), $this->config['form_valid_event_name']);
+        return $this->_dispatchGetResponse(new FormValidEvent($this->form, $this->request), $this->config['form_valid_event_name']);
+    }
+
+    public function dispatchApplyEvent(): ?bool
+    {
+        if (!$this->config['apply_event_name']) {
+            return null;
+        }
+
+        $event = new ApplyEvent($this->entity, $this->request, $this->form);
+        $this->_dispatch($event, $this->config['apply_event_name']);
+
+        if ($event->getEntity()) {
+            $this->entity = $event->getEntity();
+        }
+
+        return $event->isApplied();
     }
 
     public function dispatchSuccess(): ?Response
@@ -110,16 +143,16 @@ class FormActionActionHelper extends EntityActionHelper
             return null;
         }
 
-        return $this->_dispatchGetResponse(new GetResponseEntityEvent($this->entity, $this->request), $this->config['success_event_name']);
+        return $this->_dispatchGetResponse(new SuccessEvent($this->entity, $this->request), $this->config['success_event_name']);
     }
 
-    public function dispatchException(\Exception $e): ?Response
+    public function dispatchFailure(\Exception $e): ?Response
     {
-        if (!$this->config['exception_event_name']) {
+        if (!$this->config['failure_event_name']) {
             return null;
         }
 
-        return $this->_dispatchGetResponse(new GetResponseEntityExceptionEvent($this->entity, $this->request, $e), $this->config['exception_event_name']);
+        return $this->_dispatchGetResponse(new FailureEvent($this->entity, $this->request, $e, $this->form), $this->config['failure_event_name']);
     }
 
     public function dispatchFormInvalid(): ?Response
@@ -128,6 +161,6 @@ class FormActionActionHelper extends EntityActionHelper
             return null;
         }
 
-        return $this->_dispatchGetResponse(new GetResponseFormEvent($this->form, $this->request), $this->config['form_invalid_event_name']);
+        return $this->_dispatchGetResponse(new FormInvalidEvent($this->form, $this->request), $this->config['form_invalid_event_name']);
     }
 }

@@ -5,17 +5,22 @@ namespace Softspring\Component\CrudlController\Event;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Contracts\EventDispatcher\Event;
 
-class EntityEvent extends Event
+abstract class EntityEvent extends Event
 {
     public function __construct(
-        protected object $entity,
+        protected ?object $entity,
         protected ?Request $request
     ) {
     }
 
-    public function getEntity(): object
+    public function getEntity(): ?object
     {
         return $this->entity;
+    }
+
+    public function setEntity(?object $entity): void
+    {
+        $this->entity = $entity;
     }
 
     public function getRequest(): ?Request

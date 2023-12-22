@@ -2,8 +2,11 @@
 
 namespace Softspring\Component\CrudlController\Tests\Controller;
 
-use Softspring\Component\CrudlController\Event\GetResponseEntityEvent;
-use Softspring\Component\CrudlController\Event\GetResponseFormEvent;
+use Softspring\Component\CrudlController\Event\FormInvalidEvent;
+use Softspring\Component\CrudlController\Event\FormValidEvent;
+use Softspring\Component\CrudlController\Event\InitializeEvent;
+use Softspring\Component\CrudlController\Event\LoadEntityEvent;
+use Softspring\Component\CrudlController\Event\SuccessEvent;
 use Softspring\Component\CrudlController\Tests\Controller\Example\DeleteForm;
 use Softspring\Component\Events\GetResponseRequestEvent;
 use Symfony\Component\Form\Form;
@@ -49,7 +52,7 @@ class CrudlControllerDeleteTest extends AbstractCrudlControllerTestCase
         $expectedResponse = new Response();
 
         $this->dispatcher->expects($this->once())->method('dispatch')->willReturnCallback(function ($event, string $eventName) use ($expectedResponse) {
-            $eventName == 'not_found_event' && $event instanceof GetResponseRequestEvent  && $event->setResponse($expectedResponse);
+            $event instanceof GetResponseRequestEvent  && $event->setResponse($expectedResponse);
 
             return $event;
         });
@@ -94,11 +97,9 @@ class CrudlControllerDeleteTest extends AbstractCrudlControllerTestCase
             ],
         ];
 
-        $this->repository->expects($this->once())->method('findOneBy')->willReturn(new \stdClass());
-
         $expectedResponse = new Response();
-        $this->dispatcher->expects($this->once())->method('dispatch')->willReturnCallback(function ($event, string $eventName) use ($expectedResponse) {
-            $eventName == 'initialize_event' && $event instanceof GetResponseRequestEvent && $event->setResponse($expectedResponse);
+        $this->dispatcher->expects($this->any())->method('dispatch')->willReturnCallback(function ($event, string $eventName) use ($expectedResponse) {
+            $event instanceof InitializeEvent && $event->setResponse($expectedResponse);
 
             return $event;
         });
@@ -155,7 +156,7 @@ class CrudlControllerDeleteTest extends AbstractCrudlControllerTestCase
 
         $expectedResponse = new RedirectResponse('/');
         $this->dispatcher->expects($this->once())->method('dispatch')->willReturnCallback(function ($event, string $eventName) use ($expectedResponse) {
-            $eventName == 'form_invalid_event' && $event instanceof GetResponseFormEvent && $event->setResponse($expectedResponse);
+            $event instanceof FormInvalidEvent && $event->setResponse($expectedResponse);
 
             return $event;
         });
@@ -193,7 +194,7 @@ class CrudlControllerDeleteTest extends AbstractCrudlControllerTestCase
 
         $expectedResponse = new RedirectResponse('/');
         $this->dispatcher->expects($this->once())->method('dispatch')->willReturnCallback(function ($event, string $eventName) use ($expectedResponse) {
-            $eventName == 'form_valid_event' && $event instanceof GetResponseFormEvent && $event->setResponse($expectedResponse);
+            $event instanceof FormValidEvent && $event->setResponse($expectedResponse);
 
             return $event;
         });
@@ -232,7 +233,7 @@ class CrudlControllerDeleteTest extends AbstractCrudlControllerTestCase
 
         $expectedResponse = new RedirectResponse('/');
         $this->dispatcher->expects($this->once())->method('dispatch')->willReturnCallback(function ($event, string $eventName) use ($expectedResponse) {
-            $eventName == 'success_event' && $event instanceof GetResponseEntityEvent && $event->setResponse($expectedResponse);
+            $event instanceof SuccessEvent && $event->setResponse($expectedResponse);
 
             return $event;
         });

@@ -5,13 +5,17 @@ namespace Softspring\Component\CrudlController\Helper;
 use Doctrine\ORM\NonUniqueResultException;
 use Doctrine\ORM\NoResultException;
 use Softspring\Component\CrudlController\Event\FilterEvent;
+use Softspring\Component\CrudlController\Event\FormInitEvent;
+use Softspring\Component\CrudlController\Event\FormPrepareEvent;
+use Softspring\Component\CrudlController\Event\ViewEvent;
 use Softspring\Component\CrudlController\Manager\CrudlEntityManagerInterface;
 use Softspring\Component\DoctrinePaginator\Collection\PaginatedCollection;
 use Softspring\Component\DoctrinePaginator\Exception\InvalidFormTypeException;
 use Softspring\Component\DoctrineQueryFilters\Exception\InvalidFilterValueException;
 use Softspring\Component\DoctrineQueryFilters\Exception\MissingFromInQueryBuilderException;
+use Softspring\Component\Events\FormEvent;
 use Symfony\Component\EventDispatcher\EventDispatcherInterface;
-use Symfony\Component\Form\FormFactory;
+use Symfony\Component\Form\FormFactoryInterface;
 use Symfony\Component\Form\FormInterface;
 use Symfony\Component\Form\FormTypeInterface;
 use Symfony\Component\HttpFoundation\Response;
@@ -21,7 +25,7 @@ use Twig\Environment;
 
 class ListActionHelper extends ActionHelper
 {
-    protected FormInterface $filterForm;
+    protected ?FormInterface $filterForm = null;
     protected FilterEvent $filterEvent;
     protected PaginatedCollection $results;
 
@@ -31,38 +35,64 @@ class ListActionHelper extends ActionHelper
         protected Environment $twig,
         protected AuthorizationCheckerInterface $authorizationChecker,
         protected RouterInterface $router,
-        protected FormFactory $formFactory,
+        protected FormFactoryInterface $formFactory,
     ) {
         parent::__construct($manager, $eventDispatcher, $twig, $authorizationChecker, $router);
     }
 
-    public function renderResponse(string $view = null): Response
+    public function renderResponse(ViewEvent $event): Response
     {
-        if ($this->request->isXmlHttpRequest() && $this->config['view_page']) {
-            return parent::renderResponse($this->config['view_page']);
-        } else {
-            return parent::renderResponse($view);
+        if ($this->request->isXmlHttpRequest() && !$event->getTemplate() && $this->config['view_page']) {
+            $event->setTemplate($this->config['view_page']);
         }
+
+        return parent::renderResponse($event);
     }
 
-    public function createFilterForm(): FormInterface
+    public function dispatchFormPrepare(array $options = ['method' => 'GET']): FormPrepareEvent
     {
-        $type = $this->resolveFormClass();
+        $event = new FormPrepareEvent(null, $this->request, $options);
 
-        $this->filterForm = $this->formFactory->create($type, []);
+        if ($this->config['filter_form_prepare_event_name']) {
+            $this->_dispatch($event, $this->config['filter_form_prepare_event_name']);
+        }
 
-        $this->filterForm->handleRequest($this->request);
+        if (!$event->getType()) {
+            $event->setType($this->resolveFormClass());
+        }
 
-        return $this->filterForm;
+        return $event;
     }
 
-    public function resolveFormClass(): ?string
+    public function resolveFormClass(): string
     {
         if ($this->config['filter_form'] instanceof FormTypeInterface) {
             return get_class($this->config['filter_form']);
         }
 
         return $this->config['filter_form'];
+    }
+
+    public function createFilterForm(FormPrepareEvent $formPrepareEvent): ?FormInterface
+    {
+        $type = $formPrepareEvent->getType();
+
+        $this->filterForm = $this->formFactory->create($type, [], $formPrepareEvent->getFormOptions());
+
+        $this->filterForm->handleRequest($this->request);
+
+        return $this->filterForm;
+    }
+
+    public function dispatchFormInit(): ?FormEvent
+    {
+        if (!$this->config['filter_form_init_event_name']) {
+            return null;
+        }
+
+        $this->_dispatch($event = new FormInitEvent($this->filterForm, $this->request), $this->config['filter_form_init_event_name']);
+
+        return $event;
     }
 
     /**

@@ -32,6 +32,11 @@ class Configuration
         return self::processAction(new ListActionConfiguration(), 'list', $controllerConfigsKey, $controllerConfigs, $actionConfig);
     }
 
+    public static function actionAction(string $controllerConfigsKey, array $controllerConfigs = [], array $actionConfig = []): array
+    {
+        return self::processAction(new ApplyActionConfiguration(), 'action', $controllerConfigsKey, $controllerConfigs, $actionConfig);
+    }
+
     protected static function processAction(ConfigurationInterface $configuration, string $action, string $controllerConfigsKey, array $controllerConfigs = [], array $actionConfig = []): array
     {
         $processor = new Processor();

@@ -4,17 +4,39 @@ namespace Config;
 
 use PHPUnit\Framework\TestCase;
 use Softspring\Component\CrudlController\Config\Configuration;
-use Symfony\Component\Config\Definition\Exception\InvalidConfigurationException;
 
 class UpdateActionTest extends TestCase
 {
-    public function testUpdateEmpty()
+    public function testUpdateEmpty(): void
     {
-        $this->expectException(InvalidConfigurationException::class);
-        Configuration::updateAction('test');
+        $result = Configuration::updateAction('test');
+
+        $expected = [
+            'initialize_event_name' => null,
+            'load_entity_event_name' => null,
+            'not_found_event_name' => null,
+            'found_event_name' => null,
+            'param_converter_key' => null,
+            'form_prepare_event_name' => null,
+            'form_init_event_name' => null,
+            'form_valid_event_name' => null,
+            'apply_event_name' => null,
+            'success_event_name' => null,
+            'failure_event_name' => null,
+            'form_invalid_event_name' => null,
+            'view_event_name' => null,
+            'exception_event_name' => null,
+            'is_granted' => null,
+            'success_redirect_to' => null,
+            'entity_attribute' => 'entity',
+            'view' => null,
+            'form' => null,
+        ];
+
+        $this->assertEquals($expected, $result);
     }
 
-    public function testUpdateBasic()
+    public function testUpdateBasic(): void
     {
         $config = [
             'entity_attribute' => 'test',
@@ -25,10 +47,28 @@ class UpdateActionTest extends TestCase
 
         $result = Configuration::updateAction('test', [], $config);
 
-        $this->assertEquals($config, $result);
+        $expected = $config + [
+                'initialize_event_name' => null,
+                'load_entity_event_name' => null,
+                'not_found_event_name' => null,
+                'found_event_name' => null,
+                'form_prepare_event_name' => null,
+                'form_init_event_name' => null,
+                'form_valid_event_name' => null,
+                'apply_event_name' => null,
+                'success_event_name' => null,
+                'failure_event_name' => null,
+                'form_invalid_event_name' => null,
+                'view_event_name' => null,
+                'exception_event_name' => null,
+                'is_granted' => null,
+                'success_redirect_to' => null,
+            ];
+
+        $this->assertEquals($expected, $result);
     }
 
-    public function testUpdateOverride()
+    public function testUpdateOverride(): void
     {
         $config1 = [
             'entity_attribute' => 'test',
@@ -40,7 +80,7 @@ class UpdateActionTest extends TestCase
             'form_init_event_name' => 'form_init_event_name',
             'form_valid_event_name' => 'form_valid_event_name',
             'success_event_name' => 'success_event_name',
-            'exception_event_name' => 'exception_event_name',
+            'failure_event_name' => 'failure_event_name',
             'form_invalid_event_name' => 'form_invalid_event_name',
             'view_event_name' => 'view_event_name',
         ];
@@ -54,8 +94,16 @@ class UpdateActionTest extends TestCase
             'success_redirect_to' => 'success_redirect_to2',
         ];
 
-        $result = Configuration::updateAction('test', [ 'test' => $config1], $config2);
+        $result = Configuration::updateAction('test', ['test' => $config1], $config2);
 
-        $this->assertEquals(array_merge($config1, $config2), $result);
+        $expected = array_merge($config1, $config2) + [
+                'load_entity_event_name' => null,
+                'not_found_event_name' => null,
+                'found_event_name' => null,
+                'apply_event_name' => null,
+                'exception_event_name' => null,
+            ];
+
+        $this->assertEquals($expected, $result);
     }
 }
