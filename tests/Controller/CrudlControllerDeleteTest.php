@@ -126,6 +126,8 @@ class CrudlControllerDeleteTest extends AbstractCrudlControllerTestCase
             ],
         ];
 
+        $this->formFactory->expects($this->once())->method('create')->willReturn($this->getMockBuilder(Form::class)->disableOriginalConstructor()->getMock());
+
         $this->repository->expects($this->once())->method('findOneBy')->willReturn(new \stdClass());
 
         $this->twig->expects($this->once())->method('render')->willReturn($config['delete']['view']);

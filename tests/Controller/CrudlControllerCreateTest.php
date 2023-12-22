@@ -74,6 +74,8 @@ class CrudlControllerCreateTest extends AbstractCrudlControllerTestCase
             ],
         ];
 
+        $this->formFactory->expects($this->once())->method('create')->willReturn($this->getMockBuilder(Form::class)->disableOriginalConstructor()->getMock());
+
         $this->twig->expects($this->once())->method('render')->willReturn($config['create']['view']);
 
         $controller = $this->createController($config);
