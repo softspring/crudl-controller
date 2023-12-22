@@ -83,20 +83,10 @@ class CrudlController
                         return $response;
                     }
 
-                    try {
-                        if (!$helper->dispatchApplyEvent()) {
-                            $this->manager->saveEntity($helper->getEntity());
-                        }
-
-                        if ($response = $helper->dispatchSuccess()) {
-                            return $response;
-                        }
-
-                        return $helper->successRedirect();
-                    } catch (\Exception $e) {
-                        if ($response = $helper->dispatchFailure($e)) {
-                            return $response;
-                        }
+                    if ($response = $this->helperApply($helper, function ($entity) {
+                        $this->manager->saveEntity($entity);
+                    })) {
+                        return $response;
                     }
                 } else {
                     if ($response = $helper->dispatchFormInvalid()) {
@@ -216,20 +206,10 @@ class CrudlController
                         return $response;
                     }
 
-                    try {
-                        if (!$helper->dispatchApplyEvent()) {
-                            $this->manager->saveEntity($helper->getEntity());
-                        }
-
-                        if ($response = $helper->dispatchSuccess()) {
-                            return $response;
-                        }
-
-                        return $helper->successRedirect();
-                    } catch (\Exception $e) {
-                        if ($response = $helper->dispatchFailure($e)) {
-                            return $response;
-                        }
+                    if ($response = $this->helperApply($helper, function ($entity) {
+                        $this->manager->saveEntity($entity);
+                    })) {
+                        return $response;
                     }
                 } else {
                     if ($response = $helper->dispatchFormInvalid()) {
@@ -299,20 +279,10 @@ class CrudlController
                         return $response;
                     }
 
-                    try {
-                        if (!$helper->dispatchApplyEvent()) {
-                            $this->manager->deleteEntity($helper->getEntity());
-                        }
-
-                        if ($response = $helper->dispatchSuccess()) {
-                            return $response;
-                        }
-
-                        return $helper->successRedirect();
-                    } catch (\Exception $e) {
-                        if ($response = $helper->dispatchFailure($e)) {
-                            return $response;
-                        }
+                    if ($response = $this->helperApply($helper, function ($entity) {
+                        $this->manager->deleteEntity($entity);
+                    })) {
+                        return $response;
                     }
                 } else {
                     if ($response = $helper->dispatchFormInvalid()) {
@@ -414,23 +384,13 @@ class CrudlController
                 }
             }
 
-            try {
-                if (!$helper->dispatchApplyEvent()) {
-                    throw new \Exception('Apply action must use apply event and set it to applied');
-                }
-
-                if ($response = $helper->dispatchSuccess()) {
-                    return $response;
-                }
-
-                return $helper->successRedirect();
-            } catch (\Exception $e) {
-                if ($response = $helper->dispatchFailure($e)) {
-                    return $response;
-                }
-
-                throw new \Exception('Apply action must return a response in success or failure events');
+            if ($response = $this->helperApply($helper, function ($entity) {
+                throw new \Exception('Apply action must use apply event and set it to applied');
+            })) {
+                return $response;
             }
+
+            throw new \Exception('Apply action must return a response in success or failure events');
         } catch (\Exception $e) {
             if ($response = $helper->dispatchException($e)) {
                 return $response;
@@ -438,5 +398,26 @@ class CrudlController
 
             throw $e;
         }
+    }
+
+    protected function helperApply(FormActionActionHelper $helper, callable $applyFunction): ?Response
+    {
+        try {
+            if (!$helper->dispatchApplyEvent()) {
+                $applyFunction($helper->getEntity());
+            }
+
+            if ($response = $helper->dispatchSuccess()) {
+                return $response;
+            }
+
+            return $helper->successRedirect();
+        } catch (\Exception $e) {
+            if ($response = $helper->dispatchFailure($e)) {
+                return $response;
+            }
+        }
+
+        return null;
     }
 }
