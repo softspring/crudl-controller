@@ -11,8 +11,10 @@ class FormPrepareEvent extends EntityEvent
         ?Request $request,
         protected array $formOptions = [],
         protected mixed $type = null,
+        protected mixed $data = null,
     ) {
         parent::__construct($entity, $request);
+        $this->data = $data ?? $entity;
     }
 
     public function getFormOptions(): array
@@ -33,5 +35,15 @@ class FormPrepareEvent extends EntityEvent
     public function setType(mixed $type): void
     {
         $this->type = $type;
+    }
+
+    public function getData(): mixed
+    {
+        return $this->data;
+    }
+
+    public function setData(mixed $data): void
+    {
+        $this->data = $data;
     }
 }
