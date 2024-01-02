@@ -72,7 +72,7 @@ class FormActionActionHelper extends EntityActionHelper
             throw new \RuntimeException('Form type not defined');
         }
 
-        $data = $this->entity;
+        $data = $formPrepareEvent->getData();
         $options = $formPrepareEvent->getFormOptions();
 
         $this->form = $this->formFactory->create($type, $data, $options);
