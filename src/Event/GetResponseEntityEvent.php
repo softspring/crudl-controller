@@ -5,7 +5,10 @@ namespace Softspring\Component\CrudlController\Event;
 use Softspring\Component\Events\GetResponseEventInterface;
 use Softspring\Component\Events\GetResponseTrait;
 
-abstract class GetResponseEntityEvent extends EntityEvent implements GetResponseEventInterface
+/**
+ * @internal this class is internal, should not be used outside the component
+ */
+class GetResponseEntityEvent extends EntityEvent implements GetResponseEventInterface
 {
     use GetResponseTrait;
 }
