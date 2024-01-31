@@ -7,9 +7,10 @@ use Softspring\Component\Events\GetResponseTrait;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Contracts\EventDispatcher\Event;
 
-class ExceptionEvent extends Event implements GetResponseEventInterface
+class ExceptionEvent extends Event implements GetResponseEventInterface, GetResponseStatusCodeInterface
 {
     use GetResponseTrait;
+    use GetResponseStatusCodeTrait;
 
     public function __construct(
         protected ?Request $request,

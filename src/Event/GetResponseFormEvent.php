@@ -7,6 +7,7 @@ use Softspring\Component\Events\GetResponseFormEvent as CoreGetResponseFormEvent
 /**
  * @internal this class is internal, should not be used outside the component
  */
-class GetResponseFormEvent extends CoreGetResponseFormEvent
+class GetResponseFormEvent extends CoreGetResponseFormEvent implements GetResponseStatusCodeInterface
 {
+    use GetResponseStatusCodeTrait;
 }

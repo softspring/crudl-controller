@@ -3,6 +3,7 @@
 namespace Softspring\Component\CrudlController\Helper;
 
 use Softspring\Component\CrudlController\Event\ExceptionEvent;
+use Softspring\Component\CrudlController\Event\GetResponseStatusCodeInterface;
 use Softspring\Component\CrudlController\Event\InitializeEvent;
 use Softspring\Component\CrudlController\Event\ViewEvent;
 use Softspring\Component\CrudlController\Manager\CrudlEntityManagerInterface;
@@ -19,6 +20,7 @@ abstract class ActionHelper
     protected array $config = [];
     protected Request $request;
     protected \ArrayObject $viewData;
+    protected int $renderResponseCode = Response::HTTP_OK;
 
     public function __construct(
         protected CrudlEntityManagerInterface $manager,
@@ -61,7 +63,7 @@ abstract class ActionHelper
 
     public function renderResponse(ViewEvent $event): Response
     {
-        return new Response($this->twig->render($event->getTemplate() ?: $this->config['view'], $this->viewData->getArrayCopy()));
+        return new Response($this->twig->render($event->getTemplate() ?: $this->config['view'], $this->viewData->getArrayCopy()), $this->renderResponseCode);
     }
 
     public function dispatchInitialize(): ?Response
@@ -106,7 +108,15 @@ abstract class ActionHelper
 
     protected function _dispatchGetResponse($event, $eventName): ?Response
     {
+        if ($event instanceof GetResponseStatusCodeInterface) {
+            $event->setStatusCode($this->renderResponseCode);
+        }
+
         $this->eventDispatcher->dispatch($event, $eventName);
+
+        if ($event instanceof GetResponseStatusCodeInterface) {
+            $this->renderResponseCode = $event->getStatusCode();
+        }
 
         if ($event->getResponse()) {
             return $event->getResponse();
@@ -117,6 +127,14 @@ abstract class ActionHelper
 
     protected function _dispatch($event, $eventName): void
     {
+        if ($event instanceof GetResponseStatusCodeInterface) {
+            $event->setStatusCode($this->renderResponseCode);
+        }
+
         $this->eventDispatcher->dispatch($event, $eventName);
+
+        if ($event instanceof GetResponseStatusCodeInterface) {
+            $this->renderResponseCode = $event->getStatusCode();
+        }
     }
 }

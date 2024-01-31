@@ -8,7 +8,8 @@ use Softspring\Component\Events\GetResponseTrait;
 /**
  * @internal this class is internal, should not be used outside the component
  */
-class GetResponseEntityEvent extends EntityEvent implements GetResponseEventInterface
+class GetResponseEntityEvent extends EntityEvent implements GetResponseEventInterface, GetResponseStatusCodeInterface
 {
     use GetResponseTrait;
+    use GetResponseStatusCodeTrait;
 }
