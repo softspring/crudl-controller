@@ -9,6 +9,7 @@ use Softspring\Component\CrudlController\Event\FormInvalidEvent;
 use Softspring\Component\CrudlController\Event\FormPrepareEvent;
 use Softspring\Component\CrudlController\Event\FormValidEvent;
 use Softspring\Component\CrudlController\Event\SuccessEvent;
+use Softspring\Component\CrudlController\Event\ViewEvent;
 use Softspring\Component\CrudlController\Manager\CrudlEntityManagerInterface;
 use Softspring\Component\Events\FormEvent;
 use Symfony\Component\EventDispatcher\EventDispatcherInterface;
@@ -118,6 +119,8 @@ class FormActionActionHelper extends EntityActionHelper
             return null;
         }
 
+        $this->renderResponseCode = Response::HTTP_UNPROCESSABLE_ENTITY;
+
         return $this->_dispatchGetResponse(new FormValidEvent($this->form, $this->request), $this->config['form_valid_event_name']);
     }
 
@@ -161,6 +164,22 @@ class FormActionActionHelper extends EntityActionHelper
             return null;
         }
 
+        $this->renderResponseCode = Response::HTTP_UNPROCESSABLE_ENTITY;
+
         return $this->_dispatchGetResponse(new FormInvalidEvent($this->form, $this->request), $this->config['form_invalid_event_name']);
+    }
+
+    public function renderResponse(ViewEvent $event): Response
+    {
+        $form = $this->form;
+        $request = $event->getRequest();
+        $response = parent::renderResponse($event);
+
+        // for turbo requests set status code to 422 instead of 200
+        if ($form->isSubmitted() && !$form->isValid()) {
+            $this->renderResponseCode = Response::HTTP_UNPROCESSABLE_ENTITY;
+        }
+
+        return $response;
     }
 }

@@ -5,8 +5,10 @@ namespace Softspring\Component\CrudlController\Event;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Contracts\EventDispatcher\Event;
 
-abstract class EntityEvent extends Event
+abstract class EntityEvent extends Event implements GetResponseStatusCodeInterface
 {
+    use GetResponseStatusCodeTrait;
+
     public function __construct(
         protected ?object $entity,
         protected ?Request $request
