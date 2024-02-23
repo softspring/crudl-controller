@@ -82,7 +82,13 @@ class EntityActionHelper extends ActionHelper
             return null;
         }
 
-        return $this->_dispatchGetResponse(new EntityFoundEvent($this->entity, $this->request), $this->config['found_event_name']);
+        $response = $this->_dispatchGetResponse($event = new EntityFoundEvent($this->entity, $this->request), $this->config['found_event_name']);
+
+        if ($event->getEntity()) {
+            $this->entity = $event->getEntity();
+        }
+
+        return $response;
     }
 
     public function dispatchNotFoundEvent(): ?Response
