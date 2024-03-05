@@ -9,7 +9,7 @@ class ViewEvent extends BaseViewEvent implements GetResponseStatusCodeInterface
 {
     use GetResponseStatusCodeTrait;
 
-    public function __construct($data, protected ?string $template, Request $request = null)
+    public function __construct($data, protected ?string $template, ?Request $request = null)
     {
         parent::__construct($data, $request);
     }
