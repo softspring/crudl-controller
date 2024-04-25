@@ -2,6 +2,8 @@
 
 namespace Softspring\Component\CrudlController\Helper;
 
+use ArrayObject;
+use Exception;
 use Softspring\Component\CrudlController\Event\ExceptionEvent;
 use Softspring\Component\CrudlController\Event\GetResponseStatusCodeInterface;
 use Softspring\Component\CrudlController\Event\InitializeEvent;
@@ -19,7 +21,7 @@ abstract class ActionHelper
 {
     protected array $config = [];
     protected Request $request;
-    protected \ArrayObject $viewData;
+    protected ArrayObject $viewData;
     protected int $renderResponseCode = Response::HTTP_OK;
 
     public function __construct(
@@ -77,7 +79,7 @@ abstract class ActionHelper
         return $this->_dispatchGetResponse($event, $this->config['initialize_event_name']);
     }
 
-    public function dispatchException(\Exception $exception): ?Response
+    public function dispatchException(Exception $exception): ?Response
     {
         if (!$this->config['exception_event_name']) {
             return null;
@@ -88,9 +90,9 @@ abstract class ActionHelper
         return $this->_dispatchGetResponse($event, $this->config['exception_event_name']);
     }
 
-    public function createViewData(array $data = []): \ArrayObject
+    public function createViewData(array $data = []): ArrayObject
     {
-        $this->viewData = new \ArrayObject($data);
+        $this->viewData = new ArrayObject($data);
 
         return $this->viewData;
     }

@@ -4,6 +4,7 @@ namespace Softspring\Component\CrudlController\Controller;
 
 use Doctrine\ORM\NonUniqueResultException;
 use Doctrine\ORM\NoResultException;
+use Exception;
 use Softspring\Component\CrudlController\Config\Configuration;
 use Softspring\Component\CrudlController\Helper\EntityActionHelper;
 use Softspring\Component\CrudlController\Helper\FormActionActionHelper;
@@ -50,7 +51,7 @@ class CrudlController
 
     /**
      * @noinspection DuplicatedCode
-     * @throws \Exception
+     * @throws Exception
      */
     public function create(Request $request, array $config = [], string $configKey = 'create'): Response
     {
@@ -100,7 +101,7 @@ class CrudlController
             $viewEvent = $helper->dispatchViewEvent();
 
             return $helper->renderResponse($viewEvent);
-        } catch (\Exception $e) {
+        } catch (Exception $e) {
             if ($response = $helper->dispatchException($e)) {
                 return $response;
             }
@@ -111,7 +112,7 @@ class CrudlController
 
     /**
      * @noinspection DuplicatedCode
-     * @throws \Exception
+     * @throws Exception
      */
     public function read(Request $request, array $config = [], string $configKey = 'read'): Response
     {
@@ -150,7 +151,7 @@ class CrudlController
             $viewEvent = $helper->dispatchViewEvent();
 
             return $helper->renderResponse($viewEvent);
-        } catch (\Exception $e) {
+        } catch (Exception $e) {
             if ($response = $helper->dispatchException($e)) {
                 return $response;
             }
@@ -161,7 +162,7 @@ class CrudlController
 
     /**
      * @noinspection DuplicatedCode
-     * @throws \Exception
+     * @throws Exception
      */
     public function update(Request $request, array $config = [], string $configKey = 'update'): Response
     {
@@ -223,7 +224,7 @@ class CrudlController
             $viewEvent = $helper->dispatchViewEvent();
 
             return $helper->renderResponse($viewEvent);
-        } catch (\Exception $e) {
+        } catch (Exception $e) {
             if ($response = $helper->dispatchException($e)) {
                 return $response;
             }
@@ -234,7 +235,7 @@ class CrudlController
 
     /**
      * @noinspection DuplicatedCode
-     * @throws \Exception
+     * @throws Exception
      */
     public function delete(Request $request, array $config = [], string $configKey = 'delete'): Response
     {
@@ -296,7 +297,7 @@ class CrudlController
             $viewEvent = $helper->dispatchViewEvent();
 
             return $helper->renderResponse($viewEvent);
-        } catch (\Exception $e) {
+        } catch (Exception $e) {
             if ($response = $helper->dispatchException($e)) {
                 return $response;
             }
@@ -311,7 +312,7 @@ class CrudlController
      * @throws NonUniqueResultException
      * @throws InvalidFilterValueException
      * @throws MissingFromInQueryBuilderException
-     * @throws \Exception
+     * @throws Exception
      */
     public function list(Request $request, array $config = [], string $configKey = 'list'): Response
     {
@@ -339,7 +340,7 @@ class CrudlController
             $viewEvent = $helper->dispatchViewEvent();
 
             return $helper->renderResponse($viewEvent);
-        } catch (\Exception $e) {
+        } catch (Exception $e) {
             if ($response = $helper->dispatchException($e)) {
                 return $response;
             }
@@ -350,7 +351,7 @@ class CrudlController
 
     /**
      * @noinspection DuplicatedCode
-     * @throws \Exception
+     * @throws Exception
      */
     public function apply(Request $request, string $configKey, array $config = []): Response
     {
@@ -385,13 +386,13 @@ class CrudlController
             }
 
             if ($response = $this->helperApply($helper, function ($entity) {
-                throw new \Exception('Apply action must use apply event and set it to applied');
+                throw new Exception('Apply action must use apply event and set it to applied');
             })) {
                 return $response;
             }
 
-            throw new \Exception('Apply action must return a response in success or failure events');
-        } catch (\Exception $e) {
+            throw new Exception('Apply action must return a response in success or failure events');
+        } catch (Exception $e) {
             if ($response = $helper->dispatchException($e)) {
                 return $response;
             }
@@ -412,7 +413,7 @@ class CrudlController
             }
 
             return $helper->successRedirect();
-        } catch (\Exception $e) {
+        } catch (Exception $e) {
             if ($response = $helper->dispatchFailure($e)) {
                 return $response;
             }

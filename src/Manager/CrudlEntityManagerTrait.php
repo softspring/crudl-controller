@@ -4,6 +4,8 @@ namespace Softspring\Component\CrudlController\Manager;
 
 use Doctrine\ORM\EntityManagerInterface;
 use Doctrine\ORM\EntityRepository;
+use InvalidArgumentException;
+use ReflectionClass;
 
 trait CrudlEntityManagerTrait
 {
@@ -16,7 +18,7 @@ trait CrudlEntityManagerTrait
         return $this->getEntityClassReflection()->name;
     }
 
-    public function getEntityClassReflection(): \ReflectionClass
+    public function getEntityClassReflection(): ReflectionClass
     {
         $metadata = $this->em->getClassMetadata($this->getTargetClass());
 
@@ -38,7 +40,7 @@ trait CrudlEntityManagerTrait
     public function saveEntity(object $entity, bool $flush = true): void
     {
         if (!$this->getEntityClassReflection()->isInstance($entity)) {
-            throw new \InvalidArgumentException(sprintf('$entity must be an instance of %s', $this->getEntityClass()));
+            throw new InvalidArgumentException(sprintf('$entity must be an instance of %s', $this->getEntityClass()));
         }
 
         $this->em->persist($entity);
@@ -48,7 +50,7 @@ trait CrudlEntityManagerTrait
     public function deleteEntity(object $entity): void
     {
         if (!$this->getEntityClassReflection()->isInstance($entity)) {
-            throw new \InvalidArgumentException(sprintf('$entity must be an instance of %s', $this->getEntityClass()));
+            throw new InvalidArgumentException(sprintf('$entity must be an instance of %s', $this->getEntityClass()));
         }
 
         $this->em->remove($entity);

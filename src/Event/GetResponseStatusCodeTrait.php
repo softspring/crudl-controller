@@ -2,6 +2,7 @@
 
 namespace Softspring\Component\CrudlController\Event;
 
+use InvalidArgumentException;
 use Symfony\Component\HttpFoundation\Response;
 
 trait GetResponseStatusCodeTrait
@@ -16,7 +17,7 @@ trait GetResponseStatusCodeTrait
     public function setStatusCode(int $statusCode): void
     {
         if ($statusCode < 100 || $statusCode > 599) {
-            throw new \InvalidArgumentException(sprintf('Invalid HTTP status code "%s"', $statusCode));
+            throw new InvalidArgumentException(sprintf('Invalid HTTP status code "%s"', $statusCode));
         }
 
         $this->statusCode = $statusCode;

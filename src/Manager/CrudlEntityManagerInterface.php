@@ -4,6 +4,7 @@ namespace Softspring\Component\CrudlController\Manager;
 
 use Doctrine\ORM\EntityManagerInterface;
 use Doctrine\ORM\EntityRepository;
+use ReflectionClass;
 
 interface CrudlEntityManagerInterface
 {
@@ -20,7 +21,7 @@ interface CrudlEntityManagerInterface
     /**
      * Returns the class reflection of the doctrine managed entity.
      */
-    public function getEntityClassReflection(): \ReflectionClass;
+    public function getEntityClassReflection(): ReflectionClass;
 
     /**
      * Returns the entity repository.

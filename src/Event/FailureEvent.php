@@ -6,6 +6,7 @@ use Softspring\Component\Events\GetResponseEventInterface;
 use Softspring\Component\Events\GetResponseTrait;
 use Symfony\Component\Form\FormInterface;
 use Symfony\Component\HttpFoundation\Request;
+use Throwable;
 
 class FailureEvent extends EntityEvent implements GetResponseEventInterface
 {
@@ -14,13 +15,13 @@ class FailureEvent extends EntityEvent implements GetResponseEventInterface
     public function __construct(
         $entity,
         ?Request $request,
-        protected \Throwable $exception,
+        protected Throwable $exception,
         protected ?FormInterface $form = null,
     ) {
         parent::__construct($entity, $request);
     }
 
-    public function getException(): \Throwable
+    public function getException(): Throwable
     {
         return $this->exception;
     }

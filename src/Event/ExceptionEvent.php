@@ -6,6 +6,7 @@ use Softspring\Component\Events\GetResponseEventInterface;
 use Softspring\Component\Events\GetResponseTrait;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Contracts\EventDispatcher\Event;
+use Throwable;
 
 class ExceptionEvent extends Event implements GetResponseEventInterface, GetResponseStatusCodeInterface
 {
@@ -14,7 +15,7 @@ class ExceptionEvent extends Event implements GetResponseEventInterface, GetResp
 
     public function __construct(
         protected ?Request $request,
-        protected \Throwable $exception
+        protected Throwable $exception
     ) {
     }
 
@@ -23,7 +24,7 @@ class ExceptionEvent extends Event implements GetResponseEventInterface, GetResp
         return $this->request;
     }
 
-    public function getException(): \Throwable
+    public function getException(): Throwable
     {
         return $this->exception;
     }

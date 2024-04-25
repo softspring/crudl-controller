@@ -2,6 +2,7 @@
 
 namespace Softspring\Component\CrudlController\Helper;
 
+use ArrayObject;
 use Softspring\Component\CrudlController\Event\CreateEntityEvent;
 use Softspring\Component\CrudlController\Event\EntityFoundEvent;
 use Softspring\Component\CrudlController\Event\LoadEntityEvent;
@@ -102,7 +103,7 @@ class EntityActionHelper extends ActionHelper
         return $this->_dispatchGetResponse($event, $this->config['not_found_event_name']);
     }
 
-    public function createViewData(array $data = []): \ArrayObject
+    public function createViewData(array $data = []): ArrayObject
     {
         $data[$this->config['entity_attribute']] = $this->entity;
 

@@ -2,6 +2,7 @@
 
 namespace Softspring\Component\CrudlController\Helper;
 
+use ArrayObject;
 use Doctrine\ORM\NonUniqueResultException;
 use Doctrine\ORM\NoResultException;
 use Softspring\Component\CrudlController\Event\FilterEvent;
@@ -122,7 +123,7 @@ class ListActionHelper extends ActionHelper
         return $this->results;
     }
 
-    public function createViewData(array $data = []): \ArrayObject
+    public function createViewData(array $data = []): ArrayObject
     {
         $data[$this->config['entities_attribute']] = $this->results;
         $data['filterForm'] = $this->filterForm->createView();
