@@ -66,7 +66,7 @@ class CrudlController
             }
 
             // init entity
-            if (!$helper->dispatchCreateEntityEvent()) {
+            if (null === $helper->dispatchCreateEntityEvent()) {
                 $helper->createEntity();
             }
 

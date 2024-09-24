@@ -7,7 +7,7 @@ use Symfony\Component\HttpFoundation\Request;
 class FormPrepareEvent extends EntityEvent
 {
     public function __construct(
-        ?object $entity,
+        mixed $entity,
         ?Request $request,
         protected array $formOptions = [],
         protected mixed $type = null,

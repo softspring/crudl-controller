@@ -10,17 +10,17 @@ abstract class EntityEvent extends Event implements GetResponseStatusCodeInterfa
     use GetResponseStatusCodeTrait;
 
     public function __construct(
-        protected ?object $entity,
+        protected mixed $entity,
         protected ?Request $request
     ) {
     }
 
-    public function getEntity(): ?object
+    public function getEntity(): mixed
     {
         return $this->entity;
     }
 
-    public function setEntity(?object $entity): void
+    public function setEntity(mixed $entity): void
     {
         $this->entity = $entity;
     }
