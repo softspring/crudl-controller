@@ -11,16 +11,16 @@ use Symfony\Component\HttpFoundation\Response;
 
 class EntityActionHelper extends ActionHelper
 {
-    protected ?object $entity = null;
+    protected mixed $entity = null;
 
-    public function getEntity(): ?object
+    public function getEntity(): mixed
     {
         return $this->entity;
     }
 
     public function notFound(): bool
     {
-        return !$this->entity;
+        return null === $this->entity;
     }
 
     public function createEntity(): object
@@ -45,7 +45,7 @@ class EntityActionHelper extends ActionHelper
         parent::checkIsGranted($subject ?: $this->entity, $message);
     }
 
-    public function dispatchCreateEntityEvent(): ?object
+    public function dispatchCreateEntityEvent(): mixed
     {
         if (!$this->config['create_entity_event_name']) {
             return null;
@@ -54,9 +54,7 @@ class EntityActionHelper extends ActionHelper
         $event = new CreateEntityEvent(null, $this->request);
         $this->_dispatch($event, $this->config['create_entity_event_name']);
 
-        if ($event->getEntity()) {
-            $this->entity = $event->getEntity();
-        }
+        $this->entity = $event->getEntity();
 
         return $event->getEntity();
     }
@@ -70,11 +68,9 @@ class EntityActionHelper extends ActionHelper
         $event = new LoadEntityEvent(null, $this->request);
         $this->_dispatch($event, $this->config['load_entity_event_name']);
 
-        if ($event->getEntity()) {
-            $this->entity = $event->getEntity();
-        }
+        $this->entity = $event->getEntity();
 
-        return $event->getEntity() ?: ($event->isNotFound() ? true : null); // if is not found, skip
+        return null !== $event->getEntity() ? $event->getEntity() : ($event->isNotFound() ? true : null); // if is not found, skip
     }
 
     public function dispatchFoundEvent(): ?Response
@@ -85,9 +81,7 @@ class EntityActionHelper extends ActionHelper
 
         $response = $this->_dispatchGetResponse($event = new EntityFoundEvent($this->entity, $this->request), $this->config['found_event_name']);
 
-        if ($event->getEntity()) {
-            $this->entity = $event->getEntity();
-        }
+        $this->entity = $event->getEntity();
 
         return $response;
     }

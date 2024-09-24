@@ -8,7 +8,7 @@ use Symfony\Component\HttpFoundation\Request;
 class ApplyEvent extends EntityEvent
 {
     public function __construct(
-        ?object $entity,
+        mixed $entity,
         ?Request $request,
         protected ?FormInterface $form = null
     ) {
