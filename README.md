@@ -1,11 +1,11 @@
 # Crudl Controller
 
-[![Latest Stable Version](https://poser.pugx.org/softspring/crudl-controller/v/stable.svg)](https://packagist.org/packages/softspring/crudl-controller)
-[![Latest Unstable Version](https://poser.pugx.org/softspring/crudl-controller/v/unstable.svg)](https://packagist.org/packages/softspring/crudl-controller)
-[![License](https://poser.pugx.org/softspring/crudl-controller/license.svg)](https://packagist.org/packages/softspring/crudl-controller)
-[![PHP Version Require](http://poser.pugx.org/softspring/crudl-controller/require/php)](https://packagist.org/packages/softspring/crudl-controller)
-[![Total Downloads](https://poser.pugx.org/softspring/crudl-controller/downloads)](https://packagist.org/packages/softspring/crudl-controller)
-[![Build status](https://github.com/softspring/crudl-controller/actions/workflows/php.yml/badge.svg?branch=5.3)](https://github.com/softspring/crudl-controller/actions/workflows/php.yml)
+![Latest Stable](https://img.shields.io/packagist/v/softspring/crudl-controller?label=stable&style=flat-square)
+![Latest Unstable](https://img.shields.io/packagist/v/softspring/crudl-controller?label=unstable&style=flat-square&include_prereleases)
+![License](https://img.shields.io/packagist/l/softspring/crudl-controller?style=flat-square)
+![PHP Version](https://img.shields.io/packagist/dependency-v/softspring/crudl-controller/php?style=flat-square)
+![Downloads](https://img.shields.io/packagist/dt/softspring/crudl-controller?style=flat-square)
+[![CI](https://img.shields.io/github/actions/workflow/status/softspring/crudl-controller/php.yml?branch=5.3&style=flat-square&label=CI)](https://github.com/softspring/crudl-controller/actions/workflows/php.yml)
 ![Coverage](https://raw.githubusercontent.com/softspring/crudl-controller/5.3/.github/badges/coverage.svg)
 
 This component provides an easy CRUD+List (CRUDL from now on) feature for any doctrine entity you want to manage in your
