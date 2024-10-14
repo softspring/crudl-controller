@@ -31,6 +31,8 @@ class UpdateActionTest extends TestCase
             'entity_attribute' => 'entity',
             'view' => null,
             'form' => null,
+            'action' => 'update',
+            'view_data' => [],
         ];
 
         $this->assertEquals($expected, $result);
@@ -63,6 +65,8 @@ class UpdateActionTest extends TestCase
                 'exception_event_name' => null,
                 'is_granted' => null,
                 'success_redirect_to' => null,
+                'action' => 'update',
+                'view_data' => [],
             ];
 
         $this->assertEquals($expected, $result);
@@ -83,6 +87,8 @@ class UpdateActionTest extends TestCase
             'failure_event_name' => 'failure_event_name',
             'form_invalid_event_name' => 'form_invalid_event_name',
             'view_event_name' => 'view_event_name',
+            'action' => 'update',
+            'view_data' => [],
         ];
 
         $config2 = [

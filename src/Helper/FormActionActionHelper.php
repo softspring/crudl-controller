@@ -43,6 +43,8 @@ class FormActionActionHelper extends EntityActionHelper
     public function dispatchFormPrepare(array $options = ['method' => 'POST']): FormPrepareEvent
     {
         $event = new FormPrepareEvent($this->entity, $this->request, $options);
+        $event->setManager($this->manager);
+        $event->setConfig($this->config);
 
         if ($this->config['form_prepare_event_name']) {
             $this->_dispatch($event, $this->config['form_prepare_event_name']);
@@ -92,7 +94,10 @@ class FormActionActionHelper extends EntityActionHelper
             return null;
         }
 
-        $this->_dispatch($event = new FormInitEvent($this->form, $this->request), $this->config['form_init_event_name']);
+        $event = new FormInitEvent($this->form, $this->request);
+        $event->setManager($this->manager);
+        $event->setConfig($this->config);
+        $this->_dispatch($event, $this->config['form_init_event_name']);
 
         return $event;
     }
@@ -134,6 +139,8 @@ class FormActionActionHelper extends EntityActionHelper
         }
 
         $event = new ApplyEvent($this->entity, $this->request, $this->form);
+        $event->setManager($this->manager);
+        $event->setConfig($this->config);
         $this->_dispatch($event, $this->config['apply_event_name']);
 
         if ($event->getEntity()) {

@@ -12,6 +12,7 @@ class ExceptionEvent extends Event implements GetResponseEventInterface, GetResp
 {
     use GetResponseTrait;
     use GetResponseStatusCodeTrait;
+    use CrudlEventTrait;
 
     public function __construct(
         protected ?Request $request,

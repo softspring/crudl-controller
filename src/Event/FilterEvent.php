@@ -16,6 +16,8 @@ use Symfony\Contracts\EventDispatcher\Event;
 
 class FilterEvent extends Event
 {
+    use CrudlEventTrait;
+
     /**
      * @throws InvalidFormTypeException
      */

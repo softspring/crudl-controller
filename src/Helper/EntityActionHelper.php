@@ -52,6 +52,8 @@ class EntityActionHelper extends ActionHelper
         }
 
         $event = new CreateEntityEvent(null, $this->request);
+        $event->setManager($this->manager);
+        $event->setConfig($this->config);
         $this->_dispatch($event, $this->config['create_entity_event_name']);
 
         $this->entity = $event->getEntity();
@@ -66,6 +68,8 @@ class EntityActionHelper extends ActionHelper
         }
 
         $event = new LoadEntityEvent(null, $this->request);
+        $event->setManager($this->manager);
+        $event->setConfig($this->config);
         $this->_dispatch($event, $this->config['load_entity_event_name']);
 
         $this->entity = $event->getEntity();
@@ -79,7 +83,10 @@ class EntityActionHelper extends ActionHelper
             return null;
         }
 
-        $response = $this->_dispatchGetResponse($event = new EntityFoundEvent($this->entity, $this->request), $this->config['found_event_name']);
+        $event = new EntityFoundEvent($this->entity, $this->request);
+        $event->setManager($this->manager);
+        $event->setConfig($this->config);
+        $response = $this->_dispatchGetResponse($event, $this->config['found_event_name']);
 
         $this->entity = $event->getEntity();
 
@@ -93,6 +100,8 @@ class EntityActionHelper extends ActionHelper
         }
 
         $event = new NotFoundEvent($this->request);
+        $event->setManager($this->manager);
+        $event->setConfig($this->config);
 
         return $this->_dispatchGetResponse($event, $this->config['not_found_event_name']);
     }

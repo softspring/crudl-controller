@@ -10,4 +10,5 @@ use Softspring\Component\Events\GetResponseFormEvent as CoreGetResponseFormEvent
 class GetResponseFormEvent extends CoreGetResponseFormEvent implements GetResponseStatusCodeInterface
 {
     use GetResponseStatusCodeTrait;
+    use CrudlEventTrait;
 }

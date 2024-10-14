@@ -12,4 +12,5 @@ class GetResponseEntityEvent extends EntityEvent implements GetResponseEventInte
 {
     use GetResponseTrait;
     use GetResponseStatusCodeTrait;
+    use CrudlEventTrait;
 }

@@ -2,6 +2,7 @@
 
 namespace Softspring\Component\CrudlController\Config;
 
+use InvalidArgumentException;
 use Symfony\Component\Config\Definition\Builder\TreeBuilder;
 use Symfony\Component\Config\Definition\ConfigurationInterface;
 
@@ -14,7 +15,18 @@ class DeleteActionConfiguration implements ConfigurationInterface
         $rootNode = $treeBuilder->getRootNode();
 
         $rootNode
+            ->beforeNormalization()
+            ->always()
+            ->then(function ($data): array {
+                if (($data['action'] ?? 'delete') !== 'delete') {
+                    throw new InvalidArgumentException('Delete action configuration must have action delete');
+                }
+
+                return $data;
+            })
+            ->end()
             ->children()
+            ->scalarNode('action')->defaultValue('delete')->end()
                 // events
                 ->scalarNode('initialize_event_name')->defaultNull()->end()
                 ->scalarNode('load_entity_event_name')->defaultNull()->end()
@@ -39,6 +51,7 @@ class DeleteActionConfiguration implements ConfigurationInterface
 
                 // templates
                 ->scalarNode('view')->defaultNull()->end()
+                ->arrayNode('view_data')->useAttributeAsKey('key')->prototype('variable')->end()->end()
 
                 // form
                 ->variableNode('form')->defaultNull()->end()

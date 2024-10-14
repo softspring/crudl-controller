@@ -28,6 +28,8 @@ class CreateActionTest extends TestCase
             'entity_attribute' => 'entity',
             'view' => null,
             'form' => null,
+            'action' => 'create',
+            'view_data' => [],
         ];
 
         $this->assertEquals($expected, $result);
@@ -39,6 +41,8 @@ class CreateActionTest extends TestCase
             'entity_attribute' => 'test',
             'view' => 'view.html.twig',
             'form' => 'dummy_form_class',
+            'action' => 'create',
+            'view_data' => [],
         ];
 
         $result = Configuration::createAction('test', [], $config);
@@ -76,6 +80,8 @@ class CreateActionTest extends TestCase
             'failure_event_name' => 'failure_event_name',
             'form_invalid_event_name' => 'form_invalid_event_name',
             'view_event_name' => 'view_event_name',
+            'action' => 'create',
+            'view_data' => [],
         ];
 
         $config2 = [

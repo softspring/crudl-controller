@@ -2,6 +2,7 @@
 
 namespace Softspring\Component\CrudlController\Config;
 
+use InvalidArgumentException;
 use Symfony\Component\Config\Definition\Builder\TreeBuilder;
 use Symfony\Component\Config\Definition\ConfigurationInterface;
 
@@ -14,7 +15,18 @@ class ApplyActionConfiguration implements ConfigurationInterface
         $rootNode = $treeBuilder->getRootNode();
 
         $rootNode
+            ->beforeNormalization()
+            ->always()
+            ->then(function ($data): array {
+                if (($data['action'] ?? 'apply') !== 'apply') {
+                    throw new InvalidArgumentException('Apply action configuration must have action apply');
+                }
+
+                return $data;
+            })
+            ->end()
             ->children()
+            ->scalarNode('action')->defaultValue('apply')->end()
                 // events
                 ->scalarNode('initialize_event_name')->defaultNull()->end()
                 ->scalarNode('load_entity_event_name')->defaultNull()->end()

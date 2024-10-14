@@ -8,6 +8,7 @@ use Symfony\Contracts\EventDispatcher\Event;
 abstract class EntityEvent extends Event implements GetResponseStatusCodeInterface
 {
     use GetResponseStatusCodeTrait;
+    use CrudlEventTrait;
 
     public function __construct(
         protected mixed $entity,
