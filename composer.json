@@ -16,7 +16,7 @@
         "friendsofphp/php-cs-fixer": "3.60.*",
         "phpmd/phpmd": "dev-master",
         "phpstan/phpstan": "^1.10",
-        "phpunit/phpunit": "^10.5.5",
+        "phpunit/phpunit": "^11.4.3",
         "rector/rector": "^1.0",
         "symfony/console": "^5.4|^6.0|^7.0",
         "symfony/dependency-injection": "^5.4|^6.0|^7.0",
