@@ -42,7 +42,7 @@ class ListActionConfiguration implements ConfigurationInterface
                 ->scalarNode('is_granted')->defaultNull()->end()
 
                 // filters
-                ->variableNode('filter_form')->isRequired()->end()
+                ->variableNode('filter_form')->defaultNull()->end()
 
                 // templates
                 ->scalarNode('view')->defaultNull()->end()
