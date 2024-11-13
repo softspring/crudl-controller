@@ -44,7 +44,7 @@ class TransitionActionConfiguration implements ConfigurationInterface
 
                 // workflow
                 ->scalarNode('transition_attribute')->defaultValue('transition')->end()
-                ->scalarNode('workflow_name')->defaultNull(/* null for auto search workflow*/)->end()
+                ->scalarNode('workflow_name')->defaultNull(/* null for auto search workflow */)->end()
 
                 // entity management
                 ->scalarNode('entity_attribute')->defaultValue('entity')->end()

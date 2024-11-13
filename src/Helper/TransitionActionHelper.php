@@ -2,6 +2,7 @@
 
 namespace Softspring\Component\CrudlController\Helper;
 
+use Exception;
 use Softspring\Component\CrudlController\Event\FormPrepareEvent;
 use Softspring\Component\CrudlController\Event\ViewEvent;
 use Softspring\Component\CrudlController\Manager\CrudlEntityManagerInterface;
@@ -30,14 +31,13 @@ class TransitionActionHelper extends FormActionActionHelper
         parent::__construct($manager, $eventDispatcher, $twig, $authorizationChecker, $router, $formFactory);
     }
 
-
     protected ?string $transitionName = null;
 
     /**
      * First of all, get the transition name from the request.
-     * It's mandatory to have a transition name in the request to use this helper
+     * It's mandatory to have a transition name in the request to use this helper.
      *
-     * @throws \Exception
+     * @throws Exception
      */
     public function initialize(): void
     {
@@ -45,7 +45,7 @@ class TransitionActionHelper extends FormActionActionHelper
         $this->request->attributes->set('_crudl_action_transition_name', $this->transitionName);
 
         if (empty($this->transitionName)) {
-            throw new \Exception('Transition name not found in request');
+            throw new Exception('Transition name not found in request');
         }
     }
 
@@ -55,9 +55,9 @@ class TransitionActionHelper extends FormActionActionHelper
 
     /**
      * This method is called after initialize, after grant check, after entity is found.
-     * So it initializes the transition object and metadata, and set it to request to allow use it in listeners
+     * So it initializes the transition object and metadata, and set it to request to allow use it in listeners.
      *
-     * @throws \Exception
+     * @throws Exception
      */
     public function initTransition(): void
     {
@@ -71,7 +71,7 @@ class TransitionActionHelper extends FormActionActionHelper
         // no transition found
         if (!$this->transition) {
             // TODO set custom exception class
-            throw new \Exception('Transition not found');
+            throw new Exception('Transition not found');
         }
 
         // get transition metadata
@@ -80,7 +80,7 @@ class TransitionActionHelper extends FormActionActionHelper
     }
 
     /**
-     * This method checks if the transition is applicable to the entity and the user is allowed to apply it (it check guards)
+     * This method checks if the transition is applicable to the entity and the user is allowed to apply it (it check guards).
      *
      * @throws AccessDeniedException
      */
@@ -97,7 +97,7 @@ class TransitionActionHelper extends FormActionActionHelper
 
     /**
      * In transition actions is not mandatory to have a form, but if it is defined in transition metadata, use it
-     * Otherwise, use the parent method to resolve the form class
+     * Otherwise, use the parent method to resolve the form class.
      */
     public function resolveFormClass(): string|array|null
     {
@@ -109,7 +109,7 @@ class TransitionActionHelper extends FormActionActionHelper
     }
 
     /**
-     * In transition actions is not mandatory to have a form, so do not fail if form type is not defined
+     * In transition actions is not mandatory to have a form, so do not fail if form type is not defined.
      */
     public function createForm(FormPrepareEvent $formPrepareEvent): FormInterface|false
     {
@@ -121,7 +121,7 @@ class TransitionActionHelper extends FormActionActionHelper
     }
 
     /**
-     * Core method to apply the transition
+     * Core method to apply the transition.
      */
     public function applyTransition(): void
     {
@@ -134,7 +134,7 @@ class TransitionActionHelper extends FormActionActionHelper
     }
 
     /**
-     * This method overrides the parent one to allow read view template from transition metadata
+     * This method overrides the parent one to allow read view template from transition metadata.
      */
     public function dispatchViewEvent(): ViewEvent
     {
