@@ -57,7 +57,7 @@ class FormActionActionHelper extends EntityActionHelper
         return $event;
     }
 
-    public function resolveFormClass(): ?string
+    public function resolveFormClass(): string|array|null
     {
         if (empty($this->config['form'])) {
             return null;
@@ -70,7 +70,10 @@ class FormActionActionHelper extends EntityActionHelper
         return $this->config['form'];
     }
 
-    public function createForm(FormPrepareEvent $formPrepareEvent): FormInterface
+    /**
+     * @return FormInterface
+     */
+    public function createForm(FormPrepareEvent $formPrepareEvent): mixed
     {
         $type = $formPrepareEvent->getType();
 

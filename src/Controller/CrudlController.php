@@ -9,6 +9,7 @@ use Softspring\Component\CrudlController\Config\Configuration;
 use Softspring\Component\CrudlController\Helper\EntityActionHelper;
 use Softspring\Component\CrudlController\Helper\FormActionActionHelper;
 use Softspring\Component\CrudlController\Helper\ListActionHelper;
+use Softspring\Component\CrudlController\Helper\TransitionActionHelper;
 use Softspring\Component\CrudlController\Manager\CrudlEntityManagerInterface;
 use Softspring\Component\DoctrinePaginator\Exception\InvalidFormTypeException;
 use Softspring\Component\DoctrineQueryFilters\Exception\InvalidFilterValueException;
@@ -20,6 +21,7 @@ use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 use Symfony\Component\Routing\RouterInterface;
 use Symfony\Component\Security\Core\Authorization\AuthorizationCheckerInterface;
+use Symfony\Component\Workflow\Registry;
 use Twig\Environment;
 
 class CrudlController
@@ -33,6 +35,7 @@ class CrudlController
         protected RouterInterface $router,
         protected array $config = [],
         protected array $configs = [],
+        protected ?Registry $registry = null,
     ) {
         if (!empty($config)) {
             trigger_deprecation('softspring/crudl-controller', '5.2', 'Passing $config argument to CrudlController constructor is deprecated, use $configs instead');
@@ -428,6 +431,94 @@ class CrudlController
             }
 
             throw new Exception('Apply action must return a response in success or failure events');
+        } catch (Exception $e) {
+            if ($response = $helper->dispatchException($e)) {
+                return $response;
+            }
+
+            throw $e;
+        }
+    }
+
+    protected function buildTransitionActionHelper(Request $request, array $config, string $configKey): TransitionActionHelper
+    {
+        $helper = new TransitionActionHelper($this->manager, $this->eventDispatcher, $this->twig, $this->authorizationChecker, $this->router, $this->formFactory, $this->registry);
+        $helper->setConfig(Configuration::transitionAction($configKey, $this->configs, $config));
+        $helper->setRequest($request);
+
+        return $helper;
+    }
+
+    /**
+     * @noinspection DuplicatedCode
+     * @throws Exception
+     */
+    public function transition(Request $request, array $config = [], string $configKey = 'transition'): Response
+    {
+        $helper = $this->buildTransitionActionHelper($request, $config, $configKey);
+
+        try {
+            $helper->initialize();
+
+            if ($response = $helper->dispatchInitialize()) {
+                return $response;
+            }
+
+            // init entity
+            if (!$helper->dispatchLoadEntityEvent()) {
+                $helper->findEntity();
+            }
+
+            // init action
+            $helper->checkIsGranted();
+
+            if ($helper->notFound()) {
+                if ($response = $helper->dispatchNotFoundEvent()) {
+                    return $response;
+                }
+
+                throw new NotFoundHttpException('Entity not found');
+            } else {
+                if ($response = $helper->dispatchFoundEvent()) {
+                    return $response;
+                }
+            }
+
+            $helper->initTransition();
+            $helper->checkCanTransition();
+
+            $formPrepareEvent = $helper->dispatchFormPrepare();
+            $form = $helper->createForm($formPrepareEvent);
+            if ($form) {
+                $helper->dispatchFormInit();
+
+                // process form
+                if ($form->isSubmitted()) {
+                    if ($form->isValid()) {
+                        if ($response = $helper->dispatchFormValid()) {
+                            return $response;
+                        }
+
+                        if ($response = $this->helperApply($helper, fn () => $helper->applyTransition())) {
+                            return $response;
+                        }
+                    } else {
+                        if ($response = $helper->dispatchFormInvalid()) {
+                            return $response;
+                        }
+                    }
+                }
+            } else {
+                if ($response = $this->helperApply($helper, fn () => $helper->applyTransition())) {
+                    return $response;
+                }
+            }
+
+            // create and render view
+            $helper->createViewData();
+            $viewEvent = $helper->dispatchViewEvent();
+
+            return $helper->renderResponse($viewEvent);
         } catch (Exception $e) {
             if ($response = $helper->dispatchException($e)) {
                 return $response;

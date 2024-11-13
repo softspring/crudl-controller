@@ -65,7 +65,7 @@ abstract class ActionHelper
 
     public function renderResponse(ViewEvent $event): Response
     {
-        return new Response($this->twig->render($event->getTemplate() ?: $this->config['view'], $this->viewData->getArrayCopy()), $this->renderResponseCode);
+        return new Response($this->twig->render($event->getTemplate(), $this->viewData->getArrayCopy()), $this->renderResponseCode);
     }
 
     public function dispatchInitialize(): ?Response
@@ -106,7 +106,7 @@ abstract class ActionHelper
 
     public function dispatchViewEvent(): ViewEvent
     {
-        $event = new ViewEvent($this->viewData, null, $this->request);
+        $event = new ViewEvent($this->viewData, $this->config['view'], $this->request);
         $event->setManager($this->manager);
         $event->setConfig($this->config);
 

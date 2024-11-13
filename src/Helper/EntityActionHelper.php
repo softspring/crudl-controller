@@ -32,7 +32,7 @@ class EntityActionHelper extends ActionHelper
 
     public function findEntity(): ?object
     {
-        $searchField = $this->config['param_converter_key'];
+        $searchField = $this->config['param_converter_key'] ?? 'id';
         $searchValue = $this->request->attributes->get($this->config['entity_attribute']);
 
         $this->entity = $this->manager->getRepository()->findOneBy([$searchField => $searchValue]);
