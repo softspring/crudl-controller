@@ -50,7 +50,7 @@ class TransitionActionHelper extends FormActionActionHelper
         }
     }
 
-    /** @var WorkflowInterface|Workflow|null  */
+    /** @var WorkflowInterface|Workflow|null */
     protected ?WorkflowInterface $workflow = null;
     protected ?Transition $transition = null;
     protected ?array $transitionMetadata = null;
