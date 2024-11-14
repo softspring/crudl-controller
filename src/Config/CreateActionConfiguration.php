@@ -2,6 +2,7 @@
 
 namespace Softspring\Component\CrudlController\Config;
 
+use InvalidArgumentException;
 use Symfony\Component\Config\Definition\Builder\TreeBuilder;
 use Symfony\Component\Config\Definition\ConfigurationInterface;
 
@@ -13,7 +14,18 @@ class CreateActionConfiguration implements ConfigurationInterface
         $rootNode = $treeBuilder->getRootNode();
 
         $rootNode
+            ->beforeNormalization()
+                ->always()
+                ->then(function ($data): array {
+                    if (($data['action'] ?? 'create') !== 'create') {
+                        throw new InvalidArgumentException('Create action configuration must have action create');
+                    }
+
+                    return $data;
+                })
+            ->end()
             ->children()
+                ->scalarNode('action')->defaultValue('create')->end()
                 // events
                 ->scalarNode('initialize_event_name')->defaultNull()->end()
                 ->scalarNode('create_entity_event_name')->defaultNull()->end()
@@ -35,6 +47,7 @@ class CreateActionConfiguration implements ConfigurationInterface
 
                 // templates
                 ->scalarNode('view')->defaultNull()->end()
+                ->arrayNode('view_data')->useAttributeAsKey('key')->prototype('variable')->end()->end()
 
                 // form
                 ->variableNode('form')->defaultNull()->end()

@@ -7,4 +7,5 @@ use Softspring\Component\Events\GetResponseRequestEvent as BaseGetResponseReques
 class GetResponseRequestEvent extends BaseGetResponseRequestEvent implements GetResponseStatusCodeInterface
 {
     use GetResponseStatusCodeTrait;
+    use CrudlEventTrait;
 }

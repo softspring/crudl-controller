@@ -32,9 +32,16 @@ class Configuration
         return self::processAction(new ListActionConfiguration(), 'list', $controllerConfigsKey, $controllerConfigs, $actionConfig);
     }
 
+    // TODO THIS SHOULD BE APPLY ACTION ???
     public static function actionAction(string $controllerConfigsKey, array $controllerConfigs = [], array $actionConfig = []): array
     {
+        // TODO THIS SHOULD BE APPLY ACTION ???
         return self::processAction(new ApplyActionConfiguration(), 'action', $controllerConfigsKey, $controllerConfigs, $actionConfig);
+    }
+
+    public static function transitionAction(string $controllerConfigsKey, array $controllerConfigs = [], array $actionConfig = []): array
+    {
+        return self::processAction(new TransitionActionConfiguration(), 'transition', $controllerConfigsKey, $controllerConfigs, $actionConfig);
     }
 
     protected static function processAction(ConfigurationInterface $configuration, string $action, string $controllerConfigsKey, array $controllerConfigs = [], array $actionConfig = []): array
@@ -42,6 +49,12 @@ class Configuration
         $processor = new Processor();
 
         $mergedConfigs = array_merge($controllerConfigs[$controllerConfigsKey] ?? [], $actionConfig);
+
+        if (empty($mergedConfigs['view_data'])) {
+            unset($mergedConfigs['view_data']);
+        }
+
+        unset($mergedConfigs['action']);
 
         return $processor->processConfiguration($configuration, [$mergedConfigs]);
     }

@@ -65,7 +65,7 @@ abstract class ActionHelper
 
     public function renderResponse(ViewEvent $event): Response
     {
-        return new Response($this->twig->render($event->getTemplate() ?: $this->config['view'], $this->viewData->getArrayCopy()), $this->renderResponseCode);
+        return new Response($this->twig->render($event->getTemplate(), $this->viewData->getArrayCopy()), $this->renderResponseCode);
     }
 
     public function dispatchInitialize(): ?Response
@@ -75,6 +75,8 @@ abstract class ActionHelper
         }
 
         $event = new InitializeEvent($this->request);
+        $event->setManager($this->manager);
+        $event->setConfig($this->config);
 
         return $this->_dispatchGetResponse($event, $this->config['initialize_event_name']);
     }
@@ -86,20 +88,27 @@ abstract class ActionHelper
         }
 
         $event = new ExceptionEvent($this->request, $exception);
+        $event->setManager($this->manager);
+        $event->setConfig($this->config);
 
         return $this->_dispatchGetResponse($event, $this->config['exception_event_name']);
     }
 
     public function createViewData(array $data = []): ArrayObject
     {
-        $this->viewData = new ArrayObject($data);
+        // add extra config
+        $data['_crudl_action_config'] = $this->config ?? [];
+
+        $this->viewData = new ArrayObject(array_merge($this->config['view_data'] ?? [], $data));
 
         return $this->viewData;
     }
 
     public function dispatchViewEvent(): ViewEvent
     {
-        $event = new ViewEvent($this->viewData, null, $this->request);
+        $event = new ViewEvent($this->viewData, $this->config['view'], $this->request);
+        $event->setManager($this->manager);
+        $event->setConfig($this->config);
 
         if ($this->config['view_event_name']) {
             $this->_dispatch($event, $this->config['view_event_name']);

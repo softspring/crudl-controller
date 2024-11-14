@@ -8,6 +8,7 @@ use Symfony\Component\HttpFoundation\Request;
 class ViewEvent extends BaseViewEvent implements GetResponseStatusCodeInterface
 {
     use GetResponseStatusCodeTrait;
+    use CrudlEventTrait;
 
     public function __construct($data, protected ?string $template, ?Request $request = null)
     {

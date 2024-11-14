@@ -7,6 +7,8 @@ use Symfony\Component\HttpFoundation\Request;
 
 class ApplyEvent extends EntityEvent
 {
+    use CrudlEventTrait;
+
     public function __construct(
         mixed $entity,
         ?Request $request,

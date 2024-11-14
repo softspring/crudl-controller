@@ -1,0 +1,7 @@
+parameters:
+	ignoreErrors:
+		-
+			message: "#^Call to an undefined method Symfony\\\\Component\\\\Workflow\\\\WorkflowInterface::getEnabledTransition\\(\\)\\.$#"
+			count: 1
+			path: src/Helper/TransitionActionHelper.php
+			reportUnmatched: false

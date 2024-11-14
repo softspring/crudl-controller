@@ -53,6 +53,8 @@ class ListActionHelper extends ActionHelper
     public function dispatchFormPrepare(array $options = ['method' => 'GET']): FormPrepareEvent
     {
         $event = new FormPrepareEvent(null, $this->request, $options);
+        $event->setManager($this->manager);
+        $event->setConfig($this->config);
 
         if ($this->config['filter_form_prepare_event_name']) {
             $this->_dispatch($event, $this->config['filter_form_prepare_event_name']);
@@ -65,7 +67,7 @@ class ListActionHelper extends ActionHelper
         return $event;
     }
 
-    public function resolveFormClass(): string
+    public function resolveFormClass(): string|array|null
     {
         if ($this->config['filter_form'] instanceof FormTypeInterface) {
             return get_class($this->config['filter_form']);
@@ -91,7 +93,10 @@ class ListActionHelper extends ActionHelper
             return null;
         }
 
-        $this->_dispatch($event = new FormInitEvent($this->filterForm, $this->request), $this->config['filter_form_init_event_name']);
+        $event = new FormInitEvent($this->filterForm, $this->request);
+        $event->setManager($this->manager);
+        $event->setConfig($this->config);
+        $this->_dispatch($event, $this->config['filter_form_init_event_name']);
 
         return $event;
     }
@@ -126,8 +131,11 @@ class ListActionHelper extends ActionHelper
     public function createViewData(array $data = []): ArrayObject
     {
         $data[$this->config['entities_attribute']] = $this->results;
-        $data['filterForm'] = $this->filterForm->createView();
+        $data['filter_form'] = $this->filterForm->createView();
         $data['read_route'] = $this->config['read_route'];
+
+        /* @deprecated filterForm, use filter_form instead */
+        $data['filterForm'] = $data['filter_form'];
 
         return parent::createViewData($data);
     }

@@ -2,6 +2,7 @@
 
 namespace Softspring\Component\CrudlController\Config;
 
+use InvalidArgumentException;
 use Symfony\Component\Config\Definition\Builder\TreeBuilder;
 use Symfony\Component\Config\Definition\ConfigurationInterface;
 
@@ -13,7 +14,18 @@ class ReadActionConfiguration implements ConfigurationInterface
         $rootNode = $treeBuilder->getRootNode();
 
         $rootNode
+            ->beforeNormalization()
+            ->always()
+            ->then(function ($data): array {
+                if (($data['action'] ?? 'read') !== 'read') {
+                    throw new InvalidArgumentException('Read action configuration must have action read');
+                }
+
+                return $data;
+            })
+            ->end()
             ->children()
+            ->scalarNode('action')->defaultValue('read')->end()
                 // events
                 ->scalarNode('initialize_event_name')->defaultNull()->end()
                 ->scalarNode('load_entity_event_name')->defaultNull()->end()
@@ -31,6 +43,7 @@ class ReadActionConfiguration implements ConfigurationInterface
 
                 // templates
                 ->scalarNode('view')->defaultNull()->end()
+                ->arrayNode('view_data')->useAttributeAsKey('key')->prototype('variable')->end()->end()
             ->end()
         ;
 

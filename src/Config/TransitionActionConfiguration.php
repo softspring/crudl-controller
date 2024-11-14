@@ -6,27 +6,27 @@ use InvalidArgumentException;
 use Symfony\Component\Config\Definition\Builder\TreeBuilder;
 use Symfony\Component\Config\Definition\ConfigurationInterface;
 
-class UpdateActionConfiguration implements ConfigurationInterface
+class TransitionActionConfiguration implements ConfigurationInterface
 {
     /** @noinspection DuplicatedCode */
     public function getConfigTreeBuilder(): TreeBuilder
     {
-        $treeBuilder = new TreeBuilder('update');
+        $treeBuilder = new TreeBuilder('transition');
         $rootNode = $treeBuilder->getRootNode();
 
         $rootNode
             ->beforeNormalization()
             ->always()
             ->then(function ($data): array {
-                if (($data['action'] ?? 'update') !== 'update') {
-                    throw new InvalidArgumentException('Update action configuration must have action update');
+                if (($data['action'] ?? 'transition') !== 'transition') {
+                    throw new InvalidArgumentException('Transition action configuration must have action transition');
                 }
 
                 return $data;
             })
             ->end()
             ->children()
-            ->scalarNode('action')->defaultValue('update')->end()
+            ->scalarNode('action')->defaultValue('transition')->end()
                 // events
                 ->scalarNode('initialize_event_name')->defaultNull()->end()
                 ->scalarNode('load_entity_event_name')->defaultNull()->end()
@@ -41,6 +41,10 @@ class UpdateActionConfiguration implements ConfigurationInterface
                 ->scalarNode('form_invalid_event_name')->defaultNull()->end()
                 ->scalarNode('view_event_name')->defaultNull()->end()
                 ->scalarNode('exception_event_name')->defaultNull()->end()
+
+                // workflow
+                ->scalarNode('transition_attribute')->defaultValue('transition')->end()
+                ->scalarNode('workflow_name')->defaultNull(/* null for auto search workflow */)->end()
 
                 // entity management
                 ->scalarNode('entity_attribute')->defaultValue('entity')->end()
