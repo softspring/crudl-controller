@@ -545,9 +545,8 @@ class CrudlController
                 return $response;
             }
 
-            throw $e;
+            // throw $e;
+            return null;
         }
-
-        //        return null;
     }
 }
