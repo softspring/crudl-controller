@@ -43,7 +43,7 @@ class ListActionHelper extends ActionHelper
 
     public function renderResponse(ViewEvent $event): Response
     {
-        if ($this->request->isXmlHttpRequest() && !$event->getTemplate() && $this->config['view_page']) {
+        if ($this->request->isXmlHttpRequest() && $this->config['view_page']) {
             $event->setTemplate($this->config['view_page']);
         }
 
