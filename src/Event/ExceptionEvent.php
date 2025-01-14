@@ -16,7 +16,7 @@ class ExceptionEvent extends Event implements GetResponseEventInterface, GetResp
 
     public function __construct(
         protected ?Request $request,
-        protected Throwable $exception
+        protected Throwable $exception,
     ) {
     }
 

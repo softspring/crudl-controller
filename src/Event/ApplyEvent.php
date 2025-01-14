@@ -12,7 +12,7 @@ class ApplyEvent extends EntityEvent
     public function __construct(
         mixed $entity,
         ?Request $request,
-        protected ?FormInterface $form = null
+        protected ?FormInterface $form = null,
     ) {
         parent::__construct($entity, $request);
     }

@@ -35,7 +35,7 @@ class FilterEvent extends Event
         protected ?int $page = null,
         protected ?int $rpp = null,
         protected ?QueryBuilder $queryBuilder = null,
-        protected ?int $filtersMode = null
+        protected ?int $filtersMode = null,
     ) {
     }
 

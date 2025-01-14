@@ -12,7 +12,7 @@ abstract class EntityEvent extends Event implements GetResponseStatusCodeInterfa
 
     public function __construct(
         protected mixed $entity,
-        protected ?Request $request
+        protected ?Request $request,
     ) {
     }
 

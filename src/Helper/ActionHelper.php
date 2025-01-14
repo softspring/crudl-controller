@@ -29,7 +29,7 @@ abstract class ActionHelper
         protected EventDispatcherInterface $eventDispatcher,
         protected Environment $twig,
         protected AuthorizationCheckerInterface $authorizationChecker,
-        protected RouterInterface $router
+        protected RouterInterface $router,
     ) {
     }
 
