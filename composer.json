@@ -2,7 +2,7 @@
     "name": "softspring/crudl-controller",
     "description": "A CRUD+list helper classes",
     "type": "symfony-bundle",
-    "license": "MIT",
+    "license": "AGPL-3.0",
     "minimum-stability": "dev",
     "prefer-stable": true,
     "require": {
