@@ -528,6 +528,9 @@ class CrudlController
         }
     }
 
+    /**
+     * @throws Exception
+     */
     protected function helperApply(FormActionActionHelper $helper, callable $applyFunction): ?Response
     {
         try {
@@ -545,8 +548,7 @@ class CrudlController
                 return $response;
             }
 
-            // throw $e;
-            return null;
+            throw $e; // rethrow the exception to be handled by the caller, instead of returning null
         }
     }
 }
