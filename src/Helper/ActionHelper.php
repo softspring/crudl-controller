@@ -78,7 +78,12 @@ abstract class ActionHelper
         $event->setManager($this->manager);
         $event->setConfig($this->config);
 
-        return $this->_dispatchGetResponse($event, $this->config['initialize_event_name']);
+        $response = $this->_dispatchGetResponse($event, $this->config['initialize_event_name']);
+
+        // update helper config from event
+        $this->config = $event->getConfig();
+
+        return $response;
     }
 
     public function dispatchException(Exception $exception): ?Response
