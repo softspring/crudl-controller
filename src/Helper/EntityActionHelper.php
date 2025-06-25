@@ -37,6 +37,11 @@ class EntityActionHelper extends ActionHelper
 
         $this->entity = $this->manager->getRepository()->findOneBy([$searchField => $searchValue]);
 
+        if (null !== $this->entity) {
+            // If the entity is found, we set it to the request attributes
+            $this->request->attributes->set($this->config['entity_attribute'], $this->entity);
+        }
+
         return $this->entity;
     }
 
