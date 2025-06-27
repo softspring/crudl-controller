@@ -5,8 +5,8 @@
 ![License](https://img.shields.io/packagist/l/softspring/crudl-controller?style=flat-square)
 ![PHP Version](https://img.shields.io/packagist/dependency-v/softspring/crudl-controller/php?style=flat-square)
 ![Downloads](https://img.shields.io/packagist/dt/softspring/crudl-controller?style=flat-square)
-[![CI](https://img.shields.io/github/actions/workflow/status/softspring/crudl-controller/ci.yml?branch=5.4&style=flat-square&label=CI)](https://github.com/softspring/crudl-controller/actions/workflows/ci.yml)
-![Coverage](https://raw.githubusercontent.com/softspring/crudl-controller/5.4/.github/badges/coverage.svg)
+[![CI](https://img.shields.io/github/actions/workflow/status/softspring/crudl-controller/ci.yml?branch=5.5&style=flat-square&label=CI)](https://github.com/softspring/crudl-controller/actions/workflows/ci.yml)
+![Coverage](https://raw.githubusercontent.com/softspring/crudl-controller/5.5/.github/badges/coverage.svg)
 
 This component provides an easy CRUD+List (CRUDL from now on) feature for any doctrine entity you want to manage in your
 Symfony projects.
