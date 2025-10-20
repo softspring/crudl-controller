@@ -7,9 +7,9 @@
     "prefer-stable": true,
     "require": {
         "php": ">=8.1",
-        "softspring/doctrine-paginator": "^5.5@dev",
-        "softspring/doctrine-query-filters": "^5.5@dev",
-        "softspring/events": "^5.5@dev"
+        "softspring/doctrine-paginator": "^6.0@dev",
+        "softspring/doctrine-query-filters": "^6.0@dev",
+        "softspring/events": "^6.0@dev"
     },
     "require-dev": {
         "doctrine/orm": "^2.5 | ^3.0",
