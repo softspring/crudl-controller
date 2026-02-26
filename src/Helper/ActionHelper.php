@@ -122,7 +122,7 @@ abstract class ActionHelper
         return $event;
     }
 
-    protected function _dispatchGetResponse($event, $eventName): ?Response
+    protected function _dispatchGetResponse($event, ?string $eventName): ?Response
     {
         if ($event instanceof GetResponseStatusCodeInterface) {
             $event->setStatusCode($this->renderResponseCode);
@@ -141,7 +141,7 @@ abstract class ActionHelper
         return null;
     }
 
-    protected function _dispatch($event, $eventName): void
+    protected function _dispatch($event, ?string $eventName): void
     {
         if ($event instanceof GetResponseStatusCodeInterface) {
             $event->setStatusCode($this->renderResponseCode);

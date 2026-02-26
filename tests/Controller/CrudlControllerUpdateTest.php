@@ -2,6 +2,7 @@
 
 namespace Softspring\Component\CrudlController\Tests\Controller;
 
+use stdClass;
 use Softspring\Component\CrudlController\Event\GetResponseEntityEvent;
 use Softspring\Component\CrudlController\Event\GetResponseFormEvent;
 use Softspring\Component\CrudlController\Tests\Controller\Example\UpdateForm;
@@ -15,7 +16,7 @@ use Symfony\Component\Security\Core\Exception\AccessDeniedException;
 
 class CrudlControllerUpdateTest extends AbstractCrudlControllerTestCase
 {
-    public function testUpdateDenyUnlessGranted()
+    public function testUpdateDenyUnlessGranted(): void
     {
         $configs = [
             'update' => [
@@ -33,7 +34,7 @@ class CrudlControllerUpdateTest extends AbstractCrudlControllerTestCase
         $controller->update(new Request());
     }
 
-    public function testUpdateWithNotFoundEventReturningResponse()
+    public function testUpdateWithNotFoundEventReturningResponse(): void
     {
         $configs = [
             'update' => [
@@ -49,7 +50,9 @@ class CrudlControllerUpdateTest extends AbstractCrudlControllerTestCase
         $expectedResponse = new Response();
 
         $this->dispatcher->expects($this->once())->method('dispatch')->willReturnCallback(function ($event, string $eventName) use ($expectedResponse) {
-            $eventName == 'not_found_event' && $event instanceof GetResponseRequestEvent  && $event->setResponse($expectedResponse);
+            if ($eventName === 'not_found_event' && $event instanceof GetResponseRequestEvent) {
+                $event->setResponse($expectedResponse);
+            }
 
             return $event;
         });
@@ -59,7 +62,7 @@ class CrudlControllerUpdateTest extends AbstractCrudlControllerTestCase
         $this->assertEquals($expectedResponse, $response);
     }
 
-    public function testUpdateWithNotFoundDefault()
+    public function testUpdateWithNotFoundDefault(): void
     {
         $configs = [
             'update' => [
@@ -77,7 +80,7 @@ class CrudlControllerUpdateTest extends AbstractCrudlControllerTestCase
         $controller->update(new Request());
     }
 
-    public function testUpdateWithInitializeEventReturningResponse()
+    public function testUpdateWithInitializeEventReturningResponse(): void
     {
         $configs = [
             'update' => [
@@ -96,7 +99,9 @@ class CrudlControllerUpdateTest extends AbstractCrudlControllerTestCase
 
         $expectedResponse = new Response();
         $this->dispatcher->expects($this->once())->method('dispatch')->willReturnCallback(function ($event, string $eventName) use ($expectedResponse) {
-            $eventName == 'initialize_event' && $event instanceof GetResponseRequestEvent && $event->setResponse($expectedResponse);
+            if ($eventName === 'initialize_event' && $event instanceof GetResponseRequestEvent) {
+                $event->setResponse($expectedResponse);
+            }
 
             return $event;
         });
@@ -106,7 +111,7 @@ class CrudlControllerUpdateTest extends AbstractCrudlControllerTestCase
         $this->assertEquals($expectedResponse, $response);
     }
 
-    public function testUpdateWithNoSubmittedFormAndViewEvent()
+    public function testUpdateWithNoSubmittedFormAndViewEvent(): void
     {
         $config = [
             'update' => [
@@ -125,7 +130,7 @@ class CrudlControllerUpdateTest extends AbstractCrudlControllerTestCase
 
         $this->formFactory->expects($this->once())->method('create')->willReturn($this->getMockBuilder(Form::class)->disableOriginalConstructor()->getMock());
 
-        $this->repository->expects($this->once())->method('findOneBy')->willReturn(new \stdClass());
+        $this->repository->expects($this->once())->method('findOneBy')->willReturn(new stdClass());
 
         $this->twig->expects($this->once())->method('render')->willReturn($config['update']['view']);
 
@@ -134,7 +139,7 @@ class CrudlControllerUpdateTest extends AbstractCrudlControllerTestCase
         $this->assertEquals($config['update']['view'], $response->getContent());
     }
 
-    public function testUpdateWithFormSubmittedAndInvalidReceivingEventResponse()
+    public function testUpdateWithFormSubmittedAndInvalidReceivingEventResponse(): void
     {
         $configs = [
             'update' => [
@@ -151,11 +156,13 @@ class CrudlControllerUpdateTest extends AbstractCrudlControllerTestCase
             ],
         ];
 
-        $this->repository->expects($this->once())->method('findOneBy')->willReturn(new \stdClass());
+        $this->repository->expects($this->once())->method('findOneBy')->willReturn(new stdClass());
 
         $expectedResponse = new RedirectResponse('/');
         $this->dispatcher->expects($this->once())->method('dispatch')->willReturnCallback(function ($event, string $eventName) use ($expectedResponse) {
-            $eventName == 'form_invalid_event' && $event instanceof GetResponseFormEvent && $event->setResponse($expectedResponse);
+            if ($eventName === 'form_invalid_event' && $event instanceof GetResponseFormEvent) {
+                $event->setResponse($expectedResponse);
+            }
 
             return $event;
         });
@@ -171,7 +178,7 @@ class CrudlControllerUpdateTest extends AbstractCrudlControllerTestCase
         $this->assertEquals($expectedResponse, $response);
     }
 
-    public function testUpdateWithFormSubmittedAndValidReceivingFormEventResponse()
+    public function testUpdateWithFormSubmittedAndValidReceivingFormEventResponse(): void
     {
         $configs = [
             'update' => [
@@ -189,11 +196,13 @@ class CrudlControllerUpdateTest extends AbstractCrudlControllerTestCase
             ],
         ];
 
-        $this->repository->expects($this->once())->method('findOneBy')->willReturn(new \stdClass());
+        $this->repository->expects($this->once())->method('findOneBy')->willReturn(new stdClass());
 
         $expectedResponse = new RedirectResponse('/');
         $this->dispatcher->expects($this->once())->method('dispatch')->willReturnCallback(function ($event, string $eventName) use ($expectedResponse) {
-            $eventName == 'form_valid_event' && $event instanceof GetResponseFormEvent && $event->setResponse($expectedResponse);
+            if ($eventName === 'form_valid_event' && $event instanceof GetResponseFormEvent) {
+                $event->setResponse($expectedResponse);
+            }
 
             return $event;
         });
@@ -209,7 +218,7 @@ class CrudlControllerUpdateTest extends AbstractCrudlControllerTestCase
         $this->assertEquals($expectedResponse, $response);
     }
 
-    public function testUpdateWithFormSubmittedAndValidReceivingSuccessEventResponse()
+    public function testUpdateWithFormSubmittedAndValidReceivingSuccessEventResponse(): void
     {
         $configs = [
             'update' => [
@@ -228,11 +237,13 @@ class CrudlControllerUpdateTest extends AbstractCrudlControllerTestCase
             ],
         ];
 
-        $this->repository->expects($this->once())->method('findOneBy')->willReturn(new \stdClass());
+        $this->repository->expects($this->once())->method('findOneBy')->willReturn(new stdClass());
 
         $expectedResponse = new RedirectResponse('/');
         $this->dispatcher->expects($this->once())->method('dispatch')->willReturnCallback(function ($event, string $eventName) use ($expectedResponse) {
-            $eventName == 'success_event' && $event instanceof GetResponseEntityEvent && $event->setResponse($expectedResponse);
+            if ($eventName === 'success_event' && $event instanceof GetResponseEntityEvent) {
+                $event->setResponse($expectedResponse);
+            }
 
             return $event;
         });
@@ -248,7 +259,7 @@ class CrudlControllerUpdateTest extends AbstractCrudlControllerTestCase
         $this->assertEquals($expectedResponse, $response);
     }
 
-    public function testUpdateWithFormSubmittedAndValidWithRedirectRoute()
+    public function testUpdateWithFormSubmittedAndValidWithRedirectRoute(): void
     {
         $configs = [
             'update' => [
@@ -268,7 +279,7 @@ class CrudlControllerUpdateTest extends AbstractCrudlControllerTestCase
             ],
         ];
 
-        $this->repository->expects($this->once())->method('findOneBy')->willReturn(new \stdClass());
+        $this->repository->expects($this->once())->method('findOneBy')->willReturn(new stdClass());
 
         $this->router->expects($this->once())->method('generate')->with($this->equalTo('redirect_route'))->willReturn('/redirect/to/route');
 
@@ -285,7 +296,7 @@ class CrudlControllerUpdateTest extends AbstractCrudlControllerTestCase
         $this->assertEquals('/redirect/to/route', $response->getTargetUrl());
     }
 
-    public function testUpdateWithFormSubmittedAndValidWithDefaultRedirect()
+    public function testUpdateWithFormSubmittedAndValidWithDefaultRedirect(): void
     {
         $configs = [
             'update' => [
@@ -305,7 +316,7 @@ class CrudlControllerUpdateTest extends AbstractCrudlControllerTestCase
             ],
         ];
 
-        $this->repository->expects($this->once())->method('findOneBy')->willReturn(new \stdClass());
+        $this->repository->expects($this->once())->method('findOneBy')->willReturn(new stdClass());
 
         $form = $this->getMockBuilder(Form::class)->disableOriginalConstructor()->getMock();
         $this->formFactory->expects($this->once())->method('create')->willReturn($form);

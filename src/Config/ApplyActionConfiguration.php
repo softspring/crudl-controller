@@ -17,7 +17,7 @@ class ApplyActionConfiguration implements ConfigurationInterface
         $rootNode
             ->beforeNormalization()
             ->always()
-            ->then(function ($data): array {
+            ->then(function (array $data): array {
                 if (($data['action'] ?? 'apply') !== 'apply') {
                     throw new InvalidArgumentException('Apply action configuration must have action apply');
                 }

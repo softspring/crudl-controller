@@ -2,6 +2,7 @@
 
 namespace Softspring\Component\CrudlController\Tests\Controller;
 
+use stdClass;
 use Softspring\Component\CrudlController\Event\FormInvalidEvent;
 use Softspring\Component\CrudlController\Event\FormValidEvent;
 use Softspring\Component\CrudlController\Event\InitializeEvent;
@@ -18,7 +19,7 @@ use Symfony\Component\Security\Core\Exception\AccessDeniedException;
 
 class CrudlControllerDeleteTest extends AbstractCrudlControllerTestCase
 {
-    public function testDeleteDenyUnlessGranted()
+    public function testDeleteDenyUnlessGranted(): void
     {
         $configs = [
             'delete' => [
@@ -36,7 +37,7 @@ class CrudlControllerDeleteTest extends AbstractCrudlControllerTestCase
         $controller->delete(new Request());
     }
 
-    public function testDeleteWithNotFoundEventReturningResponse()
+    public function testDeleteWithNotFoundEventReturningResponse(): void
     {
         $configs = [
             'delete' => [
@@ -52,7 +53,9 @@ class CrudlControllerDeleteTest extends AbstractCrudlControllerTestCase
         $expectedResponse = new Response();
 
         $this->dispatcher->expects($this->once())->method('dispatch')->willReturnCallback(function ($event, string $eventName) use ($expectedResponse) {
-            $event instanceof GetResponseRequestEvent  && $event->setResponse($expectedResponse);
+            if ($event instanceof GetResponseRequestEvent) {
+                $event->setResponse($expectedResponse);
+            }
 
             return $event;
         });
@@ -62,7 +65,7 @@ class CrudlControllerDeleteTest extends AbstractCrudlControllerTestCase
         $this->assertEquals($expectedResponse, $response);
     }
 
-    public function testDeleteWithNotFoundDefault()
+    public function testDeleteWithNotFoundDefault(): void
     {
         $configs = [
             'delete' => [
@@ -80,7 +83,7 @@ class CrudlControllerDeleteTest extends AbstractCrudlControllerTestCase
         $controller->delete(new Request());
     }
 
-    public function testDeleteWithInitializeEventReturningResponse()
+    public function testDeleteWithInitializeEventReturningResponse(): void
     {
         $configs = [
             'delete' => [
@@ -99,7 +102,9 @@ class CrudlControllerDeleteTest extends AbstractCrudlControllerTestCase
 
         $expectedResponse = new Response();
         $this->dispatcher->expects($this->any())->method('dispatch')->willReturnCallback(function ($event, string $eventName) use ($expectedResponse) {
-            $event instanceof InitializeEvent && $event->setResponse($expectedResponse);
+            if ($event instanceof InitializeEvent) {
+                $event->setResponse($expectedResponse);
+            }
 
             return $event;
         });
@@ -109,7 +114,7 @@ class CrudlControllerDeleteTest extends AbstractCrudlControllerTestCase
         $this->assertEquals($expectedResponse, $response);
     }
 
-    public function testDeleteWithNoSubmittedFormAndViewEvent()
+    public function testDeleteWithNoSubmittedFormAndViewEvent(): void
     {
         $config = [
             'delete' => [
@@ -128,7 +133,7 @@ class CrudlControllerDeleteTest extends AbstractCrudlControllerTestCase
 
         $this->formFactory->expects($this->once())->method('create')->willReturn($this->getMockBuilder(Form::class)->disableOriginalConstructor()->getMock());
 
-        $this->repository->expects($this->once())->method('findOneBy')->willReturn(new \stdClass());
+        $this->repository->expects($this->once())->method('findOneBy')->willReturn(new stdClass());
 
         $this->twig->expects($this->once())->method('render')->willReturn($config['delete']['view']);
 
@@ -137,7 +142,7 @@ class CrudlControllerDeleteTest extends AbstractCrudlControllerTestCase
         $this->assertEquals($config['delete']['view'], $response->getContent());
     }
 
-    public function testDeleteWithFormSubmittedAndInvalidReceivingEventResponse()
+    public function testDeleteWithFormSubmittedAndInvalidReceivingEventResponse(): void
     {
         $configs = [
             'delete' => [
@@ -154,11 +159,13 @@ class CrudlControllerDeleteTest extends AbstractCrudlControllerTestCase
             ],
         ];
 
-        $this->repository->expects($this->once())->method('findOneBy')->willReturn(new \stdClass());
+        $this->repository->expects($this->once())->method('findOneBy')->willReturn(new stdClass());
 
         $expectedResponse = new RedirectResponse('/');
         $this->dispatcher->expects($this->once())->method('dispatch')->willReturnCallback(function ($event, string $eventName) use ($expectedResponse) {
-            $event instanceof FormInvalidEvent && $event->setResponse($expectedResponse);
+            if ($event instanceof FormInvalidEvent) {
+                $event->setResponse($expectedResponse);
+            }
 
             return $event;
         });
@@ -174,7 +181,7 @@ class CrudlControllerDeleteTest extends AbstractCrudlControllerTestCase
         $this->assertEquals($expectedResponse, $response);
     }
 
-    public function testDeleteWithFormSubmittedAndValidReceivingFormEventResponse()
+    public function testDeleteWithFormSubmittedAndValidReceivingFormEventResponse(): void
     {
         $configs = [
             'delete' => [
@@ -192,11 +199,13 @@ class CrudlControllerDeleteTest extends AbstractCrudlControllerTestCase
             ],
         ];
 
-        $this->repository->expects($this->once())->method('findOneBy')->willReturn(new \stdClass());
+        $this->repository->expects($this->once())->method('findOneBy')->willReturn(new stdClass());
 
         $expectedResponse = new RedirectResponse('/');
         $this->dispatcher->expects($this->once())->method('dispatch')->willReturnCallback(function ($event, string $eventName) use ($expectedResponse) {
-            $event instanceof FormValidEvent && $event->setResponse($expectedResponse);
+            if ($event instanceof FormValidEvent) {
+                $event->setResponse($expectedResponse);
+            }
 
             return $event;
         });
@@ -212,7 +221,7 @@ class CrudlControllerDeleteTest extends AbstractCrudlControllerTestCase
         $this->assertEquals($expectedResponse, $response);
     }
 
-    public function testDeleteWithFormSubmittedAndValidReceivingSuccessEventResponse()
+    public function testDeleteWithFormSubmittedAndValidReceivingSuccessEventResponse(): void
     {
         $configs = [
             'delete' => [
@@ -231,11 +240,13 @@ class CrudlControllerDeleteTest extends AbstractCrudlControllerTestCase
             ],
         ];
 
-        $this->repository->expects($this->once())->method('findOneBy')->willReturn(new \stdClass());
+        $this->repository->expects($this->once())->method('findOneBy')->willReturn(new stdClass());
 
         $expectedResponse = new RedirectResponse('/');
         $this->dispatcher->expects($this->once())->method('dispatch')->willReturnCallback(function ($event, string $eventName) use ($expectedResponse) {
-            $event instanceof SuccessEvent && $event->setResponse($expectedResponse);
+            if ($event instanceof SuccessEvent) {
+                $event->setResponse($expectedResponse);
+            }
 
             return $event;
         });
@@ -251,7 +262,7 @@ class CrudlControllerDeleteTest extends AbstractCrudlControllerTestCase
         $this->assertEquals($expectedResponse, $response);
     }
 
-    public function testDeleteWithFormSubmittedAndValidWithRedirectRoute()
+    public function testDeleteWithFormSubmittedAndValidWithRedirectRoute(): void
     {
         $configs = [
             'delete' => [
@@ -271,7 +282,7 @@ class CrudlControllerDeleteTest extends AbstractCrudlControllerTestCase
             ],
         ];
 
-        $this->repository->expects($this->once())->method('findOneBy')->willReturn(new \stdClass());
+        $this->repository->expects($this->once())->method('findOneBy')->willReturn(new stdClass());
 
         $this->router->expects($this->once())->method('generate')->with($this->equalTo('redirect_route'))->willReturn('/redirect/to/route');
 
@@ -288,7 +299,7 @@ class CrudlControllerDeleteTest extends AbstractCrudlControllerTestCase
         $this->assertEquals('/redirect/to/route', $response->getTargetUrl());
     }
 
-    public function testDeleteWithFormSubmittedAndValidWithDefaultRedirect()
+    public function testDeleteWithFormSubmittedAndValidWithDefaultRedirect(): void
     {
         $configs = [
             'delete' => [
@@ -308,7 +319,7 @@ class CrudlControllerDeleteTest extends AbstractCrudlControllerTestCase
             ],
         ];
 
-        $this->repository->expects($this->once())->method('findOneBy')->willReturn(new \stdClass());
+        $this->repository->expects($this->once())->method('findOneBy')->willReturn(new stdClass());
 
         $form = $this->getMockBuilder(Form::class)->disableOriginalConstructor()->getMock();
         $this->formFactory->expects($this->once())->method('create')->willReturn($form);

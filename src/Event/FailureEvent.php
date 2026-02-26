@@ -13,7 +13,7 @@ class FailureEvent extends EntityEvent implements GetResponseEventInterface
     use GetResponseTrait;
 
     public function __construct(
-        $entity,
+        mixed $entity,
         ?Request $request,
         protected Throwable $exception,
         protected ?FormInterface $form = null,

@@ -185,7 +185,7 @@ class FormActionActionHelper extends EntityActionHelper
     public function renderResponse(ViewEvent $event): Response
     {
         $form = $this->form;
-        $request = $event->getRequest();
+        $event->getRequest();
         $response = parent::renderResponse($event);
 
         // for turbo requests set status code to 422 instead of 200

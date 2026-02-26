@@ -14,7 +14,7 @@ use Symfony\Component\Security\Core\Exception\AccessDeniedException;
 
 class CrudlControllerCreateTest extends AbstractCrudlControllerTestCase
 {
-    public function testCreateDenyUnlessGranted()
+    public function testCreateDenyUnlessGranted(): void
     {
         $configs = [
             'create' => [
@@ -31,7 +31,7 @@ class CrudlControllerCreateTest extends AbstractCrudlControllerTestCase
         $controller->create(new Request());
     }
 
-    public function testCreateWithInitializeEventReturningResponse()
+    public function testCreateWithInitializeEventReturningResponse(): void
     {
         $configs = [
             'create' => [
@@ -49,7 +49,9 @@ class CrudlControllerCreateTest extends AbstractCrudlControllerTestCase
         $expectedResponse = new Response();
 
         $this->dispatcher->expects($this->once())->method('dispatch')->willReturnCallback(function ($event, string $eventName) use ($expectedResponse) {
-            $eventName == 'initialize_event' && $event instanceof GetResponseRequestEvent && $event->setResponse($expectedResponse);
+            if ($eventName === 'initialize_event' && $event instanceof GetResponseRequestEvent) {
+                $event->setResponse($expectedResponse);
+            }
 
             return $event;
         });
@@ -59,7 +61,7 @@ class CrudlControllerCreateTest extends AbstractCrudlControllerTestCase
         $this->assertEquals($expectedResponse, $response);
     }
 
-    public function testCreateWithNoSubmittedFormAndViewEvent()
+    public function testCreateWithNoSubmittedFormAndViewEvent(): void
     {
         $config = [
             'create' => [
@@ -83,7 +85,7 @@ class CrudlControllerCreateTest extends AbstractCrudlControllerTestCase
         $this->assertEquals($config['create']['view'], $response->getContent());
     }
 
-    public function testCreateWithFormSubmittedAndInvalidReceivingEventResponse()
+    public function testCreateWithFormSubmittedAndInvalidReceivingEventResponse(): void
     {
         $configs = [
             'create' => [
@@ -100,7 +102,9 @@ class CrudlControllerCreateTest extends AbstractCrudlControllerTestCase
 
         $expectedResponse = new RedirectResponse('/');
         $this->dispatcher->expects($this->once())->method('dispatch')->willReturnCallback(function ($event, string $eventName) use ($expectedResponse) {
-            $eventName == 'form_invalid_event' && $event instanceof GetResponseFormEvent && $event->setResponse($expectedResponse);
+            if ($eventName === 'form_invalid_event' && $event instanceof GetResponseFormEvent) {
+                $event->setResponse($expectedResponse);
+            }
 
             return $event;
         });
@@ -116,7 +120,7 @@ class CrudlControllerCreateTest extends AbstractCrudlControllerTestCase
         $this->assertEquals($expectedResponse, $response);
     }
 
-    public function testCreateWithFormSubmittedAndValidReceivingFormEventResponse()
+    public function testCreateWithFormSubmittedAndValidReceivingFormEventResponse(): void
     {
         $configs = [
             'create' => [
@@ -134,7 +138,9 @@ class CrudlControllerCreateTest extends AbstractCrudlControllerTestCase
 
         $expectedResponse = new RedirectResponse('/');
         $this->dispatcher->expects($this->once())->method('dispatch')->willReturnCallback(function ($event, string $eventName) use ($expectedResponse) {
-            $eventName == 'form_valid_event' && $event instanceof GetResponseFormEvent && $event->setResponse($expectedResponse);
+            if ($eventName === 'form_valid_event' && $event instanceof GetResponseFormEvent) {
+                $event->setResponse($expectedResponse);
+            }
 
             return $event;
         });
@@ -150,7 +156,7 @@ class CrudlControllerCreateTest extends AbstractCrudlControllerTestCase
         $this->assertEquals($expectedResponse, $response);
     }
 
-    public function testCreateWithFormSubmittedAndValidReceivingSuccessEventResponse()
+    public function testCreateWithFormSubmittedAndValidReceivingSuccessEventResponse(): void
     {
         $configs = [
             'create' => [
@@ -169,7 +175,9 @@ class CrudlControllerCreateTest extends AbstractCrudlControllerTestCase
 
         $expectedResponse = new RedirectResponse('/');
         $this->dispatcher->expects($this->once())->method('dispatch')->willReturnCallback(function ($event, string $eventName) use ($expectedResponse) {
-            $eventName == 'success_event' && $event instanceof GetResponseEntityEvent && $event->setResponse($expectedResponse);
+            if ($eventName === 'success_event' && $event instanceof GetResponseEntityEvent) {
+                $event->setResponse($expectedResponse);
+            }
 
             return $event;
         });
@@ -185,7 +193,7 @@ class CrudlControllerCreateTest extends AbstractCrudlControllerTestCase
         $this->assertEquals($expectedResponse, $response);
     }
 
-    public function testCreateWithFormSubmittedAndValidWithRedirectRoute()
+    public function testCreateWithFormSubmittedAndValidWithRedirectRoute(): void
     {
         $configs = [
             'create' => [
@@ -218,7 +226,7 @@ class CrudlControllerCreateTest extends AbstractCrudlControllerTestCase
         $this->assertEquals('/redirect/to/route', $response->getTargetUrl());
     }
 
-    public function testCreateWithFormSubmittedAndValidWithDefaultRedirect()
+    public function testCreateWithFormSubmittedAndValidWithDefaultRedirect(): void
     {
         $configs = [
             'create' => [

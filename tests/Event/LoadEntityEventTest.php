@@ -15,7 +15,7 @@ class LoadEntityEventTest extends TestCase
         $this->assertNull($event->getRequest());
     }
 
-    public function testSetValues()
+    public function testSetValues(): void
     {
         $entity = new ExampleEntity();
         $request = new Request();

@@ -45,7 +45,7 @@ class TransitionActionHelper extends FormActionActionHelper
         $this->transitionName = $this->request->attributes->get($this->config['transition_attribute'] ?? 'transition');
         $this->request->attributes->set('_crudl_action_transition_name', $this->transitionName);
 
-        if (empty($this->transitionName)) {
+        if (in_array($this->transitionName, [null, '', '0'], true)) {
             throw new Exception('Transition name not found in request');
         }
     }
@@ -70,7 +70,7 @@ class TransitionActionHelper extends FormActionActionHelper
         $this->request->attributes->set('_crudl_action_transition', $this->transition);
 
         // no transition found
-        if (!$this->transition) {
+        if (!$this->transition instanceof Transition) {
             // TODO set custom exception class
             throw new Exception('Transition not found');
         }

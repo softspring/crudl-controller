@@ -15,7 +15,7 @@ use Symfony\Component\Security\Core\Exception\AccessDeniedException;
 
 class CrudlControllerApplyTest extends AbstractCrudlControllerTestCase
 {
-    public function testUpdateDenyUnlessGranted()
+    public function testUpdateDenyUnlessGranted(): void
     {
         $configs = [
             'test' => [
@@ -31,7 +31,7 @@ class CrudlControllerApplyTest extends AbstractCrudlControllerTestCase
         $controller->apply(new Request(), 'test');
     }
 
-    public function testUpdateWithNotFoundEventReturningResponse()
+    public function testUpdateWithNotFoundEventReturningResponse(): void
     {
         $configs = [
             'test' => [
@@ -45,7 +45,9 @@ class CrudlControllerApplyTest extends AbstractCrudlControllerTestCase
         $expectedResponse = new Response();
 
         $this->dispatcher->expects($this->once())->method('dispatch')->willReturnCallback(function ($event, string $eventName) use ($expectedResponse) {
-            $eventName == 'not_found_event' && $event instanceof GetResponseRequestEvent  && $event->setResponse($expectedResponse);
+            if ($eventName === 'not_found_event' && $event instanceof GetResponseRequestEvent) {
+                $event->setResponse($expectedResponse);
+            }
 
             return $event;
         });
@@ -55,7 +57,7 @@ class CrudlControllerApplyTest extends AbstractCrudlControllerTestCase
         $this->assertEquals($expectedResponse, $response);
     }
 
-    public function testUpdateWithNotFoundDefault()
+    public function testUpdateWithNotFoundDefault(): void
     {
         $configs = [
             'test' => [
@@ -71,7 +73,7 @@ class CrudlControllerApplyTest extends AbstractCrudlControllerTestCase
         $controller->apply(new Request(), 'test');
     }
 
-    public function testUpdateWithInitializeEventReturningResponse()
+    public function testUpdateWithInitializeEventReturningResponse(): void
     {
         $configs = [
             'test' => [
@@ -85,7 +87,9 @@ class CrudlControllerApplyTest extends AbstractCrudlControllerTestCase
 
         $expectedResponse = new Response();
         $this->dispatcher->expects($this->once())->method('dispatch')->willReturnCallback(function ($event, string $eventName) use ($expectedResponse) {
-            $eventName == 'initialize_event' && $event instanceof GetResponseRequestEvent && $event->setResponse($expectedResponse);
+            if ($eventName === 'initialize_event' && $event instanceof GetResponseRequestEvent) {
+                $event->setResponse($expectedResponse);
+            }
 
             return $event;
         });

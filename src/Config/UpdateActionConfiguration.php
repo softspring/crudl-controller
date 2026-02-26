@@ -17,7 +17,7 @@ class UpdateActionConfiguration implements ConfigurationInterface
         $rootNode
             ->beforeNormalization()
             ->always()
-            ->then(function ($data): array {
+            ->then(function (array $data): array {
                 if (($data['action'] ?? 'update') !== 'update') {
                     throw new InvalidArgumentException('Update action configuration must have action update');
                 }

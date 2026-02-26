@@ -2,6 +2,7 @@
 
 namespace Softspring\Component\CrudlController\Tests\Controller;
 
+use stdClass;
 use Softspring\Component\Events\GetResponseRequestEvent;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
@@ -10,7 +11,7 @@ use Symfony\Component\Security\Core\Exception\AccessDeniedException;
 
 class CrudlControllerReadTest extends AbstractCrudlControllerTestCase
 {
-    public function testReadDenyUnlessGranted()
+    public function testReadDenyUnlessGranted(): void
     {
         $configs = [
             'read' => [
@@ -27,7 +28,7 @@ class CrudlControllerReadTest extends AbstractCrudlControllerTestCase
         $controller->read(new Request());
     }
 
-    public function testReadWithNotFoundEventReturningResponse()
+    public function testReadWithNotFoundEventReturningResponse(): void
     {
         $configs = [
             'read' => [
@@ -42,7 +43,9 @@ class CrudlControllerReadTest extends AbstractCrudlControllerTestCase
         $expectedResponse = new Response();
 
         $this->dispatcher->expects($this->once())->method('dispatch')->willReturnCallback(function ($event, string $eventName) use ($expectedResponse) {
-            $eventName == 'not_found_event' && $event instanceof GetResponseRequestEvent && $event->setResponse($expectedResponse);
+            if ($eventName === 'not_found_event' && $event instanceof GetResponseRequestEvent) {
+                $event->setResponse($expectedResponse);
+            }
 
             return $event;
         });
@@ -52,7 +55,7 @@ class CrudlControllerReadTest extends AbstractCrudlControllerTestCase
         $this->assertEquals($expectedResponse, $response);
     }
 
-    public function testReadWithNotFoundDefault()
+    public function testReadWithNotFoundDefault(): void
     {
         $configs = [
             'read' => [
@@ -69,7 +72,7 @@ class CrudlControllerReadTest extends AbstractCrudlControllerTestCase
         $controller->read(new Request());
     }
 
-    public function testReadWithInitializeEventReturningResponse()
+    public function testReadWithInitializeEventReturningResponse(): void
     {
         $configs = [
             'read' => [
@@ -85,7 +88,9 @@ class CrudlControllerReadTest extends AbstractCrudlControllerTestCase
 
         $expectedResponse = new Response();
         $this->dispatcher->expects($this->once())->method('dispatch')->willReturnCallback(function ($event, string $eventName) use ($expectedResponse) {
-            $eventName == 'initialize_event' && $event instanceof GetResponseRequestEvent && $event->setResponse($expectedResponse);
+            if ($eventName === 'initialize_event' && $event instanceof GetResponseRequestEvent) {
+                $event->setResponse($expectedResponse);
+            }
 
             return $event;
         });
@@ -95,7 +100,7 @@ class CrudlControllerReadTest extends AbstractCrudlControllerTestCase
         $this->assertEquals($expectedResponse, $response);
     }
 
-    public function testReadWithNoSubmittedFormAndViewEvent()
+    public function testReadWithNoSubmittedFormAndViewEvent(): void
     {
         $config = [
             'read' => [
@@ -109,7 +114,7 @@ class CrudlControllerReadTest extends AbstractCrudlControllerTestCase
             ],
         ];
 
-        $this->repository->expects($this->once())->method('findOneBy')->willReturn(new \stdClass());
+        $this->repository->expects($this->once())->method('findOneBy')->willReturn(new stdClass());
 
         $this->twig->expects($this->once())->method('render')->willReturn($config['read']['view']);
 

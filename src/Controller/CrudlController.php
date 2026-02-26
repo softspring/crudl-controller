@@ -37,7 +37,7 @@ class CrudlController
         protected array $configs = [],
         protected ?Registry $registry = null,
     ) {
-        if (!empty($config)) {
+        if ([] !== $config) {
             trigger_deprecation('softspring/crudl-controller', '5.2', 'Passing $config argument to CrudlController constructor is deprecated, use $configs instead');
             $this->configs = $this->configs ?: $config;
         }
@@ -70,7 +70,7 @@ class CrudlController
         $helper = $this->buildCreateActionHelper($request, $config, $configKey);
 
         try {
-            if ($response = $helper->dispatchInitialize()) {
+            if (($response = $helper->dispatchInitialize()) instanceof Response) {
                 return $response;
             }
 
@@ -89,19 +89,16 @@ class CrudlController
             // process form
             if ($form->isSubmitted()) {
                 if ($form->isValid()) {
-                    if ($response = $helper->dispatchFormValid()) {
+                    if (($response = $helper->dispatchFormValid()) instanceof Response) {
                         return $response;
                     }
-
-                    if ($response = $this->helperApply($helper, function ($entity) {
+                    if (($response = $this->helperApply($helper, function (object $entity): void {
                         $this->manager->saveEntity($entity);
-                    })) {
+                    })) instanceof Response) {
                         return $response;
                     }
-                } else {
-                    if ($response = $helper->dispatchFormInvalid()) {
-                        return $response;
-                    }
+                } elseif (($response = $helper->dispatchFormInvalid()) instanceof Response) {
+                    return $response;
                 }
             }
 
@@ -111,7 +108,7 @@ class CrudlController
 
             return $helper->renderResponse($viewEvent);
         } catch (Exception $e) {
-            if ($response = $helper->dispatchException($e)) {
+            if (($response = $helper->dispatchException($e)) instanceof Response) {
                 return $response;
             }
 
@@ -137,7 +134,7 @@ class CrudlController
         $helper = $this->buildReadActionHelper($request, $config, $configKey);
 
         try {
-            if ($response = $helper->dispatchInitialize()) {
+            if (($response = $helper->dispatchInitialize()) instanceof Response) {
                 return $response;
             }
 
@@ -150,15 +147,12 @@ class CrudlController
             $helper->checkIsGranted();
 
             if ($helper->notFound()) {
-                if ($response = $helper->dispatchNotFoundEvent()) {
+                if (($response = $helper->dispatchNotFoundEvent()) instanceof Response) {
                     return $response;
                 }
-
                 throw new NotFoundHttpException('Entity not found');
-            } else {
-                if ($response = $helper->dispatchFoundEvent()) {
-                    return $response;
-                }
+            } elseif (($response = $helper->dispatchFoundEvent()) instanceof Response) {
+                return $response;
             }
 
             // create and render view
@@ -167,7 +161,7 @@ class CrudlController
 
             return $helper->renderResponse($viewEvent);
         } catch (Exception $e) {
-            if ($response = $helper->dispatchException($e)) {
+            if (($response = $helper->dispatchException($e)) instanceof Response) {
                 return $response;
             }
 
@@ -193,7 +187,7 @@ class CrudlController
         $helper = $this->buildUpdateActionHelper($request, $config, $configKey);
 
         try {
-            if ($response = $helper->dispatchInitialize()) {
+            if (($response = $helper->dispatchInitialize()) instanceof Response) {
                 return $response;
             }
 
@@ -206,15 +200,12 @@ class CrudlController
             $helper->checkIsGranted();
 
             if ($helper->notFound()) {
-                if ($response = $helper->dispatchNotFoundEvent()) {
+                if (($response = $helper->dispatchNotFoundEvent()) instanceof Response) {
                     return $response;
                 }
-
                 throw new NotFoundHttpException('Entity not found');
-            } else {
-                if ($response = $helper->dispatchFoundEvent()) {
-                    return $response;
-                }
+            } elseif (($response = $helper->dispatchFoundEvent()) instanceof Response) {
+                return $response;
             }
 
             $formPrepareEvent = $helper->dispatchFormPrepare();
@@ -224,19 +215,16 @@ class CrudlController
             // process form
             if ($form->isSubmitted()) {
                 if ($form->isValid()) {
-                    if ($response = $helper->dispatchFormValid()) {
+                    if (($response = $helper->dispatchFormValid()) instanceof Response) {
                         return $response;
                     }
-
-                    if ($response = $this->helperApply($helper, function ($entity) {
+                    if (($response = $this->helperApply($helper, function (object $entity): void {
                         $this->manager->saveEntity($entity);
-                    })) {
+                    })) instanceof Response) {
                         return $response;
                     }
-                } else {
-                    if ($response = $helper->dispatchFormInvalid()) {
-                        return $response;
-                    }
+                } elseif (($response = $helper->dispatchFormInvalid()) instanceof Response) {
+                    return $response;
                 }
             }
 
@@ -246,7 +234,7 @@ class CrudlController
 
             return $helper->renderResponse($viewEvent);
         } catch (Exception $e) {
-            if ($response = $helper->dispatchException($e)) {
+            if (($response = $helper->dispatchException($e)) instanceof Response) {
                 return $response;
             }
 
@@ -272,7 +260,7 @@ class CrudlController
         $helper = $this->buildDeleteActionHelper($request, $config, $configKey);
 
         try {
-            if ($response = $helper->dispatchInitialize()) {
+            if (($response = $helper->dispatchInitialize()) instanceof Response) {
                 return $response;
             }
 
@@ -285,15 +273,12 @@ class CrudlController
             $helper->checkIsGranted();
 
             if ($helper->notFound()) {
-                if ($response = $helper->dispatchNotFoundEvent()) {
+                if (($response = $helper->dispatchNotFoundEvent()) instanceof Response) {
                     return $response;
                 }
-
                 throw new NotFoundHttpException('Entity not found');
-            } else {
-                if ($response = $helper->dispatchFoundEvent()) {
-                    return $response;
-                }
+            } elseif (($response = $helper->dispatchFoundEvent()) instanceof Response) {
+                return $response;
             }
 
             $formPrepareEvent = $helper->dispatchFormPrepare();
@@ -303,19 +288,16 @@ class CrudlController
             // process form
             if ($form->isSubmitted()) {
                 if ($form->isValid()) {
-                    if ($response = $helper->dispatchFormValid()) {
+                    if (($response = $helper->dispatchFormValid()) instanceof Response) {
                         return $response;
                     }
-
-                    if ($response = $this->helperApply($helper, function ($entity) {
+                    if (($response = $this->helperApply($helper, function (object $entity): void {
                         $this->manager->deleteEntity($entity);
-                    })) {
+                    })) instanceof Response) {
                         return $response;
                     }
-                } else {
-                    if ($response = $helper->dispatchFormInvalid()) {
-                        return $response;
-                    }
+                } elseif (($response = $helper->dispatchFormInvalid()) instanceof Response) {
+                    return $response;
                 }
             }
 
@@ -325,7 +307,7 @@ class CrudlController
 
             return $helper->renderResponse($viewEvent);
         } catch (Exception $e) {
-            if ($response = $helper->dispatchException($e)) {
+            if (($response = $helper->dispatchException($e)) instanceof Response) {
                 return $response;
             }
 
@@ -356,7 +338,7 @@ class CrudlController
 
         try {
             // init action
-            if ($response = $helper->dispatchInitialize()) {
+            if (($response = $helper->dispatchInitialize()) instanceof Response) {
                 return $response;
             }
 
@@ -374,7 +356,7 @@ class CrudlController
 
             return $helper->renderResponse($viewEvent);
         } catch (Exception $e) {
-            if ($response = $helper->dispatchException($e)) {
+            if (($response = $helper->dispatchException($e)) instanceof Response) {
                 return $response;
             }
 
@@ -400,7 +382,7 @@ class CrudlController
         $helper = $this->buildApplyActionHelper($request, $configKey, $config);
 
         try {
-            if ($response = $helper->dispatchInitialize()) {
+            if (($response = $helper->dispatchInitialize()) instanceof Response) {
                 return $response;
             }
 
@@ -413,26 +395,23 @@ class CrudlController
             $helper->checkIsGranted();
 
             if ($helper->notFound()) {
-                if ($response = $helper->dispatchNotFoundEvent()) {
+                if (($response = $helper->dispatchNotFoundEvent()) instanceof Response) {
                     return $response;
                 }
-
                 throw new NotFoundHttpException('Entity not found');
-            } else {
-                if ($response = $helper->dispatchFoundEvent()) {
-                    return $response;
-                }
+            } elseif (($response = $helper->dispatchFoundEvent()) instanceof Response) {
+                return $response;
             }
 
-            if ($response = $this->helperApply($helper, function ($entity) {
+            if (($response = $this->helperApply($helper, function ($entity): void {
                 throw new Exception('Apply action must use apply event and set it to applied');
-            })) {
+            })) instanceof Response) {
                 return $response;
             }
 
             throw new Exception('Apply action must return a response in success or failure events');
         } catch (Exception $e) {
-            if ($response = $helper->dispatchException($e)) {
+            if (($response = $helper->dispatchException($e)) instanceof Response) {
                 return $response;
             }
 
@@ -460,7 +439,7 @@ class CrudlController
         try {
             $helper->initialize();
 
-            if ($response = $helper->dispatchInitialize()) {
+            if (($response = $helper->dispatchInitialize()) instanceof Response) {
                 return $response;
             }
 
@@ -473,15 +452,12 @@ class CrudlController
             $helper->checkIsGranted();
 
             if ($helper->notFound()) {
-                if ($response = $helper->dispatchNotFoundEvent()) {
+                if (($response = $helper->dispatchNotFoundEvent()) instanceof Response) {
                     return $response;
                 }
-
                 throw new NotFoundHttpException('Entity not found');
-            } else {
-                if ($response = $helper->dispatchFoundEvent()) {
-                    return $response;
-                }
+            } elseif (($response = $helper->dispatchFoundEvent()) instanceof Response) {
+                return $response;
             }
 
             $helper->initTransition();
@@ -491,27 +467,21 @@ class CrudlController
             $form = $helper->createForm($formPrepareEvent);
             if ($form) {
                 $helper->dispatchFormInit();
-
                 // process form
                 if ($form->isSubmitted()) {
                     if ($form->isValid()) {
-                        if ($response = $helper->dispatchFormValid()) {
+                        if (($response = $helper->dispatchFormValid()) instanceof Response) {
                             return $response;
                         }
-
-                        if ($response = $this->helperApply($helper, fn () => $helper->applyTransition())) {
+                        if (($response = $this->helperApply($helper, fn () => $helper->applyTransition())) instanceof Response) {
                             return $response;
                         }
-                    } else {
-                        if ($response = $helper->dispatchFormInvalid()) {
-                            return $response;
-                        }
+                    } elseif (($response = $helper->dispatchFormInvalid()) instanceof Response) {
+                        return $response;
                     }
                 }
-            } else {
-                if ($response = $this->helperApply($helper, fn () => $helper->applyTransition())) {
-                    return $response;
-                }
+            } elseif (($response = $this->helperApply($helper, fn () => $helper->applyTransition())) instanceof Response) {
+                return $response;
             }
 
             // create and render view
@@ -520,7 +490,7 @@ class CrudlController
 
             return $helper->renderResponse($viewEvent);
         } catch (Exception $e) {
-            if ($response = $helper->dispatchException($e)) {
+            if (($response = $helper->dispatchException($e)) instanceof Response) {
                 return $response;
             }
 
@@ -538,13 +508,13 @@ class CrudlController
                 $applyFunction($helper->getEntity());
             }
 
-            if ($response = $helper->dispatchSuccess()) {
+            if (($response = $helper->dispatchSuccess()) instanceof Response) {
                 return $response;
             }
 
             return $helper->successRedirect();
         } catch (Exception $e) {
-            if ($response = $helper->dispatchFailure($e)) {
+            if (($response = $helper->dispatchFailure($e)) instanceof Response) {
                 return $response;
             }
 

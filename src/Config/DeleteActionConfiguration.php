@@ -17,7 +17,7 @@ class DeleteActionConfiguration implements ConfigurationInterface
         $rootNode
             ->beforeNormalization()
             ->always()
-            ->then(function ($data): array {
+            ->then(function (array $data): array {
                 if (($data['action'] ?? 'delete') !== 'delete') {
                     throw new InvalidArgumentException('Delete action configuration must have action delete');
                 }

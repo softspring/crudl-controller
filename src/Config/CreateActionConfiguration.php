@@ -16,7 +16,7 @@ class CreateActionConfiguration implements ConfigurationInterface
         $rootNode
             ->beforeNormalization()
                 ->always()
-                ->then(function ($data): array {
+                ->then(function (array $data): array {
                     if (($data['action'] ?? 'create') !== 'create') {
                         throw new InvalidArgumentException('Create action configuration must have action create');
                     }

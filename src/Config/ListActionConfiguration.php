@@ -16,7 +16,7 @@ class ListActionConfiguration implements ConfigurationInterface
         $rootNode
             ->beforeNormalization()
             ->always()
-            ->then(function ($data): array {
+            ->then(function (array $data): array {
                 if (($data['action'] ?? 'list') !== 'list') {
                     throw new InvalidArgumentException('List action configuration must have action list');
                 }

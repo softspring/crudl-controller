@@ -17,14 +17,22 @@ use Twig\Environment;
 
 abstract class AbstractCrudlControllerTestCase extends TestCase
 {
-    protected MockObject|ExampleManagerCrudl $manager;
-    protected MockObject|EntityRepository $repository;
-    protected MockObject|EventDispatcherInterface $dispatcher;
-    protected MockObject|Container $container;
-    protected MockObject|FormFactory $formFactory;
-    protected MockObject|Environment $twig;
-    protected MockObject|AuthorizationCheckerInterface $authorizationChecker;
-    protected MockObject|RouterInterface $router;
+    /** @var ExampleManagerCrudl&MockObject */
+    protected ExampleManagerCrudl $manager;
+    /** @var EntityRepository&MockObject */
+    protected EntityRepository $repository;
+    /** @var EventDispatcherInterface&MockObject */
+    protected EventDispatcherInterface $dispatcher;
+    /** @var Container&MockObject */
+    protected Container $container;
+    /** @var FormFactory&MockObject */
+    protected FormFactory $formFactory;
+    /** @var Environment&MockObject */
+    protected Environment $twig;
+    /** @var AuthorizationCheckerInterface&MockObject */
+    protected AuthorizationCheckerInterface $authorizationChecker;
+    /** @var RouterInterface&MockObject */
+    protected RouterInterface $router;
 
     protected function setUp(): void
     {
@@ -53,7 +61,7 @@ abstract class AbstractCrudlControllerTestCase extends TestCase
                 $this->authorizationChecker,
                 $this->router,
                 $configs])
-            ->addMethods($onlyMethods)
+            ->onlyMethods($onlyMethods)
             ->getMock();
     }
 

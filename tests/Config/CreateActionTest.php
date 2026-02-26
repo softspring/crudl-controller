@@ -7,7 +7,7 @@ use Softspring\Component\CrudlController\Config\Configuration;
 
 class CreateActionTest extends TestCase
 {
-    public function testCreateEmpty()
+    public function testCreateEmpty(): void
     {
         $result = Configuration::createAction('test');
 
@@ -35,7 +35,7 @@ class CreateActionTest extends TestCase
         $this->assertEquals($expected, $result);
     }
 
-    public function testCreateBasic()
+    public function testCreateBasic(): void
     {
         $config = [
             'entity_attribute' => 'test',
@@ -66,7 +66,7 @@ class CreateActionTest extends TestCase
         $this->assertEquals($expected, $result);
     }
 
-    public function testCreateOverride()
+    public function testCreateOverride(): void
     {
         $config1 = [
             'entity_attribute' => 'test',

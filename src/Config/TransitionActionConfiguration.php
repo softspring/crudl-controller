@@ -17,7 +17,7 @@ class TransitionActionConfiguration implements ConfigurationInterface
         $rootNode
             ->beforeNormalization()
             ->always()
-            ->then(function ($data): array {
+            ->then(function (array $data): array {
                 if (($data['action'] ?? 'transition') !== 'transition') {
                     throw new InvalidArgumentException('Transition action configuration must have action transition');
                 }

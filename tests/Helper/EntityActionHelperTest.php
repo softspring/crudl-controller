@@ -2,6 +2,8 @@
 
 namespace Helper;
 
+use stdClass;
+use ArrayObject;
 use Doctrine\ORM\EntityRepository;
 use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
@@ -21,11 +23,16 @@ use Twig\Environment;
 
 class EntityActionHelperTest extends TestCase
 {
-    protected MockObject|CrudlEntityManagerInterface $managerMock;
-    protected MockObject|EventDispatcherInterface $eventDispatcherMock;
-    protected MockObject|Environment $twigMock;
-    protected MockObject|AuthorizationCheckerInterface $authorizationCheckerMock;
-    protected MockObject|RouterInterface $routerMock;
+    /** @var CrudlEntityManagerInterface&MockObject */
+    protected MockObject $managerMock;
+    /** @var EventDispatcherInterface&MockObject */
+    protected MockObject $eventDispatcherMock;
+    /** @var Environment&MockObject */
+    protected MockObject $twigMock;
+    /** @var AuthorizationCheckerInterface&MockObject */
+    protected MockObject $authorizationCheckerMock;
+    /** @var RouterInterface&MockObject */
+    protected MockObject $routerMock;
 
     protected function setUp(): void
     {
@@ -64,7 +71,7 @@ class EntityActionHelperTest extends TestCase
 
         $repositoryMock = $this->createMock(EntityRepository::class);
         $this->managerMock->expects($this->once())->method('getRepository')->willReturn($repositoryMock);
-        $repositoryMock->expects($this->once())->method('findOneBy')->with(['id' => '123'])->willReturn($entity = new \stdClass());
+        $repositoryMock->expects($this->once())->method('findOneBy')->with(['id' => '123'])->willReturn($entity = new stdClass());
 
         $helper->findEntity();
 
@@ -95,7 +102,7 @@ class EntityActionHelperTest extends TestCase
         $entity = $helper->createEntity();
 
         $viewData = $helper->createViewData();
-        $this->assertInstanceOf(\ArrayObject::class, $viewData);
+        $this->assertInstanceOf(ArrayObject::class, $viewData);
         $this->assertArrayHasKey('entity', $viewData->getArrayCopy());
         $this->assertEquals($entity, $viewData['entity']);
     }
@@ -135,7 +142,7 @@ class EntityActionHelperTest extends TestCase
         $helper->createEntity();
 
         $expectedResponse = new Response();
-        $this->eventDispatcherMock->expects($this->once())->method('dispatch')->willReturnCallback(function (InitializeEvent $event) use ($expectedResponse) {
+        $this->eventDispatcherMock->expects($this->once())->method('dispatch')->willReturnCallback(function (InitializeEvent $event) use ($expectedResponse): InitializeEvent {
             $event->setResponse($expectedResponse);
 
             return $event;
@@ -179,7 +186,7 @@ class EntityActionHelperTest extends TestCase
         $helper->createEntity();
 
         $expectedResponse = new Response();
-        $this->eventDispatcherMock->expects($this->once())->method('dispatch')->willReturnCallback(function (NotFoundEvent $event) use ($expectedResponse) {
+        $this->eventDispatcherMock->expects($this->once())->method('dispatch')->willReturnCallback(function (NotFoundEvent $event) use ($expectedResponse): NotFoundEvent {
             $event->setResponse($expectedResponse);
 
             return $event;
