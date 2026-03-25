@@ -8,16 +8,27 @@
 [![CI](https://img.shields.io/github/actions/workflow/status/softspring/crudl-controller/ci.yml?branch=6.0&style=flat-square&label=CI)](https://github.com/softspring/crudl-controller/actions/workflows/ci.yml)
 ![Coverage](https://raw.githubusercontent.com/softspring/crudl-controller/6.0/.github/badges/coverage.svg)
 
-This component provides an easy CRUD+List (CRUDL from now on) feature for any doctrine entity you want to manage in your
-Symfony projects.
+A CRUD+list helper classes
 
-## Table of contents
+## Armonic
 
-- [1. Installation](docs/1_installation.md)
-- [2. Structure](docs/2_structure.md)
-- [3. Manager configuration](docs/3_manager.md)
-- [4. Controller configuration](docs/4_controller.md)
-- [5. Full example](docs/5_full_example.md)
+This package is part of [Armonic](https://softspring.es/en/armonic).
+
+## Documentation
+
+[Armonic Documentation](https://armonic.softspring.es/latest/components/crudl-controller)
+
+## Contributing
+
+Use the standard package commands before sending changes:
+
+```bash
+composer fix
+composer test
+composer test-bc
+```
+
+[Report issues](https://github.com/softspring/crudl-controller/issues) and [send Pull Requests](https://github.com/softspring/crudl-controller/pulls)
 
 ## License
 
