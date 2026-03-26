@@ -48,20 +48,20 @@ class CreateActionTest extends TestCase
         $result = Configuration::createAction('test', [], $config);
 
         $expected = $config + [
-                'initialize_event_name' => null,
-                'create_entity_event_name' => null,
-                'form_prepare_event_name' => null,
-                'form_init_event_name' => null,
-                'form_valid_event_name' => null,
-                'apply_event_name' => null,
-                'success_event_name' => null,
-                'failure_event_name' => null,
-                'form_invalid_event_name' => null,
-                'view_event_name' => null,
-                'exception_event_name' => null,
-                'is_granted' => null,
-                'success_redirect_to' => null,
-            ];
+            'initialize_event_name' => null,
+            'create_entity_event_name' => null,
+            'form_prepare_event_name' => null,
+            'form_init_event_name' => null,
+            'form_valid_event_name' => null,
+            'apply_event_name' => null,
+            'success_event_name' => null,
+            'failure_event_name' => null,
+            'form_invalid_event_name' => null,
+            'view_event_name' => null,
+            'exception_event_name' => null,
+            'is_granted' => null,
+            'success_redirect_to' => null,
+        ];
 
         $this->assertEquals($expected, $result);
     }
@@ -95,10 +95,10 @@ class CreateActionTest extends TestCase
         $result = Configuration::createAction('test', ['test' => $config1], $config2);
 
         $expected = array_merge($config1, $config2) + [
-                'create_entity_event_name' => null,
-                'apply_event_name' => null,
-                'exception_event_name' => null,
-            ];
+            'create_entity_event_name' => null,
+            'apply_event_name' => null,
+            'exception_event_name' => null,
+        ];
 
         $this->assertEquals($expected, $result);
     }

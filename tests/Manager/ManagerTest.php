@@ -2,13 +2,13 @@
 
 namespace Softspring\Component\CrudlController\Tests\Manager;
 
-use ReflectionClass;
-use InvalidArgumentException;
-use stdClass;
 use Doctrine\ORM\EntityManager;
 use Doctrine\ORM\EntityRepository;
 use Doctrine\ORM\Mapping\ClassMetadata;
+use InvalidArgumentException;
 use PHPUnit\Framework\TestCase;
+use ReflectionClass;
+use stdClass;
 
 class ManagerTest extends TestCase
 {

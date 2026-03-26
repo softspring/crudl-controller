@@ -2,12 +2,7 @@
 
 namespace Softspring\Component\CrudlController\Tests\Controller;
 
-use Softspring\Component\CrudlController\Event\GetResponseEntityEvent;
-use Softspring\Component\CrudlController\Event\GetResponseFormEvent;
-use Softspring\Component\CrudlController\Tests\Controller\Example\UpdateForm;
 use Softspring\Component\Events\GetResponseRequestEvent;
-use Symfony\Component\Form\Form;
-use Symfony\Component\HttpFoundation\RedirectResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
@@ -45,7 +40,7 @@ class CrudlControllerApplyTest extends AbstractCrudlControllerTestCase
         $expectedResponse = new Response();
 
         $this->dispatcher->expects($this->once())->method('dispatch')->willReturnCallback(function ($event, string $eventName) use ($expectedResponse) {
-            if ($eventName === 'not_found_event' && $event instanceof GetResponseRequestEvent) {
+            if ('not_found_event' === $eventName && $event instanceof GetResponseRequestEvent) {
                 $event->setResponse($expectedResponse);
             }
 
@@ -87,7 +82,7 @@ class CrudlControllerApplyTest extends AbstractCrudlControllerTestCase
 
         $expectedResponse = new Response();
         $this->dispatcher->expects($this->once())->method('dispatch')->willReturnCallback(function ($event, string $eventName) use ($expectedResponse) {
-            if ($eventName === 'initialize_event' && $event instanceof GetResponseRequestEvent) {
+            if ('initialize_event' === $eventName && $event instanceof GetResponseRequestEvent) {
                 $event->setResponse($expectedResponse);
             }
 

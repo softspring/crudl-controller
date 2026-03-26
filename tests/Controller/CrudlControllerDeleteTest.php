@@ -2,14 +2,13 @@
 
 namespace Softspring\Component\CrudlController\Tests\Controller;
 
-use stdClass;
 use Softspring\Component\CrudlController\Event\FormInvalidEvent;
 use Softspring\Component\CrudlController\Event\FormValidEvent;
 use Softspring\Component\CrudlController\Event\InitializeEvent;
-use Softspring\Component\CrudlController\Event\LoadEntityEvent;
 use Softspring\Component\CrudlController\Event\SuccessEvent;
 use Softspring\Component\CrudlController\Tests\Controller\Example\DeleteForm;
 use Softspring\Component\Events\GetResponseRequestEvent;
+use stdClass;
 use Symfony\Component\Form\Form;
 use Symfony\Component\HttpFoundation\RedirectResponse;
 use Symfony\Component\HttpFoundation\Request;

@@ -2,17 +2,15 @@
 
 namespace Helper;
 
-use stdClass;
 use ArrayObject;
 use Doctrine\ORM\EntityRepository;
 use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
-use Softspring\Component\CrudlController\Event\GetResponseEntityEvent;
 use Softspring\Component\CrudlController\Event\InitializeEvent;
 use Softspring\Component\CrudlController\Event\NotFoundEvent;
 use Softspring\Component\CrudlController\Helper\EntityActionHelper;
 use Softspring\Component\CrudlController\Manager\CrudlEntityManagerInterface;
-use Softspring\Component\Events\GetResponseRequestEvent;
+use stdClass;
 use Symfony\Component\EventDispatcher\EventDispatcherInterface;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
@@ -194,5 +192,4 @@ class EntityActionHelperTest extends TestCase
         $response = $helper->dispatchNotFoundEvent();
         $this->assertEquals($expectedResponse, $response);
     }
-
 }

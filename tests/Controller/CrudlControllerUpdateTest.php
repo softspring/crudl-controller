@@ -2,11 +2,11 @@
 
 namespace Softspring\Component\CrudlController\Tests\Controller;
 
-use stdClass;
 use Softspring\Component\CrudlController\Event\GetResponseEntityEvent;
 use Softspring\Component\CrudlController\Event\GetResponseFormEvent;
 use Softspring\Component\CrudlController\Tests\Controller\Example\UpdateForm;
 use Softspring\Component\Events\GetResponseRequestEvent;
+use stdClass;
 use Symfony\Component\Form\Form;
 use Symfony\Component\HttpFoundation\RedirectResponse;
 use Symfony\Component\HttpFoundation\Request;
@@ -50,7 +50,7 @@ class CrudlControllerUpdateTest extends AbstractCrudlControllerTestCase
         $expectedResponse = new Response();
 
         $this->dispatcher->expects($this->once())->method('dispatch')->willReturnCallback(function ($event, string $eventName) use ($expectedResponse) {
-            if ($eventName === 'not_found_event' && $event instanceof GetResponseRequestEvent) {
+            if ('not_found_event' === $eventName && $event instanceof GetResponseRequestEvent) {
                 $event->setResponse($expectedResponse);
             }
 
@@ -99,7 +99,7 @@ class CrudlControllerUpdateTest extends AbstractCrudlControllerTestCase
 
         $expectedResponse = new Response();
         $this->dispatcher->expects($this->once())->method('dispatch')->willReturnCallback(function ($event, string $eventName) use ($expectedResponse) {
-            if ($eventName === 'initialize_event' && $event instanceof GetResponseRequestEvent) {
+            if ('initialize_event' === $eventName && $event instanceof GetResponseRequestEvent) {
                 $event->setResponse($expectedResponse);
             }
 
@@ -160,7 +160,7 @@ class CrudlControllerUpdateTest extends AbstractCrudlControllerTestCase
 
         $expectedResponse = new RedirectResponse('/');
         $this->dispatcher->expects($this->once())->method('dispatch')->willReturnCallback(function ($event, string $eventName) use ($expectedResponse) {
-            if ($eventName === 'form_invalid_event' && $event instanceof GetResponseFormEvent) {
+            if ('form_invalid_event' === $eventName && $event instanceof GetResponseFormEvent) {
                 $event->setResponse($expectedResponse);
             }
 
@@ -200,7 +200,7 @@ class CrudlControllerUpdateTest extends AbstractCrudlControllerTestCase
 
         $expectedResponse = new RedirectResponse('/');
         $this->dispatcher->expects($this->once())->method('dispatch')->willReturnCallback(function ($event, string $eventName) use ($expectedResponse) {
-            if ($eventName === 'form_valid_event' && $event instanceof GetResponseFormEvent) {
+            if ('form_valid_event' === $eventName && $event instanceof GetResponseFormEvent) {
                 $event->setResponse($expectedResponse);
             }
 
@@ -241,7 +241,7 @@ class CrudlControllerUpdateTest extends AbstractCrudlControllerTestCase
 
         $expectedResponse = new RedirectResponse('/');
         $this->dispatcher->expects($this->once())->method('dispatch')->willReturnCallback(function ($event, string $eventName) use ($expectedResponse) {
-            if ($eventName === 'success_event' && $event instanceof GetResponseEntityEvent) {
+            if ('success_event' === $eventName && $event instanceof GetResponseEntityEvent) {
                 $event->setResponse($expectedResponse);
             }
 
