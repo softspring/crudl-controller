@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Softspring\Component\CrudlController\Tests\Controller\Example;
 
 use Symfony\Component\Form\AbstractType;

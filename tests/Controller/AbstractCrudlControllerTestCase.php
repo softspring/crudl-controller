@@ -18,21 +18,21 @@ use Twig\Environment;
 abstract class AbstractCrudlControllerTestCase extends TestCase
 {
     /** @var ExampleManagerCrudl&MockObject */
-    protected ExampleManagerCrudl $manager;
+    protected MockObject $manager;
     /** @var EntityRepository&MockObject */
-    protected EntityRepository $repository;
+    protected MockObject $repository;
     /** @var EventDispatcherInterface&MockObject */
-    protected EventDispatcherInterface $dispatcher;
+    protected MockObject $dispatcher;
     /** @var Container&MockObject */
-    protected Container $container;
+    protected MockObject $container;
     /** @var FormFactory&MockObject */
-    protected FormFactory $formFactory;
+    protected MockObject $formFactory;
     /** @var Environment&MockObject */
-    protected Environment $twig;
+    protected MockObject $twig;
     /** @var AuthorizationCheckerInterface&MockObject */
-    protected AuthorizationCheckerInterface $authorizationChecker;
+    protected MockObject $authorizationChecker;
     /** @var RouterInterface&MockObject */
-    protected RouterInterface $router;
+    protected MockObject $router;
 
     protected function setUp(): void
     {
