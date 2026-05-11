@@ -102,7 +102,7 @@ abstract class ActionHelper
     public function createViewData(array $data = []): ArrayObject
     {
         // add extra config
-        $data['_crudl_action_config'] = $this->config ?? [];
+        $data['_crudl_action_config'] = $this->config;
 
         $this->viewData = new ArrayObject(array_merge($this->config['view_data'] ?? [], $data));
 
