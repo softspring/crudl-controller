@@ -1,12 +1,12 @@
 <?php
 
-namespace Softspring\Component\CrudlController\Tests\Controller;
+namespace Softspring\Component\CrudlController\Tests\Integration\Controller;
 
 use Doctrine\ORM\EntityRepository;
 use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
 use Softspring\Component\CrudlController\Controller\CrudlController;
-use Softspring\Component\CrudlController\Tests\Manager\ExampleManagerCrudl;
+use Softspring\Component\CrudlController\Tests\Unit\Manager\ExampleManagerCrudl;
 use stdClass;
 use Symfony\Component\DependencyInjection\Container;
 use Symfony\Component\EventDispatcher\EventDispatcherInterface;

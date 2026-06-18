@@ -1,0 +1,9 @@
+<?php
+
+declare(strict_types=1);
+
+namespace Softspring\Component\CrudlController\Tests\Unit\Manager;
+
+class ExampleEntity
+{
+}

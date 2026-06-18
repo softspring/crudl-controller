@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace Softspring\Component\CrudlController\Tests\Manager;
+namespace Softspring\Component\CrudlController\Tests\Unit\Manager;
 
 use Doctrine\ORM\EntityManagerInterface;
 use Softspring\Component\CrudlController\Manager\CrudlEntityManagerInterface;
@@ -19,6 +19,6 @@ class ExampleManagerCrudl implements CrudlEntityManagerInterface
 
     public function getTargetClass(): string
     {
-        return 'Softspring\\Component\\CrudlController\\Tests\\Manager\\ExampleEntity';
+        return 'Softspring\Component\CrudlController\Tests\Unit\Manager\ExampleEntity';
     }
 }

@@ -1,10 +1,12 @@
 <?php
 
-namespace Softspring\Component\CrudlController\Tests\Controller;
+namespace Softspring\Component\CrudlController\Tests\Integration\Controller;
 
-use Softspring\Component\CrudlController\Event\GetResponseEntityEvent;
-use Softspring\Component\CrudlController\Event\GetResponseFormEvent;
-use Softspring\Component\CrudlController\Tests\Controller\Example\UpdateForm;
+use Softspring\Component\CrudlController\Event\FormInvalidEvent;
+use Softspring\Component\CrudlController\Event\FormValidEvent;
+use Softspring\Component\CrudlController\Event\InitializeEvent;
+use Softspring\Component\CrudlController\Event\SuccessEvent;
+use Softspring\Component\CrudlController\Tests\Integration\Controller\Example\DeleteForm;
 use Softspring\Component\Events\GetResponseRequestEvent;
 use stdClass;
 use Symfony\Component\Form\Form;
@@ -14,16 +16,16 @@ use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 use Symfony\Component\Security\Core\Exception\AccessDeniedException;
 
-class CrudlControllerUpdateTest extends AbstractCrudlControllerTestCase
+class CrudlControllerDeleteTest extends AbstractCrudlControllerTestCase
 {
-    public function testUpdateDenyUnlessGranted(): void
+    public function testDeleteDenyUnlessGranted(): void
     {
         $configs = [
-            'update' => [
+            'delete' => [
                 'entity_attribute' => 'entity',
                 'param_converter_key' => 'id',
                 'view' => 'template.html.twig',
-                'form' => UpdateForm::class,
+                'form' => DeleteForm::class,
                 'is_granted' => 'ROLE_MISSING',
             ],
         ];
@@ -31,17 +33,17 @@ class CrudlControllerUpdateTest extends AbstractCrudlControllerTestCase
         $this->expectException(AccessDeniedException::class);
 
         $controller = $this->createController($configs);
-        $controller->update(new Request());
+        $controller->delete(new Request());
     }
 
-    public function testUpdateWithNotFoundEventReturningResponse(): void
+    public function testDeleteWithNotFoundEventReturningResponse(): void
     {
         $configs = [
-            'update' => [
+            'delete' => [
                 'entity_attribute' => 'entity',
                 'param_converter_key' => 'id',
                 'view' => 'template.html.twig',
-                'form' => UpdateForm::class,
+                'form' => DeleteForm::class,
                 'is_granted' => null,
                 'not_found_event_name' => 'not_found_event',
             ],
@@ -50,7 +52,7 @@ class CrudlControllerUpdateTest extends AbstractCrudlControllerTestCase
         $expectedResponse = new Response();
 
         $this->dispatcher->expects($this->once())->method('dispatch')->willReturnCallback(function ($event, string $eventName) use ($expectedResponse) {
-            if ('not_found_event' === $eventName && $event instanceof GetResponseRequestEvent) {
+            if ($event instanceof GetResponseRequestEvent) {
                 $event->setResponse($expectedResponse);
             }
 
@@ -58,18 +60,18 @@ class CrudlControllerUpdateTest extends AbstractCrudlControllerTestCase
         });
 
         $controller = $this->createController($configs);
-        $response = $controller->update(new Request());
+        $response = $controller->delete(new Request());
         $this->assertEquals($expectedResponse, $response);
     }
 
-    public function testUpdateWithNotFoundDefault(): void
+    public function testDeleteWithNotFoundDefault(): void
     {
         $configs = [
-            'update' => [
+            'delete' => [
                 'entity_attribute' => 'entity',
                 'param_converter_key' => 'id',
                 'view' => 'template.html.twig',
-                'form' => UpdateForm::class,
+                'form' => DeleteForm::class,
                 'is_granted' => null,
                 'not_found_event_name' => null,
             ],
@@ -77,17 +79,17 @@ class CrudlControllerUpdateTest extends AbstractCrudlControllerTestCase
 
         $this->expectException(NotFoundHttpException::class);
         $controller = $this->createController($configs);
-        $controller->update(new Request());
+        $controller->delete(new Request());
     }
 
-    public function testUpdateWithInitializeEventReturningResponse(): void
+    public function testDeleteWithInitializeEventReturningResponse(): void
     {
         $configs = [
-            'update' => [
+            'delete' => [
                 'entity_attribute' => 'entity',
                 'param_converter_key' => 'id',
                 'view' => 'template.html.twig',
-                'form' => UpdateForm::class,
+                'form' => DeleteForm::class,
                 'is_granted' => null,
                 'not_found_event_name' => null,
                 'initialize_event_name' => 'initialize_event',
@@ -98,8 +100,8 @@ class CrudlControllerUpdateTest extends AbstractCrudlControllerTestCase
         ];
 
         $expectedResponse = new Response();
-        $this->dispatcher->expects($this->once())->method('dispatch')->willReturnCallback(function ($event, string $eventName) use ($expectedResponse) {
-            if ('initialize_event' === $eventName && $event instanceof GetResponseRequestEvent) {
+        $this->dispatcher->expects($this->any())->method('dispatch')->willReturnCallback(function ($event, string $eventName) use ($expectedResponse) {
+            if ($event instanceof InitializeEvent) {
                 $event->setResponse($expectedResponse);
             }
 
@@ -107,18 +109,18 @@ class CrudlControllerUpdateTest extends AbstractCrudlControllerTestCase
         });
 
         $controller = $this->createController($configs);
-        $response = $controller->update(new Request());
+        $response = $controller->delete(new Request());
         $this->assertEquals($expectedResponse, $response);
     }
 
-    public function testUpdateWithNoSubmittedFormAndViewEvent(): void
+    public function testDeleteWithNoSubmittedFormAndViewEvent(): void
     {
         $config = [
-            'update' => [
+            'delete' => [
                 'entity_attribute' => 'entity',
                 'param_converter_key' => 'id',
                 'view' => 'template.html.twig',
-                'form' => UpdateForm::class,
+                'form' => DeleteForm::class,
                 'is_granted' => null,
                 'not_found_event_name' => null,
                 'initialize_event_name' => null,
@@ -132,21 +134,21 @@ class CrudlControllerUpdateTest extends AbstractCrudlControllerTestCase
 
         $this->repository->expects($this->once())->method('findOneBy')->willReturn(new stdClass());
 
-        $this->twig->expects($this->once())->method('render')->willReturn($config['update']['view']);
+        $this->twig->expects($this->once())->method('render')->willReturn($config['delete']['view']);
 
         $controller = $this->createController($config);
-        $response = $controller->update(new Request());
-        $this->assertEquals($config['update']['view'], $response->getContent());
+        $response = $controller->delete(new Request());
+        $this->assertEquals($config['delete']['view'], $response->getContent());
     }
 
-    public function testUpdateWithFormSubmittedAndInvalidReceivingEventResponse(): void
+    public function testDeleteWithFormSubmittedAndInvalidReceivingEventResponse(): void
     {
         $configs = [
-            'update' => [
+            'delete' => [
                 'entity_attribute' => 'entity',
                 'param_converter_key' => 'id',
                 'view' => 'template.html.twig',
-                'form' => UpdateForm::class,
+                'form' => DeleteForm::class,
                 'is_granted' => null,
                 'not_found_event_name' => null,
                 'initialize_event_name' => null,
@@ -160,7 +162,7 @@ class CrudlControllerUpdateTest extends AbstractCrudlControllerTestCase
 
         $expectedResponse = new RedirectResponse('/');
         $this->dispatcher->expects($this->once())->method('dispatch')->willReturnCallback(function ($event, string $eventName) use ($expectedResponse) {
-            if ('form_invalid_event' === $eventName && $event instanceof GetResponseFormEvent) {
+            if ($event instanceof FormInvalidEvent) {
                 $event->setResponse($expectedResponse);
             }
 
@@ -174,18 +176,18 @@ class CrudlControllerUpdateTest extends AbstractCrudlControllerTestCase
         $form->expects($this->once())->method('isValid')->willReturn(false);
 
         $controller = $this->createController($configs);
-        $response = $controller->update(new Request());
+        $response = $controller->delete(new Request());
         $this->assertEquals($expectedResponse, $response);
     }
 
-    public function testUpdateWithFormSubmittedAndValidReceivingFormEventResponse(): void
+    public function testDeleteWithFormSubmittedAndValidReceivingFormEventResponse(): void
     {
         $configs = [
-            'update' => [
+            'delete' => [
                 'entity_attribute' => 'entity',
                 'param_converter_key' => 'id',
                 'view' => 'template.html.twig',
-                'form' => UpdateForm::class,
+                'form' => DeleteForm::class,
                 'is_granted' => null,
                 'not_found_event_name' => null,
                 'initialize_event_name' => null,
@@ -200,7 +202,7 @@ class CrudlControllerUpdateTest extends AbstractCrudlControllerTestCase
 
         $expectedResponse = new RedirectResponse('/');
         $this->dispatcher->expects($this->once())->method('dispatch')->willReturnCallback(function ($event, string $eventName) use ($expectedResponse) {
-            if ('form_valid_event' === $eventName && $event instanceof GetResponseFormEvent) {
+            if ($event instanceof FormValidEvent) {
                 $event->setResponse($expectedResponse);
             }
 
@@ -214,18 +216,18 @@ class CrudlControllerUpdateTest extends AbstractCrudlControllerTestCase
         $form->expects($this->once())->method('isValid')->willReturn(true);
 
         $controller = $this->createController($configs);
-        $response = $controller->update(new Request());
+        $response = $controller->delete(new Request());
         $this->assertEquals($expectedResponse, $response);
     }
 
-    public function testUpdateWithFormSubmittedAndValidReceivingSuccessEventResponse(): void
+    public function testDeleteWithFormSubmittedAndValidReceivingSuccessEventResponse(): void
     {
         $configs = [
-            'update' => [
+            'delete' => [
                 'entity_attribute' => 'entity',
                 'param_converter_key' => 'id',
                 'view' => 'template.html.twig',
-                'form' => UpdateForm::class,
+                'form' => DeleteForm::class,
                 'is_granted' => null,
                 'not_found_event_name' => null,
                 'initialize_event_name' => null,
@@ -241,7 +243,7 @@ class CrudlControllerUpdateTest extends AbstractCrudlControllerTestCase
 
         $expectedResponse = new RedirectResponse('/');
         $this->dispatcher->expects($this->once())->method('dispatch')->willReturnCallback(function ($event, string $eventName) use ($expectedResponse) {
-            if ('success_event' === $eventName && $event instanceof GetResponseEntityEvent) {
+            if ($event instanceof SuccessEvent) {
                 $event->setResponse($expectedResponse);
             }
 
@@ -255,18 +257,18 @@ class CrudlControllerUpdateTest extends AbstractCrudlControllerTestCase
         $form->expects($this->once())->method('isValid')->willReturn(true);
 
         $controller = $this->createController($configs);
-        $response = $controller->update(new Request());
+        $response = $controller->delete(new Request());
         $this->assertEquals($expectedResponse, $response);
     }
 
-    public function testUpdateWithFormSubmittedAndValidWithRedirectRoute(): void
+    public function testDeleteWithFormSubmittedAndValidWithRedirectRoute(): void
     {
         $configs = [
-            'update' => [
+            'delete' => [
                 'entity_attribute' => 'entity',
                 'param_converter_key' => 'id',
                 'view' => 'template.html.twig',
-                'form' => UpdateForm::class,
+                'form' => DeleteForm::class,
                 'is_granted' => null,
                 'not_found_event_name' => null,
                 'initialize_event_name' => null,
@@ -291,19 +293,19 @@ class CrudlControllerUpdateTest extends AbstractCrudlControllerTestCase
 
         $controller = $this->createController($configs);
         /** @var RedirectResponse $response */
-        $response = $controller->update(new Request());
+        $response = $controller->delete(new Request());
         $this->assertInstanceOf(RedirectResponse::class, $response);
         $this->assertEquals('/redirect/to/route', $response->getTargetUrl());
     }
 
-    public function testUpdateWithFormSubmittedAndValidWithDefaultRedirect(): void
+    public function testDeleteWithFormSubmittedAndValidWithDefaultRedirect(): void
     {
         $configs = [
-            'update' => [
+            'delete' => [
                 'entity_attribute' => 'entity',
                 'param_converter_key' => 'id',
                 'view' => 'template.html.twig',
-                'form' => UpdateForm::class,
+                'form' => DeleteForm::class,
                 'is_granted' => null,
                 'not_found_event_name' => null,
                 'initialize_event_name' => null,
@@ -327,7 +329,7 @@ class CrudlControllerUpdateTest extends AbstractCrudlControllerTestCase
         $controller = $this->createController($configs);
 
         /** @var RedirectResponse $response */
-        $response = $controller->update(new Request());
+        $response = $controller->delete(new Request());
         $this->assertInstanceOf(RedirectResponse::class, $response);
         $this->assertEquals('/', $response->getTargetUrl());
     }

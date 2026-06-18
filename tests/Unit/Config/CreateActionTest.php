@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace Softspring\Component\CrudlController\Tests\Config;
+namespace Softspring\Component\CrudlController\Tests\Unit\Config;
 
 use PHPUnit\Framework\TestCase;
 use Softspring\Component\CrudlController\Config\Configuration;

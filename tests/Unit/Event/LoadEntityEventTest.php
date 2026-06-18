@@ -1,6 +1,6 @@
 <?php
 
-namespace Softspring\Component\CrudlController\Tests\Event;
+namespace Softspring\Component\CrudlController\Tests\Unit\Event;
 
 use PHPUnit\Framework\TestCase;
 use Softspring\Component\CrudlController\Event\LoadEntityEvent;

@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace Softspring\Component\CrudlController\Tests\Controller\Example;
+namespace Softspring\Component\CrudlController\Tests\Integration\Controller\Example;
 
 use Symfony\Component\Form\AbstractType;
 

@@ -1,6 +1,6 @@
 <?php
 
-namespace Softspring\Component\CrudlController\Tests\Event;
+namespace Softspring\Component\CrudlController\Tests\Unit\Event;
 
 use Doctrine\ORM\QueryBuilder;
 use PHPUnit\Framework\TestCase;

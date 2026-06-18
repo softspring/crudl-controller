@@ -1,6 +1,6 @@
 <?php
 
-namespace Softspring\Component\CrudlController\Tests\Manager;
+namespace Softspring\Component\CrudlController\Tests\Unit\Manager;
 
 use Doctrine\ORM\EntityManager;
 use Doctrine\ORM\EntityRepository;
@@ -17,7 +17,7 @@ class ManagerTest extends TestCase
         $em = $this->getMockBuilder(EntityManager::class)->disableOriginalConstructor()->getMock();
 
         $manager = new ExampleManagerCrudl($em);
-        $this->assertEquals('Softspring\\Component\\CrudlController\\Tests\\Manager\\ExampleEntity', $manager->getTargetClass());
+        $this->assertEquals('Softspring\Component\CrudlController\Tests\Unit\Manager\ExampleEntity', $manager->getTargetClass());
     }
 
     public function testGetEntityClass(): void
@@ -31,12 +31,12 @@ class ManagerTest extends TestCase
         $em = $this->getMockBuilder(EntityManager::class)->disableOriginalConstructor()->getMock();
         $em->expects($this->once())
             ->method('getClassMetadata')
-            ->with($this->equalTo('Softspring\\Component\\CrudlController\\Tests\\Manager\\ExampleEntity'))
+            ->with($this->equalTo('Softspring\Component\CrudlController\Tests\Unit\Manager\ExampleEntity'))
             ->willReturn($metadata)
         ;
 
         $manager = new ExampleManagerCrudl($em);
-        $this->assertEquals('Softspring\\Component\\CrudlController\\Tests\\Manager\\ExampleEntity', $manager->getEntityClass());
+        $this->assertEquals('Softspring\Component\CrudlController\Tests\Unit\Manager\ExampleEntity', $manager->getEntityClass());
     }
 
     public function testCreateEntity(): void
@@ -50,7 +50,7 @@ class ManagerTest extends TestCase
         $em = $this->getMockBuilder(EntityManager::class)->disableOriginalConstructor()->getMock();
         $em->expects($this->once())
             ->method('getClassMetadata')
-            ->with($this->equalTo('Softspring\\Component\\CrudlController\\Tests\\Manager\\ExampleEntity'))
+            ->with($this->equalTo('Softspring\Component\CrudlController\Tests\Unit\Manager\ExampleEntity'))
             ->willReturn($metadata)
         ;
 
@@ -65,7 +65,7 @@ class ManagerTest extends TestCase
         $em = $this->getMockBuilder(EntityManager::class)->disableOriginalConstructor()->getMock();
         $em->expects($this->once())
             ->method('getRepository')
-            ->with($this->equalTo('Softspring\\Component\\CrudlController\\Tests\\Manager\\ExampleEntity'))
+            ->with($this->equalTo('Softspring\Component\CrudlController\Tests\Unit\Manager\ExampleEntity'))
             ->willReturn($repository)
         ;
 
@@ -84,7 +84,7 @@ class ManagerTest extends TestCase
         $em = $this->getMockBuilder(EntityManager::class)->disableOriginalConstructor()->getMock();
         $em->expects($this->once())
             ->method('getClassMetadata')
-            ->with($this->equalTo('Softspring\\Component\\CrudlController\\Tests\\Manager\\ExampleEntity'))
+            ->with($this->equalTo('Softspring\Component\CrudlController\Tests\Unit\Manager\ExampleEntity'))
             ->willReturn($metadata)
         ;
         $em->expects($this->once())
@@ -106,7 +106,7 @@ class ManagerTest extends TestCase
         $em = $this->getMockBuilder(EntityManager::class)->disableOriginalConstructor()->getMock();
         $em->expects($this->any())
             ->method('getClassMetadata')
-            ->with($this->equalTo('Softspring\\Component\\CrudlController\\Tests\\Manager\\ExampleEntity'))
+            ->with($this->equalTo('Softspring\Component\CrudlController\Tests\Unit\Manager\ExampleEntity'))
             ->willReturn($metadata)
         ;
 
