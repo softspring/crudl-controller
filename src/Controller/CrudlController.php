@@ -145,13 +145,14 @@ class CrudlController
 
             // init action
             $helper->checkIsGranted();
-
             if ($helper->notFound()) {
                 if (($response = $helper->dispatchNotFoundEvent()) instanceof Response) {
                     return $response;
                 }
                 throw new NotFoundHttpException('Entity not found');
-            } elseif (($response = $helper->dispatchFoundEvent()) instanceof Response) {
+            }
+
+            if (($response = $helper->dispatchFoundEvent()) instanceof Response) {
                 return $response;
             }
 
@@ -198,13 +199,14 @@ class CrudlController
 
             // init action
             $helper->checkIsGranted();
-
             if ($helper->notFound()) {
                 if (($response = $helper->dispatchNotFoundEvent()) instanceof Response) {
                     return $response;
                 }
                 throw new NotFoundHttpException('Entity not found');
-            } elseif (($response = $helper->dispatchFoundEvent()) instanceof Response) {
+            }
+
+            if (($response = $helper->dispatchFoundEvent()) instanceof Response) {
                 return $response;
             }
 
@@ -271,13 +273,14 @@ class CrudlController
 
             // init action
             $helper->checkIsGranted();
-
             if ($helper->notFound()) {
                 if (($response = $helper->dispatchNotFoundEvent()) instanceof Response) {
                     return $response;
                 }
                 throw new NotFoundHttpException('Entity not found');
-            } elseif (($response = $helper->dispatchFoundEvent()) instanceof Response) {
+            }
+
+            if (($response = $helper->dispatchFoundEvent()) instanceof Response) {
                 return $response;
             }
 
@@ -393,13 +396,14 @@ class CrudlController
 
             // init action
             $helper->checkIsGranted();
-
             if ($helper->notFound()) {
                 if (($response = $helper->dispatchNotFoundEvent()) instanceof Response) {
                     return $response;
                 }
                 throw new NotFoundHttpException('Entity not found');
-            } elseif (($response = $helper->dispatchFoundEvent()) instanceof Response) {
+            }
+
+            if (($response = $helper->dispatchFoundEvent()) instanceof Response) {
                 return $response;
             }
 
@@ -450,13 +454,14 @@ class CrudlController
 
             // init action
             $helper->checkIsGranted();
-
             if ($helper->notFound()) {
                 if (($response = $helper->dispatchNotFoundEvent()) instanceof Response) {
                     return $response;
                 }
                 throw new NotFoundHttpException('Entity not found');
-            } elseif (($response = $helper->dispatchFoundEvent()) instanceof Response) {
+            }
+
+            if (($response = $helper->dispatchFoundEvent()) instanceof Response) {
                 return $response;
             }
 
