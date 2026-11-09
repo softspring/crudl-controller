@@ -5,9 +5,9 @@
     "type": "symfony-bundle",
     "require": {
         "php": ">=8.4",
-        "softspring/doctrine-paginator": "^6.0@dev",
-        "softspring/doctrine-query-filters": "^6.0@dev",
-        "softspring/events": "^6.0@dev"
+        "softspring/doctrine-paginator": "6.1.*@dev",
+        "softspring/doctrine-query-filters": "6.1.*@dev",
+        "softspring/events": "6.1.*@dev"
     },
     "require-dev": {
         "doctrine/orm": "^2.10 || ^3.0 || ^4.0",
@@ -47,7 +47,8 @@
     },
     "extra": {
         "branch-alias": {
-            "dev-6.0": "6.0.x-dev"
+            "dev-6.0": "6.0.x-dev",
+            "dev-6.1": "6.1.x-dev"
         }
     },
     "scripts": {

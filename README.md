@@ -2,11 +2,11 @@
 
 [![Latest Stable](https://img.shields.io/packagist/v/softspring/crudl-controller?label=stable&style=flat-square)](https://github.com/softspring/crudl-controller/releases)
 [![Latest Unstable](https://img.shields.io/packagist/v/softspring/crudl-controller?label=unstable&style=flat-square&include_prereleases)](https://github.com/softspring/crudl-controller/releases)
-[![License](https://img.shields.io/packagist/l/softspring/crudl-controller?style=flat-square)](https://github.com/softspring/crudl-controller/blob/6.0/LICENSE)
-[![PHP Version](https://img.shields.io/packagist/dependency-v/softspring/crudl-controller/php?style=flat-square)](https://github.com/softspring/crudl-controller/blob/6.0/composer.json)
+[![License](https://img.shields.io/packagist/l/softspring/crudl-controller?style=flat-square)](https://github.com/softspring/crudl-controller/blob/6.1/LICENSE)
+[![PHP Version](https://img.shields.io/packagist/dependency-v/softspring/crudl-controller/php?style=flat-square)](https://github.com/softspring/crudl-controller/blob/6.1/composer.json)
 [![Downloads](https://img.shields.io/packagist/dt/softspring/crudl-controller?style=flat-square)](https://packagist.org/packages/softspring/crudl-controller)
-[![CI](https://img.shields.io/github/actions/workflow/status/softspring/crudl-controller/ci.yml?branch=6.0&style=flat-square&label=CI)](https://github.com/softspring/crudl-controller/actions/workflows/ci.yml)
-[![Coverage](https://img.shields.io/codecov/c/github/softspring/crudl-controller?branch=6.0&style=flat-square)](https://app.codecov.io/gh/softspring/crudl-controller/tree/6.0)
+[![CI](https://img.shields.io/github/actions/workflow/status/softspring/crudl-controller/ci.yml?branch=6.1&style=flat-square&label=CI)](https://github.com/softspring/crudl-controller/actions/workflows/ci.yml)
+[![Coverage](https://img.shields.io/codecov/c/github/softspring/crudl-controller?branch=6.1&style=flat-square)](https://app.codecov.io/gh/softspring/crudl-controller/tree/6.1)
 
 Reusable controller helpers for CRUD and list screens in Symfony applications.
 
@@ -16,7 +16,7 @@ This package is part of [Armonic](https://softspring.es/en/armonic).
 
 ## Documentation
 
-[Armonic Documentation](https://armonic.softspring.es/6.0/components/crudl-controller)
+[Armonic Documentation](https://armonic.softspring.es/6.1@dev/components/crudl-controller)
 
 ## Contributing
 
